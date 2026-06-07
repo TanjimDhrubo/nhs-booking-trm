@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+  <main class="container-sm">
+    <div class="auth-card">
+      <div class="auth-header">
+        <a href="index.html" class="auth-logo">
+          <div class="navbar-logo">NHS</div>
+        </a>
+        <h1>Create Account</h1>
+        <p>Register for NHS Appointment Booking</p>
+      </div>
+
+      <div id="message"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label for="full_name">Full Name</label>
+          <input type="text" id="full_name" required placeholder="e.g. Jane Smith">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="you@example.com">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required minlength="6" placeholder="Minimum 6 characters">
+        </div>
+
+        <div class="form-group">
+          <label for="date_of_birth">Date of Birth</label>
+          <input type="date" id="date_of_birth" required>
+        </div>
+
+        <div class="form-group">
+          <label for="nhs_number">NHS Number (optional)</label>
+          <input type="text" id="nhs_number" placeholder="10-digit NHS number" pattern="[0-9]{10}" maxlength="10">
+        </div>
+
+        <button type="submit" class="btn-primary" id="register-btn">Create Account</button>
+      </form>
+
+      <p class="auth-footer">
+        Already have an account? <a href="login.html">Sign in</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    async function insertNotification(userId, message) {
+      await supabase.from('notifications_trm').insert({
+        user_id: userId,
+        message,
+        type: 'in-app'
+      })
+    }
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const msgEl = document.getElementById('message')
+      const btn = document.getElementById('register-btn')
+      const fullName = document.getElementById('full_name').value.trim()
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value
+      const dateOfBirth = document.getElementById('date_of_birth').value
+      const nhsNumber = document.getElementById('nhs_number').value.trim() || null
+
+      msgEl.innerHTML = ''
+      btn.disabled = true
+      btn.textContent = 'Creating account...'
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName }
+        }
+      })
+
+      if (error) {
+        msgEl.innerHTML = '<div class="alert alert-error">' + error.message + '</div>'
+        btn.disabled = false
+        btn.textContent = 'Create Account'
+        return
+      }
+
+      const userId = data.user.id
+
+      const { error: profileError } = await supabase.from('profiles_trm').insert({
+        id: userId,
+        full_name: fullName,
+        date_of_birth: dateOfBirth,
+        nhs_number: nhsNumber
+      })
+
+      if (profileError) {
+        msgEl.innerHTML = '<div class="alert alert-error">Account created but profile setup failed. Please contact support.</div>'
+        btn.disabled = false
+        btn.textContent = 'Create Account'
+        return
+      }
+
+      await insertNotification(userId, 'Welcome to NHS Appointment Booking! Your account has been created successfully.')
+
+      msgEl.innerHTML = '<div class="alert alert-success">Account created! Please check your email to confirm your account, then sign in.</div>'
+      btn.disabled = false
+      btn.textContent = 'Create Account'
+      document.getElementById('register-form').reset()
+    })
+  </script>
+
+</body>
+</html>

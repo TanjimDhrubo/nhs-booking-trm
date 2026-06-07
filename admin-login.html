@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-card {
+      border-top: 3px solid var(--nhs-amber);
+    }
+
+    .staff-badge {
+      display: inline-block;
+      background: #FFF8E7;
+      color: #856404;
+      border: 1px solid #FFE69C;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .staff-badge-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .staff-info {
+      margin-top: 20px;
+    }
+
+    .staff-back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .staff-back-link a {
+      font-size: 13px;
+      color: var(--nhs-muted);
+    }
+
+    .loading-inline {
+      border: none;
+      padding: 0;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-page">
+    <div class="auth-card admin-card">
+
+      <div class="auth-logo">
+        <div class="navbar-logo">NHS</div>
+      </div>
+
+      <div class="staff-badge-wrap">
+        <span class="staff-badge">STAFF PORTAL</span>
+      </div>
+
+      <div class="auth-title">Doctor &amp; Staff Login</div>
+      <div class="auth-subtitle">NHS Booking Admin Portal | TRM</div>
+
+      <div id="message"></div>
+
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="your.name@nhs-trm.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="btn-primary btn-full">Sign In to Staff Portal</button>
+      </form>
+
+      <div class="alert alert-info staff-info">
+        Staff accounts are provisioned by your NHS administrator. Contact <a href="mailto:dpo@nhsbooking-trm.nhs.uk">dpo@nhsbooking-trm.nhs.uk</a> if you need access.
+      </div>
+
+      <div class="staff-back-link">
+        <a href="index.html">&larr; Patient portal</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <!-- TRM WATERMARK -->
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    const form = document.getElementById('admin-login-form')
+    const msgEl = document.getElementById('message')
+
+    function showMsg(msg, type = 'error') {
+      msgEl.innerHTML = `<div class="alert alert-${type}">${msg}</div>`
+    }
+
+    async function redirectIfDoctor() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const { data: doctor } = await supabase
+        .from('doctors_trm')
+        .select('id')
+        .eq('email', session.user.email)
+        .single()
+      if (doctor) {
+        window.location.href = 'admin-dashboard.html'
+      }
+    }
+
+    redirectIfDoctor()
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      msgEl.innerHTML = '<div class="alert alert-info"><div class="loading loading-inline">Signing in</div></div>'
+
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value
+
+      const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (authErr) {
+        showMsg('Invalid credentials. Please try again.')
+        return
+      }
+
+      const { data: doctor, error: docErr } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('email', email)
+        .single()
+
+      if (docErr || !doctor) {
+        await supabase.auth.signOut()
+        showMsg('You are not authorised as NHS staff. Patient login is at <a href="login.html">login.html</a>')
+        return
+      }
+
+      window.location.href = 'admin-dashboard.html'
+    })
+  </script>
+
+</body>
+</html>

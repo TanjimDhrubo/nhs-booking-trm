@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .back-link a {
+      font-size: 14px;
+      color: var(--nhs-muted);
+    }
+
+    .is-hidden {
+      display: none;
+    }
+
+    .alert-link {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container-sm">
+
+    <div class="page-header">
+      <h1>Book an Appointment</h1>
+      <p>Choose your doctor, date and time</p>
+    </div>
+
+    <div id="doctor-preselect-msg" class="alert alert-info is-hidden"></div>
+
+    <div id="message"></div>
+
+    <div class="card">
+      <form id="book-form">
+
+        <div class="form-group">
+          <label for="appt-type">Appointment Type</label>
+          <select id="appt-type" required>
+            <option value="">Select type&hellip;</option>
+            <option value="A&E (Accident & Emergency)">A&E (Accident &amp; Emergency)</option>
+            <option value="General Consultation">General Consultation</option>
+            <option value="Follow-up Appointment">Follow-up Appointment</option>
+            <option value="Specialist Referral">Specialist Referral</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="appt-date">Preferred Date</label>
+          <input type="date" id="appt-date" required>
+        </div>
+
+        <div class="form-group">
+          <label for="appt-time">Preferred Time</label>
+          <select id="appt-time" required>
+            <option value="">Select time&hellip;</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="doctor-select">Select Doctor</label>
+          <select id="doctor-select" required>
+            <option value="" disabled selected>Loading doctors&hellip;</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <button type="submit" class="btn-primary btn-full" id="submit-btn">Confirm Booking &rarr;</button>
+
+      </form>
+    </div>
+
+    <div class="back-link">
+      <a href="dashboard.html">&larr; Back to Dashboard</a>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <!-- TRM WATERMARK -->
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+
+    const form = document.getElementById('book-form')
+    const msgEl = document.getElementById('message')
+    const submitBtn = document.getElementById('submit-btn')
+    const doctorSelect = document.getElementById('doctor-select')
+    const apptTime = document.getElementById('appt-time')
+    const apptDate = document.getElementById('appt-date')
+    const preselectMsg = document.getElementById('doctor-preselect-msg')
+
+    function showMsg(msg, type = 'error') {
+      msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
+    }
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric',
+        month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    }
+
+    function populateTimes() {
+      const times = []
+      for (let h = 9; h <= 16; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          if (h === 16 && m === 30) continue
+          const date = new Date()
+          date.setHours(h, m, 0, 0)
+          const label = date.toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit', hour12: true
+          })
+          const value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')
+          times.push({ label, value })
+        }
+      }
+      apptTime.innerHTML = '<option value="">Select time&hellip;</option>'
+      for (const t of times) {
+        const opt = document.createElement('option')
+        opt.value = t.value
+        opt.textContent = t.label
+        apptTime.appendChild(opt)
+      }
+    }
+
+    populateTimes()
+
+    const today = new Date()
+    apptDate.min = today.toISOString().slice(0, 10)
+
+    async function loadDoctors(selectedId) {
+      doctorSelect.innerHTML = '<option value="" disabled selected>Loading doctors&hellip;</option>'
+
+      const { data: doctors, error } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('available', true)
+        .order('name')
+
+      if (error) {
+        doctorSelect.innerHTML = '<option value="">Failed to load doctors</option>'
+        return
+      }
+
+      doctorSelect.innerHTML = '<option value="">Select a doctor&hellip;</option>'
+
+      for (const d of doctors) {
+        const opt = document.createElement('option')
+        opt.value = d.id
+        opt.textContent = 'Dr. ' + d.name + ' \u2014 ' + d.specialisation
+        doctorSelect.appendChild(opt)
+      }
+
+      if (selectedId) {
+        doctorSelect.value = selectedId
+        const doc = doctors.find(d => d.id === selectedId)
+        if (doc) {
+          preselectMsg.classList.remove('is-hidden')
+          preselectMsg.innerHTML = 'Booking with <strong>Dr. ' + doc.name + '</strong>. You can change below.'
+        }
+      }
+    }
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      await showUserName('user-name')
+
+      const params = new URLSearchParams(window.location.search)
+      const doctorId = params.get('doctor_id') || ''
+
+      await loadDoctors(doctorId)
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      msgEl.innerHTML = ''
+      preselectMsg.classList.add('is-hidden')
+
+      const apptType = document.getElementById('appt-type').value
+      const date = apptDate.value
+      const time = apptTime.value
+      const doctorId = doctorSelect.value
+
+      if (!date) {
+        showMsg('Please select a date.')
+        return
+      }
+
+      const selectedDate = new Date(date + 'T' + (time || '00:00'))
+      const now = new Date()
+      now.setHours(0, 0, 0, 0)
+
+      if (selectedDate < now) {
+        showMsg('Please select a future date.')
+        return
+      }
+
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Booking\u2026'
+
+      const appointmentDate = new Date(date + 'T' + time).toISOString()
+
+      const { data: userData, error: userErr } = await supabase.auth.getUser()
+      if (userErr || !userData?.user) {
+        showMsg('Authentication error. Please sign in again.')
+        submitBtn.disabled = false
+        submitBtn.innerHTML = 'Confirm Booking &rarr;'
+        return
+      }
+
+      const userId = userData.user.id
+
+      const { data: doctor } = await supabase
+        .from('doctors_trm')
+        .select('name')
+        .eq('id', doctorId)
+        .single()
+
+      const { error: insertErr } = await supabase
+        .from('appointments_trm')
+        .insert({
+          user_id: userId,
+          doctor_id: doctorId,
+          appointment_type: apptType,
+          appointment_date: appointmentDate,
+          status: 'confirmed'
+        })
+
+      if (insertErr) {
+        showMsg(insertErr.message)
+        submitBtn.disabled = false
+        submitBtn.innerHTML = 'Confirm Booking &rarr;'
+        return
+      }
+
+      await supabase.from('notifications_trm').insert({
+        user_id: userId,
+        message: 'Appointment booked for ' + formatDate(appointmentDate) + ' with Dr ' + (doctor?.name || 'your doctor'),
+        type: 'in-app'
+      })
+
+      msgEl.innerHTML = '<div class="alert alert-success">Appointment booked successfully! &#x1F389; <a href="dashboard.html" class="alert-link">View Dashboard &rarr;</a></div>'
+
+      form.reset()
+      submitBtn.disabled = false
+      submitBtn.innerHTML = 'Confirm Booking &rarr;'
+    })
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    init()
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .greeting-card {
+      background: linear-gradient(135deg, var(--nhs-blue-soft) 0%, var(--bg-page) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .greeting-card h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--nhs-dark);
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .greeting-card p {
+      font-size: 15px;
+      color: var(--nhs-muted);
+      margin-bottom: 20px;
+    }
+
+    .stat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .stat-chip {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-soft);
+      color: var(--nhs-dark);
+    }
+
+    .stat-chip strong {
+      color: var(--nhs-blue);
+      font-size: 15px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--nhs-dark);
+      letter-spacing: -0.4px;
+    }
+
+    .date-block {
+      background: var(--nhs-blue-soft);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+
+    .date-block .day {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--nhs-blue);
+      line-height: 1;
+    }
+
+    .date-block .month {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--nhs-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <!-- WELCOME HEADER -->
+    <div class="greeting-card">
+      <h1 id="greeting-text">Good morning</h1>
+      <p>Here is your health overview for today</p>
+      <div class="stat-chips">
+        <div class="stat-chip"><strong id="stat-upcoming">0</strong> upcoming appointments</div>
+        <div class="stat-chip"><strong id="stat-total">0</strong> total appointments</div>
+        <div class="stat-chip"><strong id="stat-checkins">0</strong> check-ins completed</div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="grid-3">
+      <a href="book.html" class="action-card">
+        <div class="action-icon">&#x1F5D3;&#xFE0F;</div>
+        <div>
+          <div class="action-title">Book Appointment</div>
+          <div class="action-desc">Schedule with your preferred doctor</div>
+        </div>
+      </a>
+      <a href="history.html" class="action-card">
+        <div class="action-icon">&#x1F4CB;</div>
+        <div>
+          <div class="action-title">My History</div>
+          <div class="action-desc">View all past appointments</div>
+        </div>
+      </a>
+      <a href="checkin.html" class="action-card">
+        <div class="action-icon">&#x2705;</div>
+        <div>
+          <div class="action-title">Check In</div>
+          <div class="action-desc">Check in for today's visit</div>
+        </div>
+      </a>
+      <a href="notifications.html" class="action-card">
+        <div class="action-icon">&#x1F514;</div>
+        <div>
+          <div class="action-title">Notifications</div>
+          <div class="action-desc">View updates and reminders</div>
+        </div>
+      </a>
+      <a href="doctors.html" class="action-card">
+        <div class="action-icon">&#x1F468;&#x200D;&#x2695;&#xFE0F;</div>
+        <div>
+          <div class="action-title">Our Doctors</div>
+          <div class="action-desc">Browse specialist doctors</div>
+        </div>
+      </a>
+      <a href="privacy.html" class="action-card">
+        <div class="action-icon">&#x1F512;</div>
+        <div>
+          <div class="action-title">Privacy</div>
+          <div class="action-desc">Your data and rights</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- UPCOMING APPOINTMENTS -->
+    <div class="section-header">
+      <h2>Upcoming Appointments</h2>
+      <a href="book.html" class="btn-secondary btn-sm">Book New &rarr;</a>
+    </div>
+    <div id="appointments-list">
+      <div class="loading">Loading</div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <!-- TRM WATERMARK -->
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric',
+        month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    }
+
+    function getDay(iso) {
+      return new Date(iso).getDate()
+    }
+
+    function getMonth(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { month: 'short' })
+    }
+
+    function renderBadge(status) {
+      const cls = 'badge badge-' + status.replace('_', '').toLowerCase()
+      const label = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
+      return '<span class="' + cls + '">' + label + '</span>'
+    }
+
+    async function loadAppointments(userId) {
+      const el = document.getElementById('appointments-list')
+      el.innerHTML = '<div class="loading">Loading</div>'
+
+      const now = new Date().toISOString()
+
+      const { data: appts, error } = await supabase
+        .from('appointments_trm')
+        .select('*, doctors_trm(name, specialisation)')
+        .eq('user_id', userId)
+        .gte('appointment_date', now)
+        .order('appointment_date')
+
+      if (error) {
+        el.innerHTML = '<div class="alert alert-error">Failed to load appointments.</div>'
+        return
+      }
+
+      document.getElementById('stat-upcoming').textContent = appts.length
+
+      if (!appts.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">&#x1F5D3;&#xFE0F;</div>
+            <p>No upcoming appointments.</p>
+            <a href="book.html" class="btn-primary">Book Now</a>
+          </div>`
+        return
+      }
+
+      let html = ''
+      for (const a of appts) {
+        const doc = a.doctors_trm
+        const docName = doc ? doc.name : 'Unknown Doctor'
+        const docSpec = doc ? doc.specialisation : ''
+
+        html += '<div class="appt-card">'
+        html += '  <div class="date-block">'
+        html += '    <div class="day">' + getDay(a.appointment_date) + '</div>'
+        html += '    <div class="month">' + getMonth(a.appointment_date) + '</div>'
+        html += '  </div>'
+        html += '  <div class="appt-info">'
+        html += '    <div class="appt-doctor">' + docName + '</div>'
+        html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + a.appointment_type + '</div>'
+        html += '  </div>'
+        html += '  <div class="appt-actions">'
+        html +=      renderBadge(a.status)
+        html += '    <a href="reschedule.html?id=' + a.id + '" class="btn-ghost btn-sm">Reschedule</a>'
+        html += '  </div>'
+        html += '</div>'
+      }
+
+      el.innerHTML = html
+    }
+
+    async function loadStats(userId) {
+      const { count: total } = await supabase
+        .from('appointments_trm')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+
+      if (total !== null) document.getElementById('stat-total').textContent = total
+
+      const { count: checkins } = await supabase
+        .from('appointments_trm')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'checked_in')
+
+      if (checkins !== null) document.getElementById('stat-checkins').textContent = checkins
+    }
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      await showUserName('user-name')
+
+      const hour = new Date().getHours()
+      let greeting = 'Good evening'
+      if (hour < 12) greeting = 'Good morning'
+      else if (hour < 17) greeting = 'Good afternoon'
+
+      const user = session.user
+      const { data: profile } = await supabase
+        .from('profiles_trm')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+
+      const name = profile ? profile.full_name : ''
+      document.getElementById('greeting-text').textContent = greeting + ', ' + name
+
+      await Promise.all([
+        loadAppointments(user.id),
+        loadStats(user.id)
+      ])
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    init()
+  </script>
+
+</body>
+</html>

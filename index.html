@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="navbar-logo">NHS</div>
+    <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+  </a>
+  <div class="navbar-links">
+    <a href="doctors.html" class="btn-ghost">Our Doctors</a>
+    <a href="login.html" class="btn-secondary" id="nav-signin">Sign In</a>
+    <a href="register.html" class="btn-primary" id="nav-register">Register</a>
+    <a href="dashboard.html" class="btn-primary" id="nav-dashboard" style="display:none">Dashboard →</a>
+  </div>
+</nav>
+
+<section style="position:relative;background:linear-gradient(135deg,#F9F7F4 0%,#EEF4FC 50%,#F0F9F4 100%);padding:100px 24px 80px;text-align:center;overflow:hidden">
+
+  <!-- Background blobs CSS only -->
+  <div style="position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(0,94,184,0.06) 0%,transparent 70%);border-radius:60% 40% 70% 30%/50% 60% 40% 50%;top:-100px;right:-100px;pointer-events:none"></div>
+  <div style="position:absolute;width:350px;height:350px;background:radial-gradient(circle,rgba(0,127,59,0.05) 0%,transparent 70%);border-radius:40% 60% 30% 70%/60% 40% 60% 40%;bottom:-80px;left:-80px;pointer-events:none"></div>
+
+  <div style="position:relative;z-index:1;max-width:680px;margin:0 auto">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,94,184,0.08);border-radius:20px;padding:6px 16px;margin-bottom:24px">
+      <span style="width:8px;height:8px;border-radius:50%;background:#007F3B;display:inline-block"></span>
+      <span style="font-size:13px;font-weight:600;color:#005EB8">NHS Approved Booking System</span>
+    </div>
+
+    <h1 style="font-size:clamp(40px,6vw,68px);font-weight:800;letter-spacing:-2px;line-height:1.1;color:#1A2332;margin-bottom:20px">
+      Book your NHS<br>appointment <span style="color:#005EB8">online</span>
+    </h1>
+
+    <p style="font-size:18px;color:#6B7280;max-width:500px;margin:0 auto 40px;line-height:1.7">
+      Skip the phone queues. Book, reschedule, and manage your NHS appointments — all from the comfort of your home.
+    </p>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="register.html" class="btn-primary" style="font-size:16px;padding:14px 32px">Get Started →</a>
+      <a href="login.html" class="btn-secondary" style="font-size:16px;padding:14px 32px">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats bar -->
+<div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;padding:16px 24px;background:white;border-top:1px solid #E5E7EB;border-bottom:1px solid #E5E7EB">
+  <span style="font-size:13px;color:#6B7280;font-weight:500"><strong style="color:#005EB8;font-size:15px">500+</strong> Appointments Booked</span>
+  <span style="width:4px;height:4px;border-radius:50%;background:#E5E7EB;display:inline-block"></span>
+  <span style="font-size:13px;color:#6B7280;font-weight:500"><strong style="color:#005EB8;font-size:15px">6</strong> Specialist Doctors</span>
+  <span style="width:4px;height:4px;border-radius:50%;background:#E5E7EB;display:inline-block"></span>
+  <span style="font-size:13px;color:#6B7280;font-weight:500"><strong style="color:#005EB8;font-size:15px">100%</strong> Secure & Private</span>
+  <span style="width:4px;height:4px;border-radius:50%;background:#E5E7EB;display:inline-block"></span>
+  <span style="font-size:13px;color:#6B7280;font-weight:500"><strong style="color:#005EB8;font-size:15px">NHS</strong> Standards</span>
+</div>
+
+<!-- Features -->
+<section style="padding:80px 24px;background:#F9F7F4">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px">
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;color:#1A2332">Everything you need</h2>
+      <p style="color:#6B7280;font-size:16px">A complete NHS appointment management experience</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:linear-gradient(135deg,#E8F1FB,#BEE0F5)">🗓️</div>
+        <div class="feature-title">Book Appointments</div>
+        <div class="feature-desc">Schedule with your preferred doctor in seconds — A&E, General, or Specialist</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:linear-gradient(135deg,#E1F5EE,#B7EBCF)">✅</div>
+        <div class="feature-title">Check In Online</div>
+        <div class="feature-desc">Check in before you arrive and save time at the clinic</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:linear-gradient(135deg,#FFF8E7,#FFE69C)">📋</div>
+        <div class="feature-title">View History</div>
+        <div class="feature-desc">Access your complete appointment history anytime</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:linear-gradient(135deg,#FAECE7,#FDCFC6)">🔔</div>
+        <div class="feature-title">Smart Notifications</div>
+        <div class="feature-desc">Get reminders so you never miss an appointment</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:linear-gradient(135deg,#EEEDFE,#D4C5FD)">👨‍⚕️</div>
+        <div class="feature-title">Choose Your Doctor</div>
+        <div class="feature-desc">Browse NHS specialists and book directly</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:linear-gradient(135deg,#E1F5EE,#B7EBCF)">🔒</div>
+        <div class="feature-title">Secure & Private</div>
+        <div class="feature-desc">Your data protected under NHS GDPR standards</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background:#005EB8;padding:64px 24px;text-align:center">
+  <h2 style="color:white;font-size:32px;font-weight:700;margin-bottom:12px">Ready to get started?</h2>
+  <p style="color:rgba(255,255,255,0.75);font-size:16px;margin-bottom:32px">Join patients managing their NHS appointments online</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="register.html" style="background:white;color:#005EB8;font-size:15px;font-weight:700;padding:13px 32px;border-radius:12px;text-decoration:none">Create Free Account →</a>
+    <a href="doctors.html" style="background:rgba(255,255,255,0.15);color:white;font-size:15px;font-weight:600;padding:13px 32px;border-radius:12px;text-decoration:none;border:1px solid rgba(255,255,255,0.3)">Meet Our Doctors</a>
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 NHS Appointment Booking System</span>
+  <span>·</span>
+  <span class="footer-trm">Developed by TRM</span>
+  <span>·</span>
+  <a href="privacy.html">Privacy Policy</a>
+</footer>
+
+<div class="trm-watermark">Developed by TRM</div>
+
+<script type="module">
+  import { supabase } from './js/supabase.js'
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    document.getElementById('nav-signin').style.display = 'none'
+    document.getElementById('nav-register').style.display = 'none'
+    document.getElementById('nav-dashboard').style.display = 'flex'
+  }
+</script>
+
+</body>
+</html>

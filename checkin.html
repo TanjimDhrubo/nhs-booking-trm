@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .time-display {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--nhs-blue);
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .checkin-done {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <div class="page-header">
+      <h1>Check In</h1>
+      <p id="today-label">Today is</p>
+    </div>
+
+    <div id="message"></div>
+
+    <div id="today-list">
+      <div class="loading">Loading</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 class="section-heading">Upcoming Appointments</h2>
+    <div id="upcoming-list">
+      <div class="loading">Loading</div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <!-- TRM WATERMARK -->
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+
+    let userId = null
+    const msgEl = document.getElementById('message')
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric',
+        month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    }
+
+    function formatTime(iso) {
+      return new Date(iso).toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit', hour12: true
+      })
+    }
+
+    function formatTimeShort(iso) {
+      return new Date(iso).toLocaleTimeString('en-GB', {
+        hour: '2-digit', minute: '2-digit'
+      })
+    }
+
+    function renderBadge(status) {
+      const cls = 'badge badge-' + status.replace('_', '').toLowerCase()
+      const label = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
+      return '<span class="' + cls + '">' + label + '</span>'
+    }
+
+    function showMsg(msg, type) {
+      msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
+    }
+
+    function getDayBounds(date) {
+      const start = new Date(date)
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(date)
+      end.setHours(23, 59, 59, 999)
+      return { start: start.toISOString(), end: end.toISOString() }
+    }
+
+    async function loadTodayAppointments() {
+      const el = document.getElementById('today-list')
+      el.innerHTML = '<div class="loading">Loading</div>'
+
+      const now = new Date()
+      const { start, end } = getDayBounds(now)
+
+      const { data: appts, error } = await supabase
+        .from('appointments_trm')
+        .select('*, doctors_trm(name, specialisation)')
+        .eq('user_id', userId)
+        .eq('status', 'confirmed')
+        .gte('appointment_date', start)
+        .lte('appointment_date', end)
+        .order('appointment_date')
+
+      if (error) {
+        el.innerHTML = '<div class="alert alert-error">Failed to load appointments.</div>'
+        return
+      }
+
+      if (!appts.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">&#x1F5D3;&#xFE0F;</div>
+            <p>No appointments today.</p>
+            <a href="book.html" class="btn-primary">Book Now</a>
+          </div>`
+        return
+      }
+
+      let html = ''
+      for (const a of appts) {
+        const doc = a.doctors_trm
+        const docName = doc ? 'Dr. ' + doc.name : 'Unknown'
+        const docSpec = doc ? doc.specialisation : ''
+
+        html += '<div class="appt-card" id="appt-' + a.id + '">'
+        html += '  <div class="time-display">' + formatTime(a.appointment_date) + '</div>'
+        html += '  <div class="appt-info">'
+        html += '    <div class="appt-doctor">' + docName + '</div>'
+        html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + a.appointment_type + '</div>'
+        html += '  </div>'
+        html += '  <div class="appt-actions">'
+        html += '    <button class="btn-primary checkin-btn" data-id="' + a.id + '" data-doc="' + (doc ? doc.name : '') + '" data-time="' + a.appointment_date + '">Check In Now</button>'
+        html += '  </div>'
+        html += '</div>'
+      }
+
+      el.innerHTML = html
+
+      document.querySelectorAll('.checkin-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const apptId = btn.dataset.id
+          const docName = btn.dataset.doc
+          const apptTime = btn.dataset.time
+
+          btn.disabled = true
+          btn.textContent = 'Processing\u2026'
+
+          const nowStr = new Date().toISOString()
+
+          const { error: checkinErr } = await supabase
+            .from('checkins_trm')
+            .insert({
+              appointment_id: apptId,
+              checkin_time: nowStr
+            })
+
+          if (checkinErr) {
+            showMsg('Check-in failed. Please try again.', 'error')
+            btn.disabled = false
+            btn.textContent = 'Check In Now'
+            return
+          }
+
+          const { error: updateErr } = await supabase
+            .from('appointments_trm')
+            .update({ status: 'checked_in' })
+            .eq('id', apptId)
+
+          if (updateErr) {
+            showMsg('Check-in failed. Please try again.', 'error')
+            btn.disabled = false
+            btn.textContent = 'Check In Now'
+            return
+          }
+
+          await supabase.from('notifications_trm').insert({
+            user_id: userId,
+            message: 'You successfully checked in for your appointment with Dr ' + docName + ' at ' + formatTimeShort(apptTime),
+            type: 'in-app'
+          })
+
+          const card = document.getElementById('appt-' + apptId)
+          if (card) {
+            const actions = card.querySelector('.appt-actions')
+            if (actions) {
+              actions.innerHTML = '<div class="alert alert-success checkin-done">&#x2705; Checked in at ' + formatTimeShort(nowStr) + '</div>'
+            }
+          }
+        })
+      })
+    }
+
+    async function loadUpcomingAppointments() {
+      const el = document.getElementById('upcoming-list')
+      el.innerHTML = '<div class="loading">Loading</div>'
+
+      const today = new Date()
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(0, 0, 0, 0)
+
+      const weekEnd = new Date(today)
+      weekEnd.setDate(weekEnd.getDate() + 7)
+      weekEnd.setHours(23, 59, 59, 999)
+
+      const { data: appts, error } = await supabase
+        .from('appointments_trm')
+        .select('*, doctors_trm(name, specialisation)')
+        .eq('user_id', userId)
+        .eq('status', 'confirmed')
+        .gte('appointment_date', tomorrow.toISOString())
+        .lte('appointment_date', weekEnd.toISOString())
+        .order('appointment_date')
+
+      if (error) {
+        el.innerHTML = '<div class="alert alert-error">Failed to load upcoming appointments.</div>'
+        return
+      }
+
+      if (!appts.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">&#x1F4C5;</div>
+            <p>No upcoming appointments this week.</p>
+          </div>`
+        return
+      }
+
+      let html = ''
+      for (const a of appts) {
+        const doc = a.doctors_trm
+        const docName = doc ? 'Dr. ' + doc.name : 'Unknown'
+        const docSpec = doc ? doc.specialisation : ''
+
+        html += '<div class="appt-card">'
+        html += '  <div class="appt-info">'
+        html += '    <div class="appt-doctor">' + docName + '</div>'
+        html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + formatDate(a.appointment_date) + ' &middot; ' + a.appointment_type + '</div>'
+        html += '  </div>'
+        html += '  <div class="appt-actions">'
+        html +=      renderBadge(a.status)
+        html += '  </div>'
+        html += '</div>'
+      }
+
+      el.innerHTML = html
+    }
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      userId = session.user.id
+
+      await showUserName('user-name')
+
+      const today = new Date()
+      document.getElementById('today-label').textContent = 'Today is ' + today.toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      })
+
+      await Promise.all([
+        loadTodayAppointments(),
+        loadUpcomingAppointments()
+      ])
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    init()
+  </script>
+
+</body>
+</html>

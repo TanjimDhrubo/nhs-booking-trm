@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .container-narrow {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .privacy-card {
+      padding: 24px 24px 24px 28px;
+      border-left: 4px solid var(--nhs-blue);
+      margin-bottom: 20px;
+    }
+
+    .privacy-card h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .privacy-card p {
+      color: var(--nhs-muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .privacy-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .privacy-card ul li {
+      padding: 6px 0 6px 20px;
+      position: relative;
+      font-size: 15px;
+      color: var(--nhs-dark);
+      line-height: 1.5;
+    }
+
+    .privacy-card ul li::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--nhs-muted);
+      position: absolute;
+      left: 4px;
+      top: 14px;
+    }
+
+    .privacy-card ul li strong {
+      display: inline-block;
+      min-width: 120px;
+      color: var(--nhs-dark);
+    }
+
+    .privacy-card ul li .right-desc {
+      display: block;
+      font-size: 14px;
+      color: var(--nhs-muted);
+      margin-top: 1px;
+    }
+
+    .accent-blue {
+      border-left-color: var(--nhs-blue);
+    }
+
+    .accent-green {
+      border-left-color: #059669;
+    }
+
+    .accent-purple {
+      border-left-color: #8B5CF6;
+    }
+
+    .accent-amber {
+      border-left-color: #D97706;
+    }
+
+    .contact-details {
+      background: #F8F9FB;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-top: 8px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--nhs-dark);
+    }
+
+    .disclaimer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--nhs-muted);
+      margin-top: 40px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html" class="btn-ghost">&larr; Home</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container-narrow">
+
+    <div class="page-header">
+      <h1>Privacy Policy</h1>
+      <div class="header-badges">
+        <span class="badge badge-confirmed">GDPR Compliant</span>
+        <span class="badge badge-completed">NHS Standards</span>
+      </div>
+      <p>Last updated: June 2025 &middot; NHS Booking | TRM</p>
+    </div>
+
+    <!-- Card 1 -->
+    <div class="card privacy-card accent-blue">
+      <h2>&#x1F4CB; What Data We Collect</h2>
+      <p>We collect the following personal data to provide our appointment booking service:</p>
+      <ul>
+        <li>Full name and email address</li>
+        <li>Date of birth</li>
+        <li>NHS number (optional)</li>
+        <li>Appointment records and history</li>
+        <li>Check-in timestamps</li>
+        <li>Notification preferences</li>
+      </ul>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card privacy-card accent-green">
+      <h2>&#x1F3AF; Why We Collect It</h2>
+      <p>Your data is collected solely to provide the NHS Booking TRM service including:</p>
+      <ul>
+        <li>Creating and managing your appointments</li>
+        <li>Sending appointment reminders and confirmations</li>
+        <li>Maintaining your appointment history</li>
+        <li>Ensuring you receive the correct care at the right time</li>
+      </ul>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card privacy-card accent-blue">
+      <h2>&#x1F512; How It Is Stored</h2>
+      <p>All data is stored securely using Supabase — a cloud PostgreSQL database hosted on AWS infrastructure. We implement:</p>
+      <ul>
+        <li><strong>Row Level Security (RLS)</strong> — only you can access your own records</li>
+        <li><strong>Encrypted data transmission</strong> via HTTPS/TLS</li>
+        <li><strong>Password management</strong> via Supabase Auth — passwords are never stored in plain text</li>
+        <li><strong>Regular automated database backups</strong></li>
+      </ul>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card privacy-card accent-purple">
+      <h2>&#x2696;&#xFE0F; Your Rights Under UK GDPR</h2>
+      <p>Under the UK General Data Protection Regulation you have the following rights:</p>
+      <ul>
+        <li><strong>Right to Access</strong> <span class="right-desc">request a copy of your personal data</span></li>
+        <li><strong>Right to Rectification</strong> <span class="right-desc">correct inaccurate personal data</span></li>
+        <li><strong>Right to Erasure</strong> <span class="right-desc">request deletion of your personal data</span></li>
+        <li><strong>Right to Restrict Processing</strong> <span class="right-desc">limit how we use your data</span></li>
+        <li><strong>Right to Data Portability</strong> <span class="right-desc">receive your data in a machine-readable format</span></li>
+        <li><strong>Right to Object</strong> <span class="right-desc">object to processing of your personal data</span></li>
+      </ul>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="card privacy-card accent-amber">
+      <h2>&#x1F4C5; Data Retention</h2>
+      <p>In line with the NHS Records Management Code of Practice 2021, appointment records are retained for a minimum of 8 years from the date of the last entry. Personal profile data is retained for the duration of your account and deleted within 30 days of an account deletion request.</p>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="card privacy-card accent-green">
+      <h2>&#x1F36A; Cookies &amp; Session Tokens</h2>
+      <p>NHS Booking TRM does not use tracking cookies or advertising cookies. We use:</p>
+      <ul>
+        <li><strong>Secure JWT session tokens</strong> to keep you signed in during your visit. These tokens are managed automatically by Supabase Auth and expire after your session ends.</li>
+        <li><strong>No third-party analytics.</strong> No advertising networks.</li>
+        <li><strong>No data sold to third parties</strong> — ever.</li>
+      </ul>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="card privacy-card accent-blue">
+      <h2>&#x1F4E7; Contact Our Data Protection Officer</h2>
+      <p>If you wish to exercise your rights or have a privacy concern, please contact our Data Protection Officer:</p>
+      <div class="contact-details">
+        <strong>Email:</strong> dpo@nhsbooking-trm.nhs.uk<br>
+        <strong>Organisation:</strong> NHS Booking TRM — Digital Services<br>
+        <strong>Address:</strong> Digital Services Division, NHS Booking TRM, London, UK<br>
+        <strong>Response time:</strong> Within 30 days as required by UK GDPR
+      </div>
+    </div>
+
+    <p class="disclaimer">This privacy policy was prepared for educational purposes as part of a university project. NHS Booking TRM is a student-built demonstration system.</p>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <div class="trm-watermark">Developed by TRM</div>
+
+</body>
+</html>

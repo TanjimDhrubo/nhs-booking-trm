@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .detail-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--nhs-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 16px;
+      color: var(--nhs-dark);
+      margin-bottom: 16px;
+    }
+
+    .detail-value:last-child {
+      margin-bottom: 0;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .flex-row .btn-primary,
+    .flex-row .btn-ghost {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="history.html" class="btn-ghost">&larr; History</a>
+      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container-sm">
+
+    <div class="page-header">
+      <h1>Reschedule Appointment</h1>
+    </div>
+
+    <div id="page-message"></div>
+
+    <!-- Current Appointment -->
+    <div class="card" id="current-details">
+      <div class="detail-label">Current Appointment</div>
+      <div class="loading">Loading</div>
+    </div>
+
+    <!-- Reschedule Form -->
+    <div class="card" id="form-card">
+      <div class="detail-label">New Appointment Details</div>
+      <div id="message"></div>
+
+      <form id="reschedule-form">
+        <div class="form-group">
+          <label for="new-date">New Date</label>
+          <input type="date" id="new-date" required>
+        </div>
+
+        <div class="form-group">
+          <label for="new-time">New Time</label>
+          <select id="new-time" required>
+            <option value="">Select time</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="new-doctor">Change Doctor (optional)</label>
+          <select id="new-doctor">
+            <option value="">Same doctor</option>
+          </select>
+        </div>
+
+        <div class="flex-row">
+          <button type="submit" class="btn-primary" id="save-btn">Save Changes &rarr;</button>
+          <button type="button" class="btn-ghost" onclick="history.back()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <a href="history.html" class="btn-ghost back-link">&larr; Back to History</a>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric',
+        month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    }
+
+    function formatDateShort(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric',
+        month: 'long', year: 'numeric'
+      })
+    }
+
+    function showMsg(id, msg, type) {
+      document.getElementById(id).innerHTML =
+        '<div class="alert alert-' + type + '">' + msg + '</div>'
+    }
+
+    function generateTimeSlots() {
+      const slots = []
+      for (let h = 9; h <= 16; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          if (h === 16 && m === 30) break
+          const hh = String(h).padStart(2, '0')
+          const mm = String(m).padStart(2, '0')
+          slots.push(hh + ':' + mm)
+        }
+      }
+      return slots
+    }
+
+    function getTomorrow() {
+      const d = new Date()
+      d.setDate(d.getDate() + 1)
+      return d.toISOString().split('T')[0]
+    }
+
+    async function insertNotification(userId, message) {
+      await supabase.from('notifications_trm').insert({
+        user_id: userId,
+        message,
+        type: 'in-app'
+      })
+    }
+
+    async function init() {
+      const user = await requireAuth()
+      showUserName()
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        logout()
+      })
+
+      const params = new URLSearchParams(window.location.search)
+      const appointmentId = params.get('appointment_id')
+
+      if (!appointmentId) {
+        showMsg('page-message', 'No appointment selected. <a href="history.html">Back to History</a>', 'error')
+        document.getElementById('current-details').innerHTML = '<div class="detail-label">Current Appointment</div><p>No appointment selected.</p>'
+        document.getElementById('form-card').style.display = 'none'
+        return
+      }
+
+      const { data: appointment, error } = await supabase
+        .from('appointments_trm')
+        .select('*, doctors_trm(*)')
+        .eq('id', appointmentId)
+        .single()
+
+      if (error || !appointment) {
+        showMsg('page-message', 'Appointment not found. <a href="history.html">Back to History</a>', 'error')
+        document.getElementById('current-details').innerHTML = '<div class="detail-label">Current Appointment</div><p>Appointment not found.</p>'
+        document.getElementById('form-card').style.display = 'none'
+        return
+      }
+
+      const doctor = appointment.doctors_trm
+      const doctorName = doctor ? doctor.name : 'Unknown'
+      const specialisation = doctor ? doctor.specialisation : ''
+
+      document.getElementById('current-details').innerHTML =
+        '<div class="detail-label">Current Appointment</div>' +
+        '<div class="detail-value" style="font-weight:700;font-size:18px;">Dr. ' + doctorName + '</div>' +
+        (specialisation ? '<div class="detail-value" style="color:var(--nhs-muted);margin-top:-12px;">' + specialisation + '</div>' : '') +
+        '<div class="detail-value">' + formatDate(appointment.appointment_date) + '</div>' +
+        '<div class="detail-value">' + appointment.appointment_type + '</div>' +
+        '<div><span class="badge badge-' + (appointment.status === 'confirmed' ? 'confirmed' : 'pending') + '">' + appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) + '</span></div>'
+
+      const dateInput = document.getElementById('new-date')
+      const currentDateStr = appointment.appointment_date.substring(0, 10)
+      dateInput.value = currentDateStr
+      dateInput.min = getTomorrow()
+
+      const timeSelect = document.getElementById('new-time')
+      const currentTime = appointment.appointment_date.substring(11, 16)
+      const slots = generateTimeSlots()
+      for (const slot of slots) {
+        const opt = document.createElement('option')
+        opt.value = slot
+        opt.textContent = slot
+        if (slot === currentTime) opt.selected = true
+        timeSelect.appendChild(opt)
+      }
+
+      const doctorSelect = document.getElementById('new-doctor')
+      const { data: doctors } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('available', true)
+
+      if (doctors) {
+        for (const d of doctors) {
+          const opt = document.createElement('option')
+          opt.value = d.id
+          opt.textContent = d.name + ' - ' + d.specialisation
+          if (doctor && d.id === doctor.id) opt.selected = true
+          doctorSelect.appendChild(opt)
+        }
+      }
+
+      document.getElementById('reschedule-form').addEventListener('submit', async (e) => {
+        e.preventDefault()
+
+        const newDate = document.getElementById('new-date').value
+        const newTime = document.getElementById('new-time').value
+        const newDoctorId = document.getElementById('new-doctor').value
+        const btn = document.getElementById('save-btn')
+
+        document.getElementById('message').innerHTML = ''
+
+        if (new Date(newDate) <= new Date()) {
+          showMsg('message', 'New date must be after today.', 'error')
+          return
+        }
+
+        const newISO = newDate + 'T' + newTime + ':00'
+
+        btn.disabled = true
+        btn.textContent = 'Saving...'
+
+        const updateData = {
+          appointment_date: newISO,
+          status: 'confirmed'
+        }
+
+        if (newDoctorId) {
+          updateData.doctor_id = newDoctorId
+        }
+
+        const { error: updateError } = await supabase
+          .from('appointments_trm')
+          .update(updateData)
+          .eq('id', appointmentId)
+
+        if (updateError) {
+          showMsg('message', 'Failed to reschedule: ' + updateError.message, 'error')
+          btn.disabled = false
+          btn.textContent = 'Save Changes \u2192'
+          return
+        }
+
+        const selectedDoctorName = newDoctorId
+          ? 'Dr. ' + doctors.find(function(d) { return d.id === newDoctorId }).name
+          : 'Dr. ' + doctorName
+
+        await insertNotification(
+          user.id,
+          'Your ' + appointment.appointment_type + ' has been rescheduled to ' + formatDateShort(newISO) + ' with ' + selectedDoctorName + '.'
+        )
+
+        showMsg('page-message', 'Appointment rescheduled! &#x2705;', 'success')
+        showMsg('message',
+          'Your appointment has been updated. <a href="history.html" style="color:var(--nhs-blue);text-decoration:underline;">&larr; Back to History</a>',
+          'success')
+
+        document.getElementById('form-card').style.display = 'none'
+      })
+    }
+
+    init()
+  </script>
+
+</body>
+</html>

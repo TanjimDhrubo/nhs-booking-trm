@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .search-input {
+      margin-bottom: 24px;
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+      margin-top: auto;
+    }
+
+    .doctor-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .doctor-avatar {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links" id="navLinks">
+      <a href="login.html" class="btn-secondary nav-guest" id="navSignIn">Sign In</a>
+      <a href="register.html" class="btn-primary nav-guest" id="navRegister">Register</a>
+      <a href="dashboard.html" class="btn-primary nav-auth nav-hidden" id="navDashboard">Dashboard &rarr;</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <div class="page-header">
+      <h1>Meet Our Doctors</h1>
+      <p>Our team of NHS specialists ready to help you</p>
+    </div>
+
+    <div id="message"></div>
+
+    <input type="text" id="search-doctors" class="search-input" placeholder="Search by name or specialisation..." autocomplete="off">
+
+    <div id="doctors-grid" class="grid-3">
+      <div class="loading">Loading</div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <!-- TRM WATERMARK -->
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    console.log('Script started')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    console.log('Session:', session)
+
+    const { data, error } = await supabase
+      .from('doctors_trm')
+      .select('*')
+
+    console.log('Doctors data:', data)
+    console.log('Doctors error:', error)
+
+    let allDoctors = []
+    const gridEl = document.getElementById('doctors-grid')
+    const searchEl = document.getElementById('search-doctors')
+    const msgEl = document.getElementById('message')
+
+    const avatarColours = [
+      { bg: '#E8F1FB', text: '#1E40AF' },
+      { bg: '#E1F5EE', text: '#065F46' },
+      { bg: '#FAEEDA', text: '#92400E' },
+      { bg: '#FAECE7', text: '#9A3412' },
+      { bg: '#EEEDFE', text: '#5B21B6' },
+      { bg: '#FEF3C7', text: '#B45309' }
+    ]
+
+    function getInitials(name) {
+      const parts = name.trim().split(/\s+/)
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+    }
+
+    function renderDoctors(doctors) {
+      if (!doctors.length) {
+        gridEl.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state-icon">&#x1F468;&#x200D;&#x2695;&#xFE0F;</div>
+            <p>No doctors found matching your search.</p>
+          </div>`
+        return
+      }
+
+      let html = ''
+      for (let i = 0; i < doctors.length; i++) {
+        const d = doctors[i]
+        const colour = avatarColours[i % avatarColours.length]
+        const initials = getInitials(d.name)
+
+        html += '<div class="doctor-card">'
+        html += '  <div class="doctor-avatar" style="background:' + colour.bg + ';color:' + colour.text + ';">' + initials + '</div>'
+        html += '  <div class="doctor-name">Dr. ' + d.name + '</div>'
+        html += '  <div class="doctor-spec">' + d.specialisation + '</div>'
+        html += '  <span class="badge badge-confirmed">Available</span>'
+        html += '  <a href="book.html?doctor_id=' + d.id + '" class="btn-primary btn-full">Book Appointment &rarr;</a>'
+        html += '</div>'
+      }
+
+      gridEl.innerHTML = html
+    }
+
+    function applyFilter() {
+      const query = searchEl.value.trim().toLowerCase()
+
+      if (!query) {
+        renderDoctors(allDoctors)
+        return
+      }
+
+      const filtered = allDoctors.filter(d =>
+        d.name.toLowerCase().includes(query) ||
+        d.specialisation.toLowerCase().includes(query)
+      )
+
+      renderDoctors(filtered)
+    }
+
+    async function init() {
+      gridEl.innerHTML = '<div class="loading">Loading</div>'
+
+      const { data: doctors, error } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('available', true)
+        .order('name')
+
+      if (error) {
+        gridEl.innerHTML = '<div class="alert alert-error">Failed to load doctors.</div>'
+        return
+      }
+
+      allDoctors = doctors || []
+      renderDoctors(allDoctors)
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        document.querySelectorAll('.nav-guest').forEach(el => el.classList.add('nav-hidden'))
+        document.querySelectorAll('.nav-auth').forEach(el => el.classList.remove('nav-hidden'))
+      }
+    }
+
+    searchEl.addEventListener('input', applyFilter)
+
+    init()
+  </script>
+
+</body>
+</html>

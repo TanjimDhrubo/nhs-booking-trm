@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .divider-text {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+      color: var(--nhs-muted);
+      font-size: 13px;
+    }
+
+    .divider-text::before,
+    .divider-text::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .auth-links {
+      text-align: center;
+      font-size: 13px;
+      color: var(--nhs-muted);
+    }
+
+    .auth-links a {
+      color: var(--nhs-muted);
+      text-decoration: none;
+    }
+
+    .auth-links a:hover {
+      color: var(--nhs-blue);
+    }
+
+    .auth-links .sep {
+      display: inline-block;
+      margin: 0 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <div class="navbar-logo">NHS</div>
+      </div>
+
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-subtitle">Sign in to your NHS Booking account | TRM</div>
+
+      <div id="message"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Your password" required>
+        </div>
+        <button type="submit" class="btn-primary btn-full" id="submit-btn">Sign In &rarr;</button>
+      </form>
+
+      <div class="divider-text">or</div>
+
+      <div class="auth-links">
+        Don't have an account? <a href="register.html">Register here</a>
+        <span class="sep">·</span>
+        <a href="doctors.html">Browse our doctors</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
+    <span>·</span>
+    <span class="footer-trm">Developed by TRM</span>
+    <span>·</span>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <!-- TRM WATERMARK -->
+  <div class="trm-watermark">Developed by TRM</div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    const form = document.getElementById('login-form')
+    const msgEl = document.getElementById('message')
+    const submitBtn = document.getElementById('submit-btn')
+
+    function showMsg(msg, type = 'error') {
+      msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
+    }
+
+    async function redirectIfLoggedIn() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        window.location.href = 'dashboard.html'
+      }
+    }
+
+    redirectIfLoggedIn()
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      msgEl.innerHTML = ''
+
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value
+
+      if (!email || !password) {
+        showMsg('Please fill in both fields.')
+        return
+      }
+
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Signing in\u2026'
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (error) {
+        showMsg(error.message)
+        submitBtn.disabled = false
+        submitBtn.innerHTML = 'Sign In &rarr;'
+        return
+      }
+
+      window.location.href = 'dashboard.html'
+    })
+  </script>
+
+</body>
+</html>
