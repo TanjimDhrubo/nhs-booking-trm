@@ -112,54 +112,63 @@
     import { supabase } from './js/supabase.js'
 
     const form = document.getElementById('admin-login-form')
-    const msgEl = document.getElementById('message')
 
-    function showMsg(msg, type = 'error') {
-      msgEl.innerHTML = `<div class="alert alert-${type}">${msg}</div>`
-    }
-
-    async function redirectIfDoctor() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
-      const { data: doctor } = await supabase
-        .from('doctors_trm')
-        .select('id')
-        .eq('email', session.user.email)
-        .single()
-      if (doctor) {
-        window.location.href = 'admin-dashboard.html'
-      }
-    }
-
-    redirectIfDoctor()
-
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault()
-      msgEl.innerHTML = '<div class="alert alert-info"><div class="loading loading-inline">Signing in</div></div>'
 
       const email = document.getElementById('email').value.trim()
       const password = document.getElementById('password').value
+      const msgDiv = document.getElementById('message')
+      const submitBtn = form.querySelector('button[type=submit]')
 
-      const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({ email, password })
-
-      if (authErr) {
-        showMsg('Invalid credentials. Please try again.')
+      if (!email || !password) {
+        msgDiv.innerHTML = '<div class="alert alert-error">Please enter your email and password.</div>'
         return
       }
 
-      const { data: doctor, error: docErr } = await supabase
-        .from('doctors_trm')
-        .select('id, name, specialisation')
-        .eq('email', email)
-        .single()
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Signing in...'
+      msgDiv.innerHTML = ''
 
-      if (docErr || !doctor) {
-        await supabase.auth.signOut()
-        showMsg('You are not authorised as NHS staff. Patient login is at <a href="login.html">login.html</a>')
-        return
+      try {
+        // Step 1 — Try auth login
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+
+        if (authError) {
+          msgDiv.innerHTML = '<div class="alert alert-error">Invalid credentials. Please check your email and password.</div>'
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Sign In to Staff Portal'
+          return
+        }
+
+        // Step 2 — Check if this email is a doctor
+        const { data: doctorData, error: doctorError } = await supabase
+          .from('doctors_trm')
+          .select('id, name, specialisation, email')
+          .eq('email', email)
+          .single()
+
+        if (doctorError || !doctorData) {
+          // Not a doctor — sign out and reject
+          await supabase.auth.signOut()
+          msgDiv.innerHTML = '<div class="alert alert-error">You are not authorised as NHS staff. Patient login is at <a href="login.html">login.html</a></div>'
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Sign In to Staff Portal'
+          return
+        }
+
+        // Step 3 — Success, go to admin dashboard
+        window.location.href = 'admin-dashboard.html'
+
+      } catch (err) {
+        console.error('Admin login error:', err)
+        msgDiv.innerHTML = '<div class="alert alert-error">An unexpected error occurred. Please try again.</div>'
+        submitBtn.disabled = false
+        submitBtn.textContent = 'Sign In to Staff Portal'
       }
-
-      window.location.href = 'admin-dashboard.html'
     })
   </script>
 

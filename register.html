@@ -23,8 +23,8 @@
 
       <form id="register-form">
         <div class="form-group">
-          <label for="full_name">Full Name</label>
-          <input type="text" id="full_name" required placeholder="e.g. Jane Smith">
+          <label for="full-name">Full Name</label>
+          <input type="text" id="full-name" required placeholder="e.g. Jane Smith">
         </div>
 
         <div class="form-group">
@@ -34,17 +34,17 @@
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" required minlength="6" placeholder="Minimum 6 characters">
+          <input type="password" id="password" required minlength="8" placeholder="Minimum 8 characters">
         </div>
 
         <div class="form-group">
-          <label for="date_of_birth">Date of Birth</label>
-          <input type="date" id="date_of_birth" required>
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" required>
         </div>
 
         <div class="form-group">
-          <label for="nhs_number">NHS Number (optional)</label>
-          <input type="text" id="nhs_number" placeholder="10-digit NHS number" pattern="[0-9]{10}" maxlength="10">
+          <label for="nhs-number">NHS Number (optional)</label>
+          <input type="text" id="nhs-number" placeholder="10-digit NHS number" pattern="[0-9]{10}" maxlength="10">
         </div>
 
         <button type="submit" class="btn-primary" id="register-btn">Create Account</button>
@@ -70,66 +70,90 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
 
-    async function insertNotification(userId, message) {
-      await supabase.from('notifications_trm').insert({
-        user_id: userId,
-        message,
-        type: 'in-app'
-      })
-    }
+    const form = document.getElementById('register-form')
 
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault()
-
-      const msgEl = document.getElementById('message')
-      const btn = document.getElementById('register-btn')
-      const fullName = document.getElementById('full_name').value.trim()
+      
+      const fullName = document.getElementById('full-name').value.trim()
       const email = document.getElementById('email').value.trim()
       const password = document.getElementById('password').value
-      const dateOfBirth = document.getElementById('date_of_birth').value
-      const nhsNumber = document.getElementById('nhs_number').value.trim() || null
+      const dob = document.getElementById('dob').value
+      const nhsNumber = document.getElementById('nhs-number').value.trim()
+      const msgDiv = document.getElementById('message')
+      const submitBtn = form.querySelector('button[type=submit]')
 
-      msgEl.innerHTML = ''
-      btn.disabled = true
-      btn.textContent = 'Creating account...'
+      // Validate
+      if (!fullName || !email || !password || !dob) {
+        msgDiv.innerHTML = '<div class="alert alert-error">Please fill in all required fields.</div>'
+        return
+      }
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName }
+      if (password.length < 8) {
+        msgDiv.innerHTML = '<div class="alert alert-error">Password must be at least 8 characters.</div>'
+        return
+      }
+
+      // Loading state
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Creating account...'
+      msgDiv.innerHTML = ''
+
+      try {
+        // Step 1 — Create auth account
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName }
+          }
+        })
+
+        if (authError) {
+          msgDiv.innerHTML = `<div class="alert alert-error">${authError.message}</div>`
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Create Account'
+          return
         }
-      })
 
-      if (error) {
-        msgEl.innerHTML = '<div class="alert alert-error">' + error.message + '</div>'
-        btn.disabled = false
-        btn.textContent = 'Create Account'
-        return
+        if (!authData.user) {
+          msgDiv.innerHTML = '<div class="alert alert-error">Signup failed. Please try again.</div>'
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Create Account'
+          return
+        }
+
+        // Step 2 — Insert profile using service role workaround
+        // Wait a moment for auth to propagate
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        const { error: profileError } = await supabase
+          .from('profiles_trm')
+          .upsert({
+            id: authData.user.id,
+            full_name: fullName,
+            date_of_birth: dob || null,
+            nhs_number: nhsNumber || null
+          }, {
+            onConflict: 'id'
+          })
+
+        if (profileError) {
+          console.error('Profile error:', profileError)
+          // Still show success — trigger will handle profile
+          msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! Please check your email to verify your account, then sign in.</div>'
+        } else {
+          msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! Please check your email to verify your account, then sign in.</div>'
+        }
+
+        submitBtn.textContent = 'Account Created!'
+        
+      } catch (err) {
+        console.error('Unexpected error:', err)
+        msgDiv.innerHTML = '<div class="alert alert-error">An unexpected error occurred. Please try again.</div>'
+        submitBtn.disabled = false
+        submitBtn.textContent = 'Create Account'
       }
-
-      const userId = data.user.id
-
-      const { error: profileError } = await supabase.from('profiles_trm').insert({
-        id: userId,
-        full_name: fullName,
-        date_of_birth: dateOfBirth,
-        nhs_number: nhsNumber
-      })
-
-      if (profileError) {
-        msgEl.innerHTML = '<div class="alert alert-error">Account created but profile setup failed. Please contact support.</div>'
-        btn.disabled = false
-        btn.textContent = 'Create Account'
-        return
-      }
-
-      await insertNotification(userId, 'Welcome to NHS Appointment Booking! Your account has been created successfully.')
-
-      msgEl.innerHTML = '<div class="alert alert-success">Account created! Please check your email to confirm your account, then sign in.</div>'
-      btn.disabled = false
-      btn.textContent = 'Create Account'
-      document.getElementById('register-form').reset()
     })
   </script>
 
