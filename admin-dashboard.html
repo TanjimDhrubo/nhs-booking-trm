@@ -205,14 +205,14 @@
       doctorId = doctor.id
       doctorName = doctor.name
 
-      document.getElementById('doctor-name').textContent = 'Dr. ' + doctor.name
+      document.getElementById('doctor-name').textContent = doctor.name
       document.getElementById('doctor-spec').textContent = doctor.specialisation
 
       const hour = new Date().getHours()
       let greeting = 'Good evening'
       if (hour < 12) greeting = 'Good morning'
       else if (hour < 17) greeting = 'Good afternoon'
-      document.getElementById('greeting').textContent = greeting + ', Dr. ' + doctor.name
+      document.getElementById('greeting').textContent = greeting + ', ' + doctor.name
 
       return doctor
     }

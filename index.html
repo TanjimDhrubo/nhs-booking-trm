@@ -93,7 +93,7 @@
       Skip the phone queues. Book, reschedule, and manage your NHS appointments — all from the comfort of your home.
     </p>
 
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <div class="hero-actions" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <a href="register.html" class="btn-primary" style="font-size:16px;padding:14px 32px">Get Started →</a>
       <a href="login.html" class="btn-secondary" style="font-size:16px;padding:14px 32px">Sign In</a>
     </div>
@@ -255,21 +255,38 @@
   import { supabase } from './js/supabase.js'
 
   const { data: { session } } = await supabase.auth.getSession()
+  window.userLoggedIn = !!session
 
   if (session) {
-    // Set global auth state for card clicks above
-    window.userLoggedIn = true
+    // Hide auth buttons
+    const signin = document.getElementById('nav-signin')
+    const register = document.getElementById('nav-register')
+    const dashboard = document.getElementById('nav-dashboard')
+    if (signin) signin.style.display = 'none'
+    if (register) register.style.display = 'none'
+    if (dashboard) dashboard.style.display = 'flex'
 
-    // Update navbar
-    document.getElementById('nav-signin').style.display = 'none'
-    document.getElementById('nav-register').style.display = 'none'
-    document.getElementById('nav-dashboard').style.display = 'flex'
+    // Hide hero Sign In and Get Started buttons
+    // Replace them with single Dashboard button
+    const heroActions = document.querySelector('.hero-actions')
+    if (heroActions) {
+      heroActions.innerHTML = `
+        <a href="dashboard.html" class="btn-primary"
+           style="font-size:16px;padding:14px 32px">
+           Go to Dashboard →
+        </a>
+      `
+    }
 
     // Update menu protected links
-    document.getElementById('menu-book').href = 'book.html'
-    document.getElementById('menu-checkin').href = 'checkin.html'
-    document.getElementById('menu-history').href = 'history.html'
-    document.getElementById('menu-notif').href = 'notifications.html'
+    const menuBook = document.getElementById('menu-book')
+    const menuCheckin = document.getElementById('menu-checkin')
+    const menuHistory = document.getElementById('menu-history')
+    const menuNotif = document.getElementById('menu-notif')
+    if (menuBook) menuBook.href = 'book.html'
+    if (menuCheckin) menuCheckin.href = 'checkin.html'
+    if (menuHistory) menuHistory.href = 'history.html'
+    if (menuNotif) menuNotif.href = 'notifications.html'
   }
 </script>
 

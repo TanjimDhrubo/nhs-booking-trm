@@ -116,7 +116,7 @@
     form.addEventListener('submit', async function(e) {
       e.preventDefault()
 
-      const email = document.getElementById('email').value.trim()
+      const email = document.getElementById('email').value.trim().toLowerCase()
       const password = document.getElementById('password').value
       const msgDiv = document.getElementById('message')
       const submitBtn = form.querySelector('button[type=submit]')
@@ -128,44 +128,87 @@
 
       submitBtn.disabled = true
       submitBtn.textContent = 'Signing in...'
-      msgDiv.innerHTML = ''
+      msgDiv.innerHTML = '<div class="alert alert-info">Verifying credentials...</div>'
 
       try {
-        // Step 1 — Try auth login
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        })
+        // Step 1: Sign out any existing session first
+        await supabase.auth.signOut()
+
+        // Step 2: Try to sign in
+        const { data: authData, error: authError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password
+          })
+
+        console.log('Auth result:', authData, authError)
 
         if (authError) {
-          msgDiv.innerHTML = '<div class="alert alert-error">Invalid credentials. Please check your email and password.</div>'
+          msgDiv.innerHTML = `<div class="alert alert-error">
+            Login failed: ${authError.message}<br>
+            <small>Make sure you are using your NHS staff email
+            and correct password.</small>
+          </div>`
           submitBtn.disabled = false
           submitBtn.textContent = 'Sign In to Staff Portal'
           return
         }
 
-        // Step 2 — Check if this email is a doctor
+        if (!authData.user) {
+          msgDiv.innerHTML = '<div class="alert alert-error">Login failed. Please try again.</div>'
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Sign In to Staff Portal'
+          return
+        }
+
+        const userEmail = authData.user.email.toLowerCase()
+        console.log('Looking for doctor with email:', userEmail)
+
+        // Step 3: Check doctors table - try multiple approaches
         const { data: doctorData, error: doctorError } = await supabase
           .from('doctors_trm')
           .select('id, name, specialisation, email')
-          .eq('email', email)
-          .single()
+          .limit(20)
 
-        if (doctorError || !doctorData) {
-          // Not a doctor — sign out and reject
+        console.log('All doctors:', doctorData, doctorError)
+
+        if (doctorError) {
+          msgDiv.innerHTML = `<div class="alert alert-error">
+            Database error: ${doctorError.message}
+          </div>`
           await supabase.auth.signOut()
-          msgDiv.innerHTML = '<div class="alert alert-error">You are not authorised as NHS staff. Patient login is at <a href="login.html">login.html</a></div>'
           submitBtn.disabled = false
           submitBtn.textContent = 'Sign In to Staff Portal'
           return
         }
 
-        // Step 3 — Success, go to admin dashboard
-        window.location.href = 'admin-dashboard.html'
+        // Find doctor by email (case insensitive)
+        const doctor = doctorData ? doctorData.find(d =>
+          d.email && d.email.toLowerCase() === userEmail
+        ) : null
+
+        console.log('Found doctor:', doctor)
+
+        if (!doctor) {
+          await supabase.auth.signOut()
+          msgDiv.innerHTML = `<div class="alert alert-error">
+            You are not registered as NHS staff.<br>
+            <small>Patient login: <a href="login.html">click here</a></small>
+          </div>`
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Sign In to Staff Portal'
+          return
+        }
+
+        // Step 4: Success
+        msgDiv.innerHTML = '<div class="alert alert-success">Welcome, ' + doctor.name + '! Redirecting...</div>'
+        setTimeout(() => {
+          window.location.href = 'admin-dashboard.html'
+        }, 1000)
 
       } catch (err) {
-        console.error('Admin login error:', err)
-        msgDiv.innerHTML = '<div class="alert alert-error">An unexpected error occurred. Please try again.</div>'
+        console.error('Unexpected error:', err)
+        msgDiv.innerHTML = '<div class="alert alert-error">Unexpected error. Please try again.</div>'
         submitBtn.disabled = false
         submitBtn.textContent = 'Sign In to Staff Portal'
       }

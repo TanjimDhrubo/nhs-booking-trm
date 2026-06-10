@@ -44,6 +44,8 @@ D:\test run\
 ├── history.html         ⬜ needs code
 ├── index.html           ⬜ needs code
 ├── login.html           ⬜ needs code
+├── admin-login.html     ⬜ needs code — staff/doctor login portal
+├── admin-dashboard.html ⬜ needs code — doctor appointment view
 ├── notifications.html   ⬜ needs code
 ├── privacy.html         ⬜ needs code
 ├── register.html        ⬜ needs code
@@ -266,8 +268,50 @@ async function insertNotification(userId, message) {
 | reschedule.html | ⬜ Pending |
 | notifications.html | ⬜ Pending |
 | privacy.html | ⬜ Pending |
+| admin-login.html | ⬜ Pending |
+| admin-dashboard.html | ⬜ Pending |
 
 ---
+
+---
+
+## ADMIN PORTAL RULES
+
+### Access
+- Admin portal is completely separate from patient portal
+- No visible link from any patient page — accessed directly via URL
+- URL: admin-login.html then redirects to admin-dashboard.html
+
+### Admin Authentication
+- Uses same Supabase Auth but checks if logged-in user exists in doctors_trm table
+- If email matches a doctor in doctors_trm → grant access to admin-dashboard
+- If email does NOT match a doctor → show error "You are not authorised as staff"
+- This means doctors log in with their own email accounts created in Supabase Auth
+
+### Admin Dashboard Shows
+- The logged-in doctor's own name and specialisation (from doctors_trm)
+- Today's appointments with that doctor (filter by doctor_id)
+- This week's upcoming appointments
+- Each appointment shows: patient full_name (from profiles_trm), appointment_type, appointment_date formatted, status badge
+- Read only — no edit/cancel from admin side for now
+
+### Admin Branding
+- Same TRM branding rules apply
+- Navbar shows "NHS Admin Portal | TRM" instead of regular site name
+- Footer same as patient pages
+- Background same warm off-white
+- Add a subtle "STAFF ONLY" badge in the navbar so it's visually distinct
+
+### Admin Seed Data
+- The 6 doctors already in doctors_trm need Supabase Auth accounts
+- When testing: manually create auth accounts in Supabase Dashboard
+  Auth → Users → Add User → use email like sarah.mitchell@nhs-trm.com
+- The admin-login page has a note explaining this to the demo user
+
+### Security Note
+- This is a university demo — not production security
+- Real NHS systems would use NHS Staff Identity and MFA
+- Mention this in your individual report for extra marks
 
 ## MISTAKES TO NEVER MAKE
 - Never use require() — ES modules only

@@ -187,7 +187,7 @@
       for (const d of doctors) {
         const opt = document.createElement('option')
         opt.value = d.id
-        opt.textContent = 'Dr. ' + d.name + ' \u2014 ' + d.specialisation
+        opt.textContent = d.name + ' \u2014 ' + d.specialisation
         doctorSelect.appendChild(opt)
       }
 
@@ -196,7 +196,7 @@
         const doc = doctors.find(d => d.id === selectedId)
         if (doc) {
           preselectMsg.classList.remove('is-hidden')
-          preselectMsg.innerHTML = 'Booking with <strong>Dr. ' + doc.name + '</strong>. You can change below.'
+          preselectMsg.innerHTML = 'Booking with <strong>' + doc.name + '</strong>. You can change below.'
         }
       }
     }
@@ -277,7 +277,7 @@
 
       await supabase.from('notifications_trm').insert({
         user_id: userId,
-        message: 'Appointment booked for ' + formatDate(appointmentDate) + ' with Dr ' + (doctor?.name || 'your doctor'),
+        message: 'Appointment booked for ' + formatDate(appointmentDate) + ' with ' + (doctor?.name || 'your doctor'),
         type: 'in-app'
       })
 

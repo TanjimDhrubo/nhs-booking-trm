@@ -7,150 +7,47 @@
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--nhs-border, #E5E7EB);
-    }
-
-    .toggle-row:last-of-type {
-      border-bottom: none;
-    }
-
-    .toggle-info {
-      flex: 1;
-    }
-
-    .toggle-label {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--nhs-dark);
-    }
-
-    .toggle-desc {
-      font-size: 13px;
-      color: var(--nhs-muted);
-      margin-top: 2px;
-    }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--nhs-border, #E5E7EB);
-    }
-
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: var(--nhs-dark);
-    }
-
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--nhs-blue);
-    }
-
-    .section-divider {
-      height: 1px;
-      background: var(--nhs-border, #E5E7EB);
-      margin: 36px 0 28px;
-    }
-
-    .notif-row {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      padding: 16px 20px;
-      border-left: 3px solid var(--nhs-blue);
-      border-bottom: 1px solid var(--nhs-border, #E5E7EB);
-      background: var(--bg-card);
-    }
-
-    .notif-row:last-child {
-      border-bottom: none;
-    }
-
-    .notif-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #EBF2FA;
-      color: var(--nhs-blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
+    .toggle-wrap {
+      position: relative;
+      width: 44px;
+      height: 24px;
       flex-shrink: 0;
     }
 
-    .notif-body {
-      flex: 1;
-      min-width: 0;
+    .toggle-wrap input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
     }
 
-    .notif-msg {
-      font-size: 15px;
-      color: var(--nhs-dark);
-      line-height: 1.5;
-      margin-bottom: 3px;
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #D1D5DB;
+      border-radius: 24px;
+      transition: background 0.2s;
     }
 
-    .notif-time {
-      font-size: 13px;
-      color: var(--nhs-muted);
+    .toggle-slider::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
     }
 
-    #pref-msg {
-      margin-top: 12px;
+    .toggle-wrap input:checked + .toggle-slider {
+      background: var(--nhs-blue);
     }
 
-    .card-title {
-      font-size: 18px;
-      margin-bottom: 4px;
-    }
-
-    .save-btn-wrap {
-      margin-top: 12px;
-    }
-
-    .activity-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 20px;
-    }
-
-    .activity-header h2 {
-      margin: 0;
-    }
-
-    .list-card {
-      padding: 0;
-    }
-
-    .list-card .loading {
-      padding: 40px;
-    }
-
-    .list-card .empty-state {
-      padding: 60px 20px;
-    }
-
-    .list-alert {
-      margin: 16px;
-    }
-
-    .activity-sub {
-      color: var(--nhs-muted);
-      font-size: 13px;
+    .toggle-wrap input:checked + .toggle-slider::after {
+      transform: translateX(20px);
     }
   </style>
 </head>
@@ -179,60 +76,68 @@
 
     <div class="grid-2">
 
-      <!-- Preferences Card -->
+      <!-- LEFT CARD — Preferences -->
       <div class="card">
-        <h3 class="card-title">Notification Preferences</h3>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:0">Notification Preferences</h3>
+        <div class="divider"></div>
 
-        <div class="toggle-row">
-          <input type="checkbox" id="pref-email">
-          <div class="toggle-info">
-            <div class="toggle-label">Email Reminders</div>
-            <div class="toggle-desc">Get emailed before each appointment</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
+          <div>
+            <div style="font-weight:600;font-size:14px">Email Reminders</div>
+            <p style="font-size:13px;color:var(--nhs-muted);margin:0">Get emailed before appointments</p>
           </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" id="pref-email">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
 
-        <div class="toggle-row">
-          <input type="checkbox" id="pref-inapp">
-          <div class="toggle-info">
-            <div class="toggle-label">In-App Alerts</div>
-            <div class="toggle-desc">See updates when you log in</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
+          <div>
+            <div style="font-weight:600;font-size:14px">In-App Alerts</div>
+            <p style="font-size:13px;color:var(--nhs-muted);margin:0">See updates when you log in</p>
           </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" id="pref-inapp">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
 
-        <button class="btn-secondary save-btn-wrap" id="save-prefs">Save Preferences</button>
+        <button class="btn-secondary" style="width:100%;justify-content:center;margin-top:16px" id="save-prefs">Save Preferences</button>
         <div id="pref-msg"></div>
       </div>
 
-      <!-- Stats Card -->
+      <!-- RIGHT CARD — Stats -->
       <div class="card">
-        <h3 class="card-title">Activity Summary</h3>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:0">Activity Summary</h3>
+        <div class="divider"></div>
 
-        <div class="stat-row">
-          <span class="stat-label">Total notifications</span>
-          <span class="stat-value" id="stat-total-notifs">0</span>
+        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
+          <span style="font-size:14px">Total Notifications</span>
+          <span style="color:var(--nhs-blue);font-weight:700" id="stat-total">0</span>
         </div>
 
-        <div class="stat-row">
-          <span class="stat-label">Appointments booked</span>
-          <span class="stat-value" id="stat-bookings">0</span>
+        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
+          <span style="font-size:14px">Appointments Booked</span>
+          <span style="color:var(--nhs-blue);font-weight:700" id="stat-booked">0</span>
         </div>
 
-        <div class="stat-row">
-          <span class="stat-label">Check-ins completed</span>
-          <span class="stat-value" id="stat-checkins">0</span>
+        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
+          <span style="font-size:14px">Check-ins Completed</span>
+          <span style="color:var(--nhs-blue);font-weight:700" id="stat-checkins">0</span>
         </div>
       </div>
 
     </div>
 
-    <div class="section-divider"></div>
+    <div class="divider"></div>
 
-    <div class="activity-header">
-      <h2>Recent Activity</h2>
-      <small class="activity-sub">Last 50 notifications</small>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-size:22px;font-weight:700;color:var(--nhs-dark);letter-spacing:-0.4px">Recent Activity</h2>
+      <small style="color:var(--nhs-muted);font-size:13px">Showing last 50 notifications</small>
     </div>
 
-    <div id="notif-list" class="card list-card">
+    <div id="notif-list">
       <div class="loading">Loading</div>
     </div>
 
@@ -247,94 +152,98 @@
     <a href="privacy.html">Privacy Policy</a>
   </footer>
 
+  <!-- TRM WATERMARK -->
   <div class="trm-watermark">Developed by TRM</div>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
 
-    function timeAgo(iso) {
-      const now = new Date()
-      const date = new Date(iso)
-      const diffMs = now - date
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-
-      if (diffHours < 1) return 'Just now'
-      if (diffHours < 24) return diffHours + ' hours ago'
-      if (diffHours < 48) return 'Yesterday'
-
-      return date.toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+    function timeAgo(isoString) {
+      const diff = Date.now() - new Date(isoString).getTime()
+      const mins = Math.floor(diff / 60000)
+      const hours = Math.floor(diff / 3600000)
+      const days = Math.floor(diff / 86400000)
+      if (mins < 1) return 'Just now'
+      if (mins < 60) return mins + ' minutes ago'
+      if (hours < 24) return hours + ' hours ago'
+      if (days === 1) return 'Yesterday'
+      return new Date(isoString).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
       })
     }
 
-    async function init() {
-      const user = await requireAuth()
-      showUserName()
+    async function loadNotifications() {
+      const { data: { user } } = await supabase.auth.getUser()
 
-      document.getElementById('logout-btn').addEventListener('click', logout)
-
-      const prefEmail = document.getElementById('pref-email')
-      const prefInApp = document.getElementById('pref-inapp')
-
-      prefEmail.checked = localStorage.getItem('pref_email') !== 'false'
-      prefInApp.checked = localStorage.getItem('pref_inapp') !== 'false'
-
-      document.getElementById('save-prefs').addEventListener('click', () => {
-        localStorage.setItem('pref_email', prefEmail.checked)
-        localStorage.setItem('pref_inapp', prefInApp.checked)
-        const msgEl = document.getElementById('pref-msg')
-        msgEl.innerHTML = '<div class="alert alert-success">Preferences saved!</div>'
-        setTimeout(() => { msgEl.innerHTML = '' }, 2000)
-      })
-
-      const listEl = document.getElementById('notif-list')
-
-      const { data: notifications, error } = await supabase
+      const { data, error } = await supabase
         .from('notifications_trm')
-        .select('id, message, sent_at, type')
+        .select('*')
         .eq('user_id', user.id)
         .order('sent_at', { ascending: false })
         .limit(50)
 
+      document.getElementById('stat-total').textContent = data ? data.length : 0
+      document.getElementById('stat-booked').textContent = data ? data.filter(n => n.message.toLowerCase().includes('booked')).length : 0
+      document.getElementById('stat-checkins').textContent = data ? data.filter(n => n.message.toLowerCase().includes('checked in')).length : 0
+
+      const el = document.getElementById('notif-list')
+
       if (error) {
-        listEl.innerHTML = '<div class="alert alert-error list-alert">Failed to load notifications.</div>'
+        el.innerHTML = '<div class="alert alert-error">Failed to load notifications.</div>'
         return
       }
 
-      if (!notifications || !notifications.length) {
-        listEl.innerHTML =
-          '<div class="empty-state">' +
-            '<div class="empty-state-icon">&#x1F514;</div>' +
-            '<p>No notifications yet. Book your first appointment to get started! &#x1F514;</p>' +
-          '</div>'
+      if (!data || data.length === 0) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔔</div>
+            <p>No notifications yet.</p>
+            <a href="book.html" class="btn-primary">Book an Appointment</a>
+          </div>`
         return
       }
 
-      let html = ''
-      let bookedCount = 0
-      let checkinCount = 0
-
-      for (const n of notifications) {
-        if (n.message.toLowerCase().includes('booked')) bookedCount++
-        if (n.message.toLowerCase().includes('checked in')) checkinCount++
-
-        html += '<div class="notif-row">'
-        html += '  <div class="notif-icon">&#x1F514;</div>'
-        html += '  <div class="notif-body">'
-        html += '    <div class="notif-msg">' + n.message + '</div>'
-        html += '    <div class="notif-time">' + timeAgo(n.sent_at) + '</div>'
-        html += '  </div>'
-        html += '</div>'
+      let html = '<div style="border-top:1px solid #F3F4F6">'
+      for (const n of data) {
+        html += `
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
+            <div style="width:40px;height:40px;border-radius:50%;background:#E8F1FB;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔔</div>
+            <div style="flex:1">
+              <p style="font-size:14px;font-weight:500;color:#1A2332;margin-bottom:4px">${n.message}</p>
+              <p style="font-size:12px;color:#6B7280">${timeAgo(n.sent_at)}</p>
+            </div>
+          </div>`
       }
+      html += '</div>'
 
-      listEl.innerHTML = html
-
-      document.getElementById('stat-total-notifs').textContent = notifications.length
-      document.getElementById('stat-bookings').textContent = bookedCount
-      document.getElementById('stat-checkins').textContent = checkinCount
+      el.innerHTML = html
     }
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      await showUserName('user-name')
+
+      const emailPref = localStorage.getItem('pref-email') !== 'false'
+      const inappPref = localStorage.getItem('pref-inapp') !== 'false'
+      document.getElementById('pref-email').checked = emailPref
+      document.getElementById('pref-inapp').checked = inappPref
+
+      document.getElementById('save-prefs').addEventListener('click', () => {
+        localStorage.setItem('pref-email', document.getElementById('pref-email').checked)
+        localStorage.setItem('pref-inapp', document.getElementById('pref-inapp').checked)
+        document.getElementById('pref-msg').innerHTML = '<div class="alert alert-success">Preferences saved!</div>'
+        setTimeout(() => {
+          document.getElementById('pref-msg').innerHTML = ''
+        }, 2000)
+      })
+
+      await loadNotifications()
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
 
     init()
   </script>
