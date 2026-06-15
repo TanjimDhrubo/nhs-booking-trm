@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — sign in to your account to book and manage your NHS appointments online. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, sign in, login">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -11,7 +13,6 @@
       width: 100%;
       justify-content: center;
     }
-
     .divider-text {
       display: flex;
       align-items: center;
@@ -20,7 +21,6 @@
       color: var(--nhs-muted);
       font-size: 13px;
     }
-
     .divider-text::before,
     .divider-text::after {
       content: '';
@@ -28,22 +28,18 @@
       height: 1px;
       background: var(--border);
     }
-
     .auth-links {
       text-align: center;
       font-size: 13px;
       color: var(--nhs-muted);
     }
-
     .auth-links a {
       color: var(--nhs-muted);
       text-decoration: none;
     }
-
     .auth-links a:hover {
       color: var(--nhs-blue);
     }
-
     .auth-links .sep {
       display: inline-block;
       margin: 0 4px;
@@ -52,54 +48,57 @@
 </head>
 <body>
 
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <div class="auth-page">
-    <div class="auth-card">
 
-      <div class="auth-logo">
-        <div class="navbar-logo">NHS</div>
-      </div>
+    <main id="main-content">
+      <div class="auth-card">
 
-      <div class="auth-title">Welcome back</div>
-      <div class="auth-subtitle">Sign in to your NHS Booking account | TRM</div>
+        <header class="auth-logo">
+          <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+          <h1 class="auth-title">Welcome back</h1>
+          <p class="auth-subtitle">Sign in to your <abbr title="National Health Service">NHS</abbr> Booking account | TRM</p>
+        </header>
 
-      <div id="message"></div>
+        <div id="message"></div>
 
-      <form id="login-form">
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input type="email" id="email" placeholder="your@email.com" required>
+        <form id="login-form" aria-label="Sign in form">
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" id="email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Your password" required>
+          </div>
+          <button type="submit" class="btn-primary btn-full" id="submit-btn">Sign In &rarr;</button>
+        </form>
+
+        <div class="divider-text">or</div>
+
+        <div class="auth-links">
+          Don't have an account? <a href="register.html">Register here</a>
+          <span class="sep">·</span>
+          <a href="doctors.html">Browse our doctors</a>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Your password" required>
-        </div>
-        <button type="submit" class="btn-primary btn-full" id="submit-btn">Sign In &rarr;</button>
-      </form>
 
-      <div class="divider-text">or</div>
-
-      <div class="auth-links">
-        Don't have an account? <a href="register.html">Register here</a>
-        <span class="sep">·</span>
-        <a href="doctors.html">Browse our doctors</a>
       </div>
+    </main>
 
-    </div>
+    <footer>
+      <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </footer>
+
+    <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
   </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
-  </footer>
-
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
 
   <script type="module">
     import { supabase } from './js/supabase.js'

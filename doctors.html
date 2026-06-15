@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — browse our specialist doctors and book an appointment. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, doctors, specialists">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -10,26 +12,22 @@
     .search-input {
       margin-bottom: 24px;
     }
-
     .btn-full {
       width: 100%;
       justify-content: center;
       margin-top: auto;
     }
-
     .doctor-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
     }
-
     .doctor-avatar {
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
-
     .nav-hidden {
       display: none;
     }
@@ -37,11 +35,12 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
     </a>
     <div class="navbar-links" id="navLinks">
       <a href="login.html" class="btn-secondary nav-guest" id="navSignIn">Sign In</a>
@@ -50,37 +49,41 @@
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
+  <main id="main-content" class="container">
 
-    <div class="page-header">
+    <header class="page-header">
       <h1>Meet Our Doctors</h1>
-      <p>Our team of NHS specialists ready to help you</p>
-    </div>
+      <p>Our team of <abbr title="National Health Service">NHS</abbr> specialists ready to help you</p>
+    </header>
 
     <div id="message"></div>
 
-    <input type="text" id="search-doctors" class="search-input" placeholder="Search by name or specialisation..." autocomplete="off">
+    <section aria-labelledby="heading-search">
+      <h2 id="heading-search" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Search doctors</h2>
+      <label for="search-doctors" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Search by name or specialisation</label>
+      <input type="text" id="search-doctors" class="search-input" placeholder="Search by name or specialisation..." autocomplete="off">
+    </section>
 
-    <div id="doctors-grid" class="grid-3">
-      <div class="loading">Loading</div>
-    </div>
+    <section aria-labelledby="heading-doctors-grid">
+      <h2 id="heading-doctors-grid" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Available doctors</h2>
+      <div id="doctors-grid" class="grid-3">
+        <div class="loading">Loading</div>
+      </div>
+    </section>
 
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -121,7 +124,7 @@
       if (!doctors.length) {
         gridEl.innerHTML = `
           <div class="empty-state" style="grid-column: 1 / -1;">
-            <div class="empty-state-icon">&#x1F468;&#x200D;&#x2695;&#xFE0F;</div>
+            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
             <p>No doctors found matching your search.</p>
           </div>`
         return
@@ -133,13 +136,13 @@
         const colour = avatarColours[i % avatarColours.length]
         const initials = getInitials(d.name)
 
-        html += '<div class="doctor-card">'
-        html += '  <div class="doctor-avatar" style="background:' + colour.bg + ';color:' + colour.text + ';">' + initials + '</div>'
-        html += '  <div class="doctor-name">' + d.name + '</div>'
-        html += '  <div class="doctor-spec">' + d.specialisation + '</div>'
+        html += '<article class="doctor-card">'
+        html += '  <div class="doctor-avatar" style="background:' + colour.bg + ';color:' + colour.text + ';" aria-hidden="true">' + initials + '</div>'
+        html += '  <h3 class="doctor-name">' + d.name + '</h3>'
+        html += '  <p class="doctor-spec">' + d.specialisation + '</p>'
         html += '  <span class="badge badge-confirmed">Available</span>'
         html += '  <a href="book.html?doctor_id=' + d.id + '" class="btn-primary btn-full">Book Appointment &rarr;</a>'
-        html += '</div>'
+        html += '</article>'
       }
 
       gridEl.innerHTML = html

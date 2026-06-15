@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — view your complete appointment history. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, history, appointments">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -13,7 +15,6 @@
       flex-wrap: wrap;
       margin-bottom: 24px;
     }
-
     .filter-btn {
       font-size: 13px;
       padding: 7px 18px;
@@ -22,55 +23,59 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
       <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
-      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
+  <main id="main-content" class="container">
 
-    <div class="page-header">
+    <header class="page-header">
       <h1>Appointment History</h1>
-      <p>All your NHS appointments</p>
-    </div>
+      <p>All your <abbr title="National Health Service">NHS</abbr> appointments</p>
+    </header>
 
     <div id="message"></div>
 
-    <div class="filter-row">
-      <button class="btn-primary filter-btn" id="filter-all">All</button>
-      <button class="btn-secondary filter-btn" id="filter-upcoming">Upcoming</button>
-      <button class="btn-secondary filter-btn" id="filter-past">Past</button>
-      <button class="btn-secondary filter-btn" id="filter-cancelled">Cancelled</button>
-    </div>
+    <section aria-labelledby="heading-filters">
+      <h2 id="heading-filters" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Filter appointments</h2>
+      <div class="filter-row">
+        <button class="btn-primary filter-btn" id="filter-all">All</button>
+        <button class="btn-secondary filter-btn" id="filter-upcoming">Upcoming</button>
+        <button class="btn-secondary filter-btn" id="filter-past">Past</button>
+        <button class="btn-secondary filter-btn" id="filter-cancelled">Cancelled</button>
+      </div>
+    </section>
 
-    <div id="history-list">
-      <div class="loading">Loading</div>
-    </div>
+    <section aria-labelledby="heading-history-list">
+      <h2 id="heading-history-list" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Appointment list</h2>
+      <div id="history-list">
+        <div class="loading">Loading</div>
+      </div>
+    </section>
 
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -116,20 +121,20 @@
       if (!appointments.length) {
         listEl.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">&#x1F5D3;&#xFE0F;</div>
+            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
             <p>No appointments to show.</p>
             <a href="book.html" class="btn-primary">Book Now</a>
           </div>`
         return
       }
 
-      let html = '<div class="table-wrap"><table><thead><tr><th>Date &amp; Time</th><th>Doctor</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>'
+      let html = '<div class="table-wrap"><table><caption class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Appointment history table</caption><thead><tr><th scope="col">Date &amp; Time</th><th scope="col">Doctor</th><th scope="col">Type</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>'
 
       const now = new Date()
 
       for (const a of appointments) {
         const doc = a.doctors_trm
-        const docName = doc ? 'Dr. ' + doc.name : 'Unknown'
+        const docName = doc ? doc.name : 'Unknown'
         const apptDate = new Date(a.appointment_date)
         const isFuture = apptDate > now && a.status === 'confirmed'
         const isPastOrCancelled = apptDate < now || a.status === 'cancelled'
@@ -141,7 +146,7 @@
         }
 
         html += '<tr>'
-        html += '<td>' + formatDate(a.appointment_date) + '</td>'
+        html += '<td><time datetime="' + a.appointment_date + '">' + formatDate(a.appointment_date) + '</time></td>'
         html += '<td>' + docName + '</td>'
         html += '<td>' + a.appointment_type + '</td>'
         html += '<td>' + renderBadge(a.status) + '</td>'

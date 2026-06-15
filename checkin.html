@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — check in online for your appointment today. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, check in, queue">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -14,7 +16,6 @@
       min-width: 80px;
       flex-shrink: 0;
     }
-
     .checkin-done {
       font-size: 13px;
       font-weight: 600;
@@ -24,55 +25,58 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
       <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
-      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
+  <main id="main-content" class="container">
 
-    <div class="page-header">
+    <header class="page-header">
       <h1>Check In</h1>
-      <p id="today-label">Today is</p>
-    </div>
+      <p id="today-label">Today is <time datetime="">&nbsp;</time></p>
+    </header>
 
     <div id="message"></div>
 
-    <div id="today-list">
-      <div class="loading">Loading</div>
-    </div>
+    <section aria-labelledby="heading-today">
+      <h2 id="heading-today">Today's Appointments</h2>
+      <div id="today-list">
+        <div class="loading">Loading</div>
+      </div>
+    </section>
 
-    <div class="divider"></div>
+    <div class="divider" aria-hidden="true"></div>
 
-    <h2 class="section-heading">Upcoming Appointments</h2>
-    <div id="upcoming-list">
-      <div class="loading">Loading</div>
-    </div>
+    <section aria-labelledby="heading-upcoming">
+      <h2 id="heading-upcoming">Upcoming Appointments</h2>
+      <div id="upcoming-list">
+        <div class="loading">Loading</div>
+      </div>
+    </section>
 
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -143,7 +147,7 @@
       if (!appts.length) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">&#x1F5D3;&#xFE0F;</div>
+            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
             <p>No appointments today.</p>
             <a href="book.html" class="btn-primary">Book Now</a>
           </div>`
@@ -153,11 +157,11 @@
       let html = ''
       for (const a of appts) {
         const doc = a.doctors_trm
-        const docName = doc ? 'Dr. ' + doc.name : 'Unknown'
+        const docName = doc ? doc.name : 'Unknown'
         const docSpec = doc ? doc.specialisation : ''
 
-        html += '<div class="appt-card" id="appt-' + a.id + '">'
-        html += '  <div class="time-display">' + formatTime(a.appointment_date) + '</div>'
+        html += '<article class="appt-card" id="appt-' + a.id + '">'
+        html += '  <div class="time-display"><time datetime="' + a.appointment_date + '">' + formatTime(a.appointment_date) + '</time></div>'
         html += '  <div class="appt-info">'
         html += '    <div class="appt-doctor">' + docName + '</div>'
         html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + a.appointment_type + '</div>'
@@ -165,7 +169,7 @@
         html += '  <div class="appt-actions">'
         html += '    <button class="btn-primary checkin-btn" data-id="' + a.id + '" data-doc="' + (doc ? doc.name : '') + '" data-time="' + a.appointment_date + '">Check In Now</button>'
         html += '  </div>'
-        html += '</div>'
+        html += '</article>'
       }
 
       el.innerHTML = html
@@ -209,7 +213,7 @@
 
           await supabase.from('notifications_trm').insert({
             user_id: userId,
-            message: 'You successfully checked in for your appointment with Dr ' + docName + ' at ' + formatTimeShort(apptTime),
+            message: 'You successfully checked in for your appointment with ' + docName + ' at ' + formatTimeShort(apptTime),
             type: 'in-app'
           })
 
@@ -217,7 +221,7 @@
           if (card) {
             const actions = card.querySelector('.appt-actions')
             if (actions) {
-              actions.innerHTML = '<div class="alert alert-success checkin-done">&#x2705; Checked in at ' + formatTimeShort(nowStr) + '</div>'
+              actions.innerHTML = '<div class="alert alert-success checkin-done"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Checked in at <time datetime="' + nowStr + '">' + formatTimeShort(nowStr) + '</time></div>'
             }
           }
         })
@@ -254,7 +258,7 @@
       if (!appts.length) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">&#x1F4C5;</div>
+            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
             <p>No upcoming appointments this week.</p>
           </div>`
         return
@@ -263,10 +267,10 @@
       let html = ''
       for (const a of appts) {
         const doc = a.doctors_trm
-        const docName = doc ? 'Dr. ' + doc.name : 'Unknown'
+        const docName = doc ? doc.name : 'Unknown'
         const docSpec = doc ? doc.specialisation : ''
 
-        html += '<div class="appt-card">'
+        html += '<article class="appt-card">'
         html += '  <div class="appt-info">'
         html += '    <div class="appt-doctor">' + docName + '</div>'
         html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + formatDate(a.appointment_date) + ' &middot; ' + a.appointment_type + '</div>'
@@ -274,7 +278,7 @@
         html += '  <div class="appt-actions">'
         html +=      renderBadge(a.status)
         html += '  </div>'
-        html += '</div>'
+        html += '</article>'
       }
 
       el.innerHTML = html
@@ -289,9 +293,11 @@
       await showUserName('user-name')
 
       const today = new Date()
-      document.getElementById('today-label').textContent = 'Today is ' + today.toLocaleDateString('en-GB', {
+      const todayStr = today.toISOString()
+      const labelEl = document.getElementById('today-label')
+      labelEl.innerHTML = 'Today is <time datetime="' + todayStr.slice(0,10) + '">' + today.toLocaleDateString('en-GB', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      })
+      }) + '</time>'
 
       await Promise.all([
         loadTodayAppointments(),

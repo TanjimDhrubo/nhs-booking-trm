@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — create an account to book and manage your NHS appointments online. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, register, sign up">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="auth-page">
 
-  <main class="container-sm">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <main id="main-content" class="container-sm">
     <div class="auth-card">
-      <div class="auth-header">
+
+      <header class="auth-header">
         <a href="index.html" class="auth-logo">
-          <div class="navbar-logo">NHS</div>
+          <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
         </a>
         <h1>Create Account</h1>
-        <p>Register for NHS Appointment Booking</p>
-      </div>
+        <p>Register for <abbr title="National Health Service">NHS</abbr> Appointment Booking</p>
+      </header>
 
       <div id="message"></div>
 
-      <form id="register-form">
+      <form id="register-form" aria-label="Account registration form">
         <div class="form-group">
           <label for="full-name">Full Name</label>
           <input type="text" id="full-name" required placeholder="e.g. Jane Smith">
@@ -43,7 +48,7 @@
         </div>
 
         <div class="form-group">
-          <label for="nhs-number">NHS Number (optional)</label>
+          <label for="nhs-number"><abbr title="National Health Service">NHS</abbr> Number (optional)</label>
           <input type="text" id="nhs-number" placeholder="10-digit NHS number" pattern="[0-9]{10}" maxlength="10">
         </div>
 
@@ -53,21 +58,21 @@
       <p class="auth-footer">
         Already have an account? <a href="login.html">Sign in</a>
       </p>
+
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -85,7 +90,6 @@
       const msgDiv = document.getElementById('message')
       const submitBtn = form.querySelector('button[type=submit]')
 
-      // Validate
       if (!fullName || !email || !password || !dob) {
         msgDiv.innerHTML = '<div class="alert alert-error">Please fill in all required fields.</div>'
         return
@@ -96,13 +100,11 @@
         return
       }
 
-      // Loading state
       submitBtn.disabled = true
       submitBtn.textContent = 'Creating account...'
       msgDiv.innerHTML = ''
 
       try {
-        // Step 1 — Create auth account
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email,
           password,
@@ -125,8 +127,6 @@
           return
         }
 
-        // Step 2 — Insert profile using service role workaround
-        // Wait a moment for auth to propagate
         await new Promise(resolve => setTimeout(resolve, 1000))
 
         const { error: profileError } = await supabase
@@ -142,7 +142,6 @@
 
         if (profileError) {
           console.error('Profile error:', profileError)
-          // Still show success — trigger will handle profile
           msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! Please check your email to verify your account, then sign in.</div>'
         } else {
           msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! Please check your email to verify your account, then sign in.</div>'

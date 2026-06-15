@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — staff portal login for doctors and administrators. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, staff, admin, doctor login">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -10,7 +12,6 @@
     .admin-card {
       border-top: 3px solid var(--nhs-amber);
     }
-
     .staff-badge {
       display: inline-block;
       background: #FFF8E7;
@@ -23,31 +24,25 @@
       letter-spacing: 1px;
       text-transform: uppercase;
     }
-
     .staff-badge-wrap {
       text-align: center;
       margin-bottom: 20px;
     }
-
     .btn-full {
       width: 100%;
       justify-content: center;
     }
-
     .staff-info {
       margin-top: 20px;
     }
-
     .staff-back-link {
       text-align: center;
       margin-top: 20px;
     }
-
     .staff-back-link a {
       font-size: 13px;
       color: var(--nhs-muted);
     }
-
     .loading-inline {
       border: none;
       padding: 0;
@@ -57,58 +52,60 @@
 </head>
 <body>
 
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <div class="auth-page">
-    <div class="auth-card admin-card">
 
-      <div class="auth-logo">
-        <div class="navbar-logo">NHS</div>
-      </div>
+    <main id="main-content">
+      <div class="auth-card admin-card">
 
-      <div class="staff-badge-wrap">
-        <span class="staff-badge">STAFF PORTAL</span>
-      </div>
+        <header class="auth-logo">
+          <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+          <div class="staff-badge-wrap">
+            <span class="staff-badge">STAFF PORTAL</span>
+          </div>
+          <h1 class="auth-title">Doctor &amp; Staff Login</h1>
+          <p class="auth-subtitle"><abbr title="National Health Service">NHS</abbr> Booking Admin Portal | TRM</p>
+        </header>
 
-      <div class="auth-title">Doctor &amp; Staff Login</div>
-      <div class="auth-subtitle">NHS Booking Admin Portal | TRM</div>
+        <div id="message"></div>
 
-      <div id="message"></div>
+        <form id="admin-login-form" aria-label="Staff login form">
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" id="email" placeholder="your.name@nhs-trm.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+          </div>
+          <button type="submit" class="btn-primary btn-full">Sign In to Staff Portal</button>
+        </form>
 
-      <form id="admin-login-form">
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input type="email" id="email" placeholder="your.name@nhs-trm.com" required>
+        <div class="alert alert-info staff-info">
+          Staff accounts are provisioned by your <abbr title="National Health Service">NHS</abbr> administrator. Contact <a href="mailto:dpo@nhsbooking-trm.nhs.uk">dpo@nhsbooking-trm.nhs.uk</a> if you need access.
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" required>
+
+        <div class="staff-back-link">
+          <a href="index.html">&larr; Patient portal</a>
         </div>
-        <button type="submit" class="btn-primary btn-full">Sign In to Staff Portal</button>
-      </form>
 
-      <div class="alert alert-info staff-info">
-        Staff accounts are provisioned by your NHS administrator. Contact <a href="mailto:dpo@nhsbooking-trm.nhs.uk">dpo@nhsbooking-trm.nhs.uk</a> if you need access.
       </div>
+    </main>
 
-      <div class="staff-back-link">
-        <a href="index.html">&larr; Patient portal</a>
-      </div>
+    <footer>
+      <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </footer>
 
-    </div>
+    <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
   </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
-  </footer>
-
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -133,10 +130,8 @@
       msgDiv.innerHTML = '<div class="alert alert-info">Verifying credentials...</div>'
 
       try {
-        // Step 1: Sign out any existing session first
         await supabase.auth.signOut()
 
-        // Step 2: Try to sign in
         const { data: authData, error: authError } =
           await supabase.auth.signInWithPassword({
             email,
@@ -148,7 +143,7 @@
         if (authError) {
           msgDiv.innerHTML = `<div class="alert alert-error">
             Login failed: ${authError.message}<br>
-            <small>Make sure you are using your NHS staff email
+            <small>Make sure you are using your <abbr title="National Health Service">NHS</abbr> staff email
             and correct password.</small>
           </div>`
           submitBtn.disabled = false
@@ -166,7 +161,6 @@
         const userEmail = authData.user.email.toLowerCase()
         console.log('Looking for doctor with email:', userEmail)
 
-        // Step 3: Check doctors table - try multiple approaches
         const { data: doctorData, error: doctorError } = await supabase
           .from('doctors_trm')
           .select('id, name, specialisation, email')
@@ -184,7 +178,6 @@
           return
         }
 
-        // Find doctor by email (case insensitive)
         const doctor = doctorData ? doctorData.find(d =>
           d.email && d.email.toLowerCase() === userEmail
         ) : null
@@ -194,7 +187,7 @@
         if (!doctor) {
           await supabase.auth.signOut()
           msgDiv.innerHTML = `<div class="alert alert-error">
-            You are not registered as NHS staff.<br>
+            You are not registered as <abbr title="National Health Service">NHS</abbr> staff.<br>
             <small>Patient login: <a href="login.html">click here</a></small>
           </div>`
           submitBtn.disabled = false
@@ -202,7 +195,6 @@
           return
         }
 
-        // Step 4: Success
         msgDiv.innerHTML = '<div class="alert alert-success">Welcome, ' + doctor.name + '! Redirecting...</div>'
         setTimeout(() => {
           window.location.href = 'admin-dashboard.html'

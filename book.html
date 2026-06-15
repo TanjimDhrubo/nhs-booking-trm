@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — book an appointment with your preferred doctor. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, book appointment, doctor">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -11,21 +13,17 @@
       width: 100%;
       justify-content: center;
     }
-
     .back-link {
       text-align: center;
       margin-top: 24px;
     }
-
     .back-link a {
       font-size: 14px;
       color: var(--nhs-muted);
     }
-
     .is-hidden {
       display: none;
     }
-
     .alert-link {
       font-weight: 600;
     }
@@ -33,39 +31,39 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
       <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
-      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container-sm">
+  <main id="main-content" class="container-sm">
 
-    <div class="page-header">
+    <header class="page-header">
       <h1>Book an Appointment</h1>
       <p>Choose your doctor, date and time</p>
-    </div>
+    </header>
 
     <div id="doctor-preselect-msg" class="alert alert-info is-hidden"></div>
 
     <div id="message"></div>
 
-    <div class="card">
-      <form id="book-form">
+    <article class="card">
+      <form id="book-form" aria-label="Book appointment form">
 
         <div class="form-group">
           <label for="appt-type">Appointment Type</label>
           <select id="appt-type" required>
             <option value="">Select type&hellip;</option>
-            <option value="A&E (Accident & Emergency)">A&E (Accident &amp; Emergency)</option>
+            <option value="A&E (Accident & Emergency)">A&amp;E (Accident &amp; Emergency)</option>
             <option value="General Consultation">General Consultation</option>
             <option value="Follow-up Appointment">Follow-up Appointment</option>
             <option value="Specialist Referral">Specialist Referral</option>
@@ -91,12 +89,12 @@
           </select>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider" aria-hidden="true"></div>
 
         <button type="submit" class="btn-primary btn-full" id="submit-btn">Confirm Booking &rarr;</button>
 
       </form>
-    </div>
+    </article>
 
     <div class="back-link">
       <a href="dashboard.html">&larr; Back to Dashboard</a>
@@ -104,19 +102,17 @@
 
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -283,7 +279,7 @@
         type: 'in-app'
       })
 
-      msgEl.innerHTML = '<div class="alert alert-success">Appointment booked successfully! &#x1F389; <a href="dashboard.html" class="alert-link">View Dashboard &rarr;</a></div>'
+      msgEl.innerHTML = '<div class="alert alert-success">Appointment booked successfully! <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;vertical-align:text-bottom"><polyline points="20 6 9 17 4 12"/></svg> <a href="dashboard.html" class="alert-link">View Dashboard &rarr;</a></div>'
 
       form.reset()
       submitBtn.disabled = false

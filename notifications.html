@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — view your notifications and activity summary. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, notifications, alerts">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -13,14 +15,12 @@
       height: 24px;
       flex-shrink: 0;
     }
-
     .toggle-wrap input {
       opacity: 0;
       width: 0;
       height: 0;
       position: absolute;
     }
-
     .toggle-slider {
       position: absolute;
       cursor: pointer;
@@ -29,7 +29,6 @@
       border-radius: 24px;
       transition: background 0.2s;
     }
-
     .toggle-slider::after {
       content: '';
       position: absolute;
@@ -41,11 +40,9 @@
       border-radius: 50%;
       transition: transform 0.2s;
     }
-
     .toggle-wrap input:checked + .toggle-slider {
       background: var(--nhs-blue);
     }
-
     .toggle-wrap input:checked + .toggle-slider::after {
       transform: translateX(20px);
     }
@@ -53,109 +50,111 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
       <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
-      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
+  <main id="main-content" class="container">
 
-    <div class="page-header">
+    <header class="page-header">
       <h1>Notifications</h1>
       <p>Your activity and appointment updates</p>
-    </div>
+    </header>
 
     <div class="grid-2">
 
-      <!-- LEFT CARD — Preferences -->
-      <div class="card">
-        <h3 style="font-size:16px;font-weight:700;margin-bottom:0">Notification Preferences</h3>
-        <div class="divider"></div>
+      <section aria-labelledby="heading-preferences">
+        <article class="card">
+          <h2 id="heading-preferences" style="font-size:16px;font-weight:700;margin-bottom:0">Notification Preferences</h2>
+          <div class="divider" aria-hidden="true"></div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
-          <div>
-            <div style="font-weight:600;font-size:14px">Email Reminders</div>
-            <p style="font-size:13px;color:var(--nhs-muted);margin:0">Get emailed before appointments</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
+            <div>
+              <h3 style="font-weight:600;font-size:14px;margin:0">Email Reminders</h3>
+              <p style="font-size:13px;color:var(--nhs-muted);margin:0">Get emailed before appointments</p>
+            </div>
+            <label class="toggle-wrap" aria-label="Toggle email reminders">
+              <input type="checkbox" id="pref-email">
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <label class="toggle-wrap">
-            <input type="checkbox" id="pref-email">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
-          <div>
-            <div style="font-weight:600;font-size:14px">In-App Alerts</div>
-            <p style="font-size:13px;color:var(--nhs-muted);margin:0">See updates when you log in</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
+            <div>
+              <h3 style="font-weight:600;font-size:14px;margin:0">In-App Alerts</h3>
+              <p style="font-size:13px;color:var(--nhs-muted);margin:0">See updates when you log in</p>
+            </div>
+            <label class="toggle-wrap" aria-label="Toggle in-app alerts">
+              <input type="checkbox" id="pref-inapp">
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <label class="toggle-wrap">
-            <input type="checkbox" id="pref-inapp">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
 
-        <button class="btn-secondary" style="width:100%;justify-content:center;margin-top:16px" id="save-prefs">Save Preferences</button>
-        <div id="pref-msg"></div>
+          <button class="btn-secondary" style="width:100%;justify-content:center;margin-top:16px" id="save-prefs">Save Preferences</button>
+          <div id="pref-msg"></div>
+        </article>
+      </section>
+
+      <section aria-labelledby="heading-stats">
+        <article class="card">
+          <h2 id="heading-stats" style="font-size:16px;font-weight:700;margin-bottom:0">Activity Summary</h2>
+          <div class="divider" aria-hidden="true"></div>
+
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
+            <span style="font-size:14px">Total Notifications</span>
+            <span style="color:var(--nhs-blue);font-weight:700" id="stat-total">0</span>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
+            <span style="font-size:14px">Appointments Booked</span>
+            <span style="color:var(--nhs-blue);font-weight:700" id="stat-booked">0</span>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
+            <span style="font-size:14px">Check-ins Completed</span>
+            <span style="color:var(--nhs-blue);font-weight:700" id="stat-checkins">0</span>
+          </div>
+        </article>
+      </section>
+
+    </div>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <section aria-labelledby="heading-activity">
+      <header style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+        <h2 id="heading-activity" style="font-size:22px;font-weight:700;color:var(--nhs-dark);letter-spacing:-0.4px">Recent Activity</h2>
+        <small style="color:var(--nhs-muted);font-size:13px">Showing last 50 notifications</small>
+      </header>
+
+      <div id="notif-list">
+        <div class="loading">Loading</div>
       </div>
-
-      <!-- RIGHT CARD — Stats -->
-      <div class="card">
-        <h3 style="font-size:16px;font-weight:700;margin-bottom:0">Activity Summary</h3>
-        <div class="divider"></div>
-
-        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
-          <span style="font-size:14px">Total Notifications</span>
-          <span style="color:var(--nhs-blue);font-weight:700" id="stat-total">0</span>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
-          <span style="font-size:14px">Appointments Booked</span>
-          <span style="color:var(--nhs-blue);font-weight:700" id="stat-booked">0</span>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6">
-          <span style="font-size:14px">Check-ins Completed</span>
-          <span style="color:var(--nhs-blue);font-weight:700" id="stat-checkins">0</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="divider"></div>
-
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
-      <h2 style="font-size:22px;font-weight:700;color:var(--nhs-dark);letter-spacing:-0.4px">Recent Activity</h2>
-      <small style="color:var(--nhs-muted);font-size:13px">Showing last 50 notifications</small>
-    </div>
-
-    <div id="notif-list">
-      <div class="loading">Loading</div>
-    </div>
+    </section>
 
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <!-- TRM WATERMARK -->
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -199,7 +198,7 @@
       if (!data || data.length === 0) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">🔔</div>
+            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
             <p>No notifications yet.</p>
             <a href="book.html" class="btn-primary">Book an Appointment</a>
           </div>`
@@ -209,13 +208,13 @@
       let html = '<div style="border-top:1px solid #F3F4F6">'
       for (const n of data) {
         html += `
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
-            <div style="width:40px;height:40px;border-radius:50%;background:#E8F1FB;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔔</div>
+          <article style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
+            <div style="width:40px;height:40px;border-radius:50%;background:#E8F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;stroke:#1A2332"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
             <div style="flex:1">
               <p style="font-size:14px;font-weight:500;color:#1A2332;margin-bottom:4px">${n.message}</p>
-              <p style="font-size:12px;color:#6B7280">${timeAgo(n.sent_at)}</p>
+              <p style="font-size:12px;color:#6B7280"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>
             </div>
-          </div>`
+          </article>`
       }
       html += '</div>'
 

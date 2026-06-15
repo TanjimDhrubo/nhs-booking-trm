@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — reschedule your appointment to a new date or time. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, reschedule, change appointment">
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
@@ -15,29 +17,24 @@
       letter-spacing: 0.3px;
       margin-bottom: 4px;
     }
-
     .detail-value {
       font-size: 16px;
       color: var(--nhs-dark);
       margin-bottom: 16px;
     }
-
     .detail-value:last-child {
       margin-bottom: 0;
     }
-
     .flex-row {
       display: flex;
       gap: 8px;
       align-items: center;
     }
-
     .flex-row .btn-primary,
     .flex-row .btn-ghost {
       flex: 1;
       justify-content: center;
     }
-
     .back-link {
       display: block;
       text-align: center;
@@ -47,82 +44,85 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
       <a href="history.html" class="btn-ghost">&larr; History</a>
-      <button class="btn-ghost" id="logout-btn">Sign Out</button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container-sm">
+  <main id="main-content" class="container-sm">
 
-    <div class="page-header">
+    <header class="page-header">
       <h1>Reschedule Appointment</h1>
-    </div>
+    </header>
 
     <div id="page-message"></div>
 
-    <!-- Current Appointment -->
-    <div class="card" id="current-details">
-      <div class="detail-label">Current Appointment</div>
-      <div class="loading">Loading</div>
-    </div>
+    <section aria-labelledby="heading-current-appt">
+      <h2 id="heading-current-appt" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Current appointment details</h2>
+      <article class="card" id="current-details">
+        <div class="detail-label">Current Appointment</div>
+        <div class="loading">Loading</div>
+      </article>
+    </section>
 
-    <!-- Reschedule Form -->
-    <div class="card" id="form-card">
-      <div class="detail-label">New Appointment Details</div>
-      <div id="message"></div>
+    <section aria-labelledby="heading-reschedule-form">
+      <h2 id="heading-reschedule-form" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Reschedule form</h2>
+      <article class="card" id="form-card">
+        <div class="detail-label">New Appointment Details</div>
+        <div id="message"></div>
 
-      <form id="reschedule-form">
-        <div class="form-group">
-          <label for="new-date">New Date</label>
-          <input type="date" id="new-date" required>
-        </div>
+        <form id="reschedule-form" aria-label="Reschedule appointment form">
+          <div class="form-group">
+            <label for="new-date">New Date</label>
+            <input type="date" id="new-date" required>
+          </div>
 
-        <div class="form-group">
-          <label for="new-time">New Time</label>
-          <select id="new-time" required>
-            <option value="">Select time</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="new-time">New Time</label>
+            <select id="new-time" required>
+              <option value="">Select time</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="new-doctor">Change Doctor (optional)</label>
-          <select id="new-doctor">
-            <option value="">Same doctor</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="new-doctor">Change Doctor (optional)</label>
+            <select id="new-doctor">
+              <option value="">Same doctor</option>
+            </select>
+          </div>
 
-        <div class="flex-row">
-          <button type="submit" class="btn-primary" id="save-btn">Save Changes &rarr;</button>
-          <button type="button" class="btn-ghost" onclick="history.back()">Cancel</button>
-        </div>
-      </form>
-    </div>
+          <div class="flex-row">
+            <button type="submit" class="btn-primary" id="save-btn">Save Changes &rarr;</button>
+            <button type="button" class="btn-ghost" id="cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </article>
+    </section>
 
     <a href="history.html" class="btn-ghost back-link">&larr; Back to History</a>
 
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span>·</span>
-    <span class="footer-trm">Developed by TRM</span>
-    <span>·</span>
+    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span aria-hidden="true">·</span>
+    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+    <span aria-hidden="true">·</span>
     <a href="privacy.html">Privacy Policy</a>
     <span aria-hidden="true">·</span>
     <a href="team.html">Meet the Team</a>
   </footer>
 
-  <div class="trm-watermark">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
@@ -183,6 +183,10 @@
         logout()
       })
 
+      document.getElementById('cancel-btn').addEventListener('click', () => {
+        history.back()
+      })
+
       const params = new URLSearchParams(window.location.search)
       const appointmentId = params.get('appointment_id')
 
@@ -212,9 +216,9 @@
 
       document.getElementById('current-details').innerHTML =
         '<div class="detail-label">Current Appointment</div>' +
-        '<div class="detail-value" style="font-weight:700;font-size:18px;">Dr. ' + doctorName + '</div>' +
+        '<div class="detail-value" style="font-weight:700;font-size:18px;">' + doctorName + '</div>' +
         (specialisation ? '<div class="detail-value" style="color:var(--nhs-muted);margin-top:-12px;">' + specialisation + '</div>' : '') +
-        '<div class="detail-value">' + formatDate(appointment.appointment_date) + '</div>' +
+        '<div class="detail-value"><time datetime="' + appointment.appointment_date + '">' + formatDate(appointment.appointment_date) + '</time></div>' +
         '<div class="detail-value">' + appointment.appointment_type + '</div>' +
         '<div><span class="badge badge-' + (appointment.status === 'confirmed' ? 'confirmed' : 'pending') + '">' + appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) + '</span></div>'
 
@@ -292,15 +296,15 @@
         }
 
         const selectedDoctorName = newDoctorId
-          ? 'Dr. ' + doctors.find(function(d) { return d.id === newDoctorId }).name
-          : 'Dr. ' + doctorName
+          ? doctors.find(function(d) { return d.id === newDoctorId }).name
+          : doctorName
 
         await insertNotification(
           user.id,
           'Your ' + appointment.appointment_type + ' has been rescheduled to ' + formatDateShort(newISO) + ' with ' + selectedDoctorName + '.'
         )
 
-        showMsg('page-message', 'Appointment rescheduled! &#x2705;', 'success')
+        showMsg('page-message', 'Appointment rescheduled! <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;vertical-align:text-bottom"><polyline points="20 6 9 17 4 12"/></svg>', 'success')
         showMsg('message',
           'Your appointment has been updated. <a href="history.html" style="color:var(--nhs-blue);text-decoration:underline;">&larr; Back to History</a>',
           'success')
