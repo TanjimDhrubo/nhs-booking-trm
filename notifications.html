@@ -53,9 +53,9 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <nav class="navbar" aria-label="Main navigation">
-    <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
-      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
@@ -145,7 +145,7 @@
   </main>
 
   <footer>
-    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
     <span aria-hidden="true">·</span>
     <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
     <span aria-hidden="true">·</span>
@@ -198,7 +198,7 @@
       if (!data || data.length === 0) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div class="empty-state-icon" aria-hidden="true">⌖</div>
             <p>No notifications yet.</p>
             <a href="book.html" class="btn-primary">Book an Appointment</a>
           </div>`
@@ -209,7 +209,7 @@
       for (const n of data) {
         html += `
           <article style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
-            <div style="width:40px;height:40px;border-radius:50%;background:#E8F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;stroke:#1A2332"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:#E8F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">⌖</span></div>
             <div style="flex:1">
               <p style="font-size:14px;font-weight:500;color:#1A2332;margin-bottom:4px">${n.message}</p>
               <p style="font-size:12px;color:#6B7280"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>

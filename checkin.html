@@ -28,9 +28,9 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <nav class="navbar" aria-label="Main navigation">
-    <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
-      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
@@ -67,7 +67,7 @@
   </main>
 
   <footer>
-    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
     <span aria-hidden="true">·</span>
     <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
     <span aria-hidden="true">·</span>
@@ -147,7 +147,7 @@
       if (!appts.length) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div class="empty-state-icon" aria-hidden="true">☑</div>
             <p>No appointments today.</p>
             <a href="book.html" class="btn-primary">Book Now</a>
           </div>`
@@ -221,7 +221,7 @@
           if (card) {
             const actions = card.querySelector('.appt-actions')
             if (actions) {
-              actions.innerHTML = '<div class="alert alert-success checkin-done"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Checked in at <time datetime="' + nowStr + '">' + formatTimeShort(nowStr) + '</time></div>'
+              actions.innerHTML = '<div class="alert alert-success checkin-done"><span class="sym" aria-hidden="true">✓</span> Checked in at <time datetime="' + nowStr + '">' + formatTimeShort(nowStr) + '</time></div>'
             }
           }
         })
@@ -258,7 +258,7 @@
       if (!appts.length) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div class="empty-state-icon" aria-hidden="true">☑</div>
             <p>No upcoming appointments this week.</p>
           </div>`
         return

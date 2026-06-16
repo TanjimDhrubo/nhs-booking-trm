@@ -34,9 +34,9 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <nav class="navbar" aria-label="Main navigation">
-    <a href="index.html" class="navbar-brand">
-      <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
-      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| <a href="team.html" aria-label="Meet the TRM team">TRM</a></span></span>
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
@@ -103,7 +103,7 @@
   </main>
 
   <footer>
-    <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+    <span>&copy; 2026 NHS Appointment Booking System</span>
     <span aria-hidden="true">·</span>
     <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
     <span aria-hidden="true">·</span>
@@ -279,7 +279,7 @@
         type: 'in-app'
       })
 
-      msgEl.innerHTML = '<div class="alert alert-success">Appointment booked successfully! <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;vertical-align:text-bottom"><polyline points="20 6 9 17 4 12"/></svg> <a href="dashboard.html" class="alert-link">View Dashboard &rarr;</a></div>'
+      msgEl.innerHTML = '<div class="alert alert-success">Appointment booked successfully! <span class="sym" aria-hidden="true">✓</span> <a href="dashboard.html" class="alert-link">View Dashboard &rarr;</a></div>'
 
       form.reset()
       submitBtn.disabled = false

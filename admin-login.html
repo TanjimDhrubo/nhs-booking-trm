@@ -60,12 +60,12 @@
       <div class="auth-card admin-card">
 
         <header class="auth-logo">
-          <div class="navbar-logo"><abbr title="National Health Service">NHS</abbr></div>
+          <div class="navbar-logo">NHS</div>
           <div class="staff-badge-wrap">
             <span class="staff-badge">STAFF PORTAL</span>
           </div>
           <h1 class="auth-title">Doctor &amp; Staff Login</h1>
-          <p class="auth-subtitle"><abbr title="National Health Service">NHS</abbr> Booking Admin Portal | TRM</p>
+          <p class="auth-subtitle">NHS Booking Admin Portal | TRM</p>
         </header>
 
         <div id="message"></div>
@@ -83,7 +83,7 @@
         </form>
 
         <div class="alert alert-info staff-info">
-          Staff accounts are provisioned by your <abbr title="National Health Service">NHS</abbr> administrator. Contact <a href="mailto:dpo@nhsbooking-trm.nhs.uk">dpo@nhsbooking-trm.nhs.uk</a> if you need access.
+          Staff accounts are provisioned by your NHS administrator. Contact <a href="mailto:dpo@nhsbooking-trm.nhs.uk">dpo@nhsbooking-trm.nhs.uk</a> if you need access.
         </div>
 
         <div class="staff-back-link">
@@ -94,7 +94,7 @@
     </main>
 
     <footer>
-      <span>&copy; 2026 <abbr title="National Health Service">NHS</abbr> Appointment Booking System</span>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">·</span>
       <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
       <span aria-hidden="true">·</span>
@@ -143,7 +143,7 @@
         if (authError) {
           msgDiv.innerHTML = `<div class="alert alert-error">
             Login failed: ${authError.message}<br>
-            <small>Make sure you are using your <abbr title="National Health Service">NHS</abbr> staff email
+            <small>Make sure you are using your NHS staff email
             and correct password.</small>
           </div>`
           submitBtn.disabled = false
@@ -187,7 +187,7 @@
         if (!doctor) {
           await supabase.auth.signOut()
           msgDiv.innerHTML = `<div class="alert alert-error">
-            You are not registered as <abbr title="National Health Service">NHS</abbr> staff.<br>
+            You are not registered as NHS staff.<br>
             <small>Patient login: <a href="login.html">click here</a></small>
           </div>`
           submitBtn.disabled = false
