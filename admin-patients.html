@@ -34,7 +34,7 @@
   <nav class="navbar" aria-label="Main navigation">
     <a href="admin-dashboard.html" class="navbar-brand" aria-label="NHS Admin Portal">
       <div class="navbar-logo" aria-hidden="true">NHS</div>
-      <span class="navbar-name admin-nav-name"><abbr title="National Health Service">NHS</abbr> Admin Portal <span>| TRM</span></span>
+      <span class="navbar-name admin-nav-name"><abbr title="National Health Service" style="text-decoration:none">NHS</abbr> Admin Portal <span>| TRM</span></span>
       <span class="admin-staff-badge">STAFF ONLY</span>
     </a>
     <div class="navbar-links">
@@ -103,22 +103,12 @@
 
     let allPatients = []
 
-    const { data: { session } } = await supabase.auth.getSession()
-
-    window.addEventListener('pageshow', async (e) => {
-      if (e.persisted) {
-        const { data } = await supabase.auth.getSession()
-        if (!data.session) window.location.replace('admin-login.html')
-        else init()
-      }
-    })
-
-    if (!session) {
-      window.location.replace('admin-login.html')
-      return
-    }
-
     async function init() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        window.location.replace('admin-login.html')
+        return
+      }
       const userEmail = session.user.email
 
       const { data: doctor } = await supabase
@@ -203,6 +193,10 @@
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut()
       window.location.replace('admin-login.html')
+    })
+
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) init()
     })
 
     init()

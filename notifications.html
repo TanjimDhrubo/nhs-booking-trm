@@ -56,7 +56,7 @@
   <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
       <div class="navbar-logo" aria-hidden="true">NHS</div>
-      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| TRM</span></span>
+      <span class="navbar-name"><abbr title="National Health Service" style="text-decoration:none">NHS</abbr> Appointment Booking <span>| TRM</span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
@@ -83,27 +83,28 @@
           <h2 id="heading-preferences" style="font-size:16px;font-weight:700;margin-bottom:0">Notification Preferences</h2>
           <div class="divider" aria-hidden="true"></div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
-            <div>
-              <h3 style="font-weight:600;font-size:14px;margin:0">Email Reminders</h3>
-              <p style="font-size:13px;color:var(--nhs-muted);margin:0">Get emailed before appointments</p>
-            </div>
-            <label class="toggle-wrap" aria-label="Toggle email reminders">
-              <input type="checkbox" id="pref-email">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
-            <div>
-              <h3 style="font-weight:600;font-size:14px;margin:0">In-App Alerts</h3>
-              <p style="font-size:13px;color:var(--nhs-muted);margin:0">See updates when you log in</p>
-            </div>
-            <label class="toggle-wrap" aria-label="Toggle in-app alerts">
-              <input type="checkbox" id="pref-inapp">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
+              <div>
+                <h3 style="font-weight:600;font-size:14px;margin:0">Email Reminders</h3>
+                <p style="font-size:13px;color:var(--nhs-muted);margin:0">Get emailed before appointments</p>
+              </div>
+              <label class="toggle-wrap" aria-label="Toggle email reminders">
+                <input type="checkbox" id="pref-email">
+                <span class="toggle-slider"></span>
+              </label>
+            </li>
+            <li style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6">
+              <div>
+                <h3 style="font-weight:600;font-size:14px;margin:0">In-App Alerts</h3>
+                <p style="font-size:13px;color:var(--nhs-muted);margin:0">See updates when you log in</p>
+              </div>
+              <label class="toggle-wrap" aria-label="Toggle in-app alerts">
+                <input type="checkbox" id="pref-inapp">
+                <span class="toggle-slider"></span>
+              </label>
+            </li>
+          </ul>
 
           <button class="btn-secondary" style="width:100%;justify-content:center;margin-top:16px" id="save-prefs">Save Preferences</button>
           <div id="pref-msg"></div>

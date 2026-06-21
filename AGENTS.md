@@ -82,20 +82,21 @@ import { requireAuth, showUserName, logout } from './js/auth.js'
 |-------|---------|
 | profiles_trm | id (uuid FK auth.users), full_name, date_of_birth, nhs_number, created_at |
 | doctors_trm | id (uuid), name, specialisation, available (bool), email (text), auth_id (uuid) |
-| appointments_trm | id, user_id (FK), doctor_id (FK), appointment_type, appointment_date, status, created_at |
+| appointments_trm | id, user_id (FK), doctor_id (FK), appointment_type, appointment_date, status, created_at, dependent_id (FK) |
 | checkins_trm | id, appointment_id (FK), checkin_time |
 | notifications_trm | id, user_id (FK), message, sent_at, type |
+| dependents_trm | id (uuid), guardian_id (uuid FK auth.users), full_name, date_of_birth, nhs_number, created_at |
+| questionnaires_trm | id, appointment_id (FK), user_id (FK), symptoms, duration, severity, pain_location, triggers, relief, medications, additional_notes, ai_brief, created_at |
+| chat_history_trm | id, user_id (FK), role, message, created_at |
+| settings_trm | id, key (unique), value, created_at, updated_at |
 
 ### Important notes:
 - doctors_trm.name already includes "Dr." prefix — NEVER add "Dr." manually
 - Appointment status values: confirmed / cancelled / completed / checked_in
 - RLS enabled on all tables — users only access their own data
 - doctors_trm is publicly readable by all (including unauthenticated users)
-- dependents_trm: id (uuid), guardian_id (uuid FK auth.users), full_name, date_of_birth, nhs_number, created_at
-- appointments_trm.dependent_id (uuid FK dependents_trm, nullable) — set when booking for a dependent
-- questionnaires_trm: id, appointment_id (FK), user_id (FK), symptoms, duration, severity, pain_location, triggers, relief, medications, additional_notes, ai_brief, created_at
-- chat_history_trm: id, user_id (FK), role, message, created_at — stores AI chat conversation history
-- settings_trm: id, key (unique), value — stores config like Groq API key
+- `settings_trm` RLS policy `USING(true)` does NOT allow anon reads (returns `[]`). Service_role reads work. Groq API key is hardcoded in `js/ai-agent.js` as workaround.
+- `doctors_trm.auth_id` is the FK to `auth.users` — verified populated for all 6 doctors
 - Run this SQL in Supabase SQL Editor to create dependents_trm table and add dependent_id column:
   ```sql
   CREATE TABLE dependents_trm (
@@ -392,6 +393,9 @@ if (session) {
 | css/style.css | ✅ Complete |
 | js/supabase.js | ✅ Complete |
 | js/auth.js | ✅ Complete |
+| js/theme.js | ✅ Complete |
+| js/helpers.js | ✅ Complete |
+| js/ai-agent.js | ✅ Complete — health Q&A chatbot + symptom analysis |
 | index.html | ✅ Complete |
 | login.html | ✅ Complete |
 | register.html | ✅ Complete |
@@ -405,13 +409,17 @@ if (session) {
 | privacy.html | ✅ Complete |
 | admin-login.html | ✅ Complete |
 | admin-dashboard.html | ✅ Complete |
-| design.md                | ✅ Complete |
-| team.html                | ✅ Complete — TRM team portfolio page
-| 404.html                 | ✅ Complete — branded error page with navigation links
-| profile.html             | ✅ Complete — patient profile/settings page
-| confirmation.html        | ✅ Complete — post-booking confirmation with print
-| admin-patients.html      | ✅ Complete — admin view all patients with search
-| admin-analytics.html     | ✅ Complete — admin appointment analytics with stats |
+| chat.html | ✅ Complete — AI health chatbot with conversational interface |
+| questionnaire.html | ✅ Complete — optional pre-appointment symptom form |
+| admin-questionnaire.html | ✅ Complete — doctor view of patient questionnaire + AI brief |
+| 404.html | ✅ Complete — branded error page |
+| profile.html | ✅ Complete — patient profile/settings page |
+| confirmation.html | ✅ Complete — post-booking confirmation with print |
+| admin-patients.html | ✅ Complete — admin view all patients with search |
+| admin-analytics.html | ✅ Complete — admin appointment analytics with stats |
+| team.html | ✅ Complete — TRM team portfolio page |
+| design.md | ✅ Complete |
+| plans.md | ✅ Complete |
 
 ---
 
@@ -432,6 +440,15 @@ if (session) {
 - All `var` in JS changed to `const` across all 19 HTML files (theme toggle scripts, index.html feature card handlers, menu code)
 - privacy.html: removed empty module script block
 - Signup fixed: `handle_new_user_trm()` trigger function updated with SECURITY DEFINER to allow `supabase_auth_admin` to write to `public.profiles_trm`
+
+### Fixed in This Session
+- All 19 navbar `<abbr>` tags: added `style="text-decoration:none"` to hide browser default dotted underline
+- chat.html: pageshow handler no longer redirects guest users to login on bfcache restore — calls `init()` instead (chat works without login)
+- doctors_trm.auth_id: populated for all 6 doctors (was NULL despite auth accounts existing)
+- Doctor profiles: updated 7 "User" placeholders to real names (Dr. Sarah Mitchell, Dr. James Okafor, Dr. Priya Sharma, Dr. Thomas Webb, Dr. Aisha Rahman, Dr. David Chen, Test Patient)
+- notifications.html: replaced `<div>` preference rows with semantic `<ul>`/`<li>` structure
+- team.html: footer link corrected from `index.html` ("Back to System") to `team.html` ("Meet the Team")
+- admin-patients.html, admin-analytics.html: moved session check from top-level into `init()` function (consistent with admin-dashboard pattern), removed redundant pageshow handler
 
 ## MISTAKES TO NEVER MAKE
 - Never add "Dr." prefix — names already include it in DB

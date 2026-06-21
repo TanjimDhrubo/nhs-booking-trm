@@ -179,7 +179,7 @@ section covers the **visual** consequences of that requirement.)
 - Text contrast: body text on `--bg-page` and `--bg-card` must clear
   WCAG AA (4.5:1) — `--nhs-muted` (#6B7280) on white passes; don't go
   lighter than that for body copy
-- Skip-link present on every page except index.html (per AGENTS.md)
+- Skip-link present on every page
 
 ## 11. What This Project Deliberately Rejects
 

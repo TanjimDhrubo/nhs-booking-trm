@@ -142,16 +142,17 @@ Embed an AI agent directly into the website that:
 
 ### Implementation
 
-**Option A — Browser Direct (Simpler)**
-- Call an LLM API directly from the browser (OpenAI / Claude / Gemini)
-- API key stored server-side or behind a proxy
-- Suitable for MVP
+**Chosen: Option A — Browser Direct (Groq API)**
+- Call LLM API directly from the browser — Groq API with `llama-3.3-70b-versatile`
+- API key hardcoded in `js/ai-agent.js` — acceptable for university demo
+- Server-side proxy (Edge Function) would be used in production to secure API key
+- `settings_trm` table stores the key but RLS policy `USING(true)` does not allow anon reads (returns `[]`) — known Supabase quirk, worked around by hardcoding
 
 **Option B — Supabase Edge Functions (Better)**
 - Deploy Edge Functions (Deno) as middleware
 - Keeps API keys secure
 - Rate limiting, logging, caching
-- More professional architecture
+- More professional architecture — recommended for production
 
 ### Features
 
@@ -182,7 +183,7 @@ Embed an AI agent directly into the website that:
   │ Consider ergonomic assessment.      │
   └─────────────────────────────────────┘
   ```
-- Stored in `questionnaire_analysis_trm` table (or as JSONB column)
+- Stored in `ai_brief` column on `questionnaires_trm` table
 - Doctor sees it on `admin-questionnaire.html`
 
 ### Database Changes (AI Feature)
@@ -229,6 +230,10 @@ Every AI-generated response must include prominent disclaimer:
 Phase 1:
   ├── NHS Number auto-generation
   │   └── SQL trigger update + register.html changes
+  │
+  ├── Dependents
+  │   ├── SQL: dependents_trm table + dependent_id on appointments_trm
+  │   └── Book for dependent option in booking flow
   │
   ├── Questionnaire
   │   ├── SQL: questionnaires_trm table
