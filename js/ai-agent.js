@@ -2,15 +2,7 @@ import { supabase } from './supabase.js'
 
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'llama-3.3-70b-versatile'
-
-let apiKey = null
-
-async function getApiKey() {
-  if (apiKey) return apiKey
-  const { data } = await supabase.from('settings_trm').select('value').eq('key', 'groq_api_key').single()
-  if (data?.value) apiKey = data.value
-  return apiKey
-}
+const GROQ_API_KEY = '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'
 
 const SYSTEM_PROMPT = `You are a friendly and professional NHS health information assistant. 
 
@@ -29,15 +21,14 @@ const SYSTEM_PROMPT = `You are a friendly and professional NHS health informatio
 - Use plain English, not medical jargon.`
 
 async function callGroq(messages) {
-  const key = await getApiKey()
-  if (!key) return 'AI assistant is unavailable right now. Please try again later.'
+  if (!GROQ_API_KEY) return 'AI assistant is unavailable right now. Please try again later.'
 
   try {
     const res = await fetch(GROQ_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
+        'Authorization': 'Bearer ' + GROQ_API_KEY
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
@@ -70,8 +61,7 @@ export async function chatWithAI(conversation, userMessage) {
 }
 
 export async function analyseSymptoms(answers) {
-  const key = await getApiKey()
-  if (!key) return 'AI analysis unavailable. Set up a Groq API key in settings.'
+  if (!GROQ_API_KEY) return 'AI analysis unavailable. Set up a Groq API key in settings.'
 
   const prompt = `You are an NHS triage assistant. Analyse these symptoms and provide a concise clinical brief for the doctor.
 Keep it professional, factual, and under 150 words. Include possible patterns but always flag urgency if present.
@@ -97,7 +87,7 @@ Format:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
+        'Authorization': 'Bearer ' + GROQ_API_KEY
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
