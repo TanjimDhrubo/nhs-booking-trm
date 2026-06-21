@@ -44,7 +44,7 @@
   <nav class="navbar" style="position:relative" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
       <div class="navbar-logo" aria-hidden="true">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| TRM</span></span>
     </a>
 
     <div class="navbar-links" style="position:relative">
@@ -203,17 +203,26 @@
           </article>
 
           <article class="feature-card" id="card-doctors">
-            <div class="feature-icon" style="width:64px;height:64px;border-radius:16px"><span class="sym" aria-hidden="true">⚕</span></div>
+            <div class="feature-icon" style="width:64px;height:64px;border-radius:16px"><span class="sym" aria-hidden="true">&#9881;</span></div>
             <h3 class="feature-title">Our Doctors</h3>
             <p class="feature-desc">Browse NHS specialists and book directly with your preferred doctor</p>
           </article>
 
           <article class="feature-card" id="card-privacy">
-            <div class="feature-icon" style="width:64px;height:64px;border-radius:16px"><span class="sym" aria-hidden="true">⛨</span></div>
+            <div class="feature-icon" style="width:64px;height:64px;border-radius:16px"><span class="sym" aria-hidden="true">&#9896;</span></div>
             <h3 class="feature-title">Secure &amp; Private</h3>
             <p class="feature-desc">Your health data protected under NHS GDPR standards</p>
           </article>
         </div>
+
+        <article class="feature-card" id="card-ai" style="margin-top:16px;display:flex;align-items:center;gap:20px;padding:28px 32px;cursor:pointer;text-align:left">
+          <div class="feature-icon" style="width:64px;height:64px;border-radius:16px;flex-shrink:0"><span class="sym" aria-hidden="true">&#9670;</span></div>
+          <div style="flex:1">
+            <h3 class="feature-title" style="font-size:20px">AI Health Assistant</h3>
+            <p class="feature-desc" style="font-size:15px">Chat about symptoms, ask health questions, and get AI-powered guidance before your appointment &mdash; no login needed</p>
+          </div>
+          <span class="btn-primary" style="flex-shrink:0;pointer-events:none">Try it &rarr;</span>
+        </article>
       </div>
     </section>
 
@@ -286,6 +295,7 @@
       'card-history': { page: 'history.html',       auth: true  },
       'card-notif':   { page: 'notifications.html', auth: true  },
       'card-doctors': { page: 'doctors.html',       auth: false },
+      'card-ai':      { page: 'chat.html',          auth: false },
       'card-privacy': { page: 'privacy.html',       auth: false }
     }
 

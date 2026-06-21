@@ -40,12 +40,13 @@ D:\test run\
 │   ├── supabase.js          ✅ COMPLETE — do not touch unless asked
 │   ├── auth.js              ✅ COMPLETE — do not touch unless asked
 │   ├── theme.js             ✅ COMPLETE — do not touch unless asked
-│   └── helpers.js           ✅ COMPLETE — shared module (formatDate, renderBadge, showMsg, generateTimeSlots, etc.)
+│   ├── helpers.js           ✅ COMPLETE — shared module (formatDate, renderBadge, showMsg, generateTimeSlots, etc.)
+│   └── ai-agent.js          ✅ COMPLETE — health Q&A chatbot + symptom analysis for doctors
 ├── index.html               ✅ Complete
 ├── login.html               ✅ Complete
 ├── register.html            ✅ Complete
-├── dashboard.html           ✅ Complete
-├── book.html                ✅ Complete
+├── dashboard.html           ✅ Complete — includes Health Assistant card in quick actions
+├── book.html                ✅ Complete — 2-button choice (Book Now / Fill Questionnaire) + Talk to AI link
 ├── history.html             ✅ Complete
 ├── checkin.html             ✅ Complete
 ├── doctors.html             ✅ Complete
@@ -53,7 +54,10 @@ D:\test run\
 ├── notifications.html       ✅ Complete
 ├── privacy.html             ✅ Complete
 ├── admin-login.html         ✅ Complete
-├── admin-dashboard.html     ✅ Complete
+├── admin-dashboard.html     ✅ Complete — shows questionnaire badge per appointment
+├── chat.html                ✅ Complete — AI health chatbot with conversational interface
+├── questionnaire.html       ✅ Complete — optional pre-appointment symptom form
+├── admin-questionnaire.html ✅ Complete — doctor view of patient questionnaire + AI brief
 ├── design.md                ✅ Complete
 ├── 404.html                 ✅ Complete — branded error page
 ├── profile.html             ✅ Complete — patient profile/settings page
@@ -89,6 +93,9 @@ import { requireAuth, showUserName, logout } from './js/auth.js'
 - doctors_trm is publicly readable by all (including unauthenticated users)
 - dependents_trm: id (uuid), guardian_id (uuid FK auth.users), full_name, date_of_birth, nhs_number, created_at
 - appointments_trm.dependent_id (uuid FK dependents_trm, nullable) — set when booking for a dependent
+- questionnaires_trm: id, appointment_id (FK), user_id (FK), symptoms, duration, severity, pain_location, triggers, relief, medications, additional_notes, ai_brief, created_at
+- chat_history_trm: id, user_id (FK), role, message, created_at — stores AI chat conversation history
+- settings_trm: id, key (unique), value — stores config like Groq API key
 - Run this SQL in Supabase SQL Editor to create dependents_trm table and add dependent_id column:
   ```sql
   CREATE TABLE dependents_trm (

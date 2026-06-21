@@ -170,11 +170,10 @@
         console.log('Auth result:', authData, authError)
 
         if (authError) {
-          msgDiv.innerHTML = `<div class="alert alert-error">
-            Login failed: ${authError.message}<br>
-            <small>Make sure you are using your NHS staff email
-            and correct password.</small>
-          </div>`
+          msgDiv.innerHTML = '<div class="alert alert-error">' +
+            'Login failed: ' + authError.message +
+            '<br><small>Make sure you are using your NHS staff email' +
+            ' and correct password.</small></div>'
           submitBtn.disabled = false
           submitBtn.textContent = 'Sign In to Staff Portal'
           return
@@ -215,10 +214,9 @@
 
         if (!doctor) {
           await supabase.auth.signOut()
-          msgDiv.innerHTML = `<div class="alert alert-error">
-            You are not registered as NHS staff.<br>
-            <small>Patient login: <a href="login.html">click here</a></small>
-          </div>`
+          msgDiv.innerHTML = '<div class="alert alert-error">' +
+            'You are not registered as NHS staff.' +
+            '<br><small>Patient login: <a href="login.html">click here</a></small></div>'
           submitBtn.disabled = false
           submitBtn.textContent = 'Sign In to Staff Portal'
           return
@@ -236,6 +234,8 @@
         submitBtn.textContent = 'Sign In to Staff Portal'
       }
     })
+
+    window.addEventListener('pageshow', (e) => { if (e.persisted) redirectIfLoggedIn() })
   </script>
 
 </body>

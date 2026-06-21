@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — AI health assistant chatbot. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 64px - 80px - 80px); min-height: 420px; max-height: 600px; }
+    .chat-msgs { flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 12px; }
+    .chat-msg { display: flex; gap: 10px; max-width: 85%; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-msg.ai { align-self: flex-start; }
+    .chat-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+    .chat-av.user { background: var(--nhs-blue); color: #fff; }
+    .chat-av.ai { background: var(--bg-subtle, #F0EDE8); color: var(--nhs-dark); border: 1px solid var(--border, #E5E2DC); }
+    .chat-bub { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.6; word-wrap: break-word; white-space: pre-wrap; }
+    .chat-msg.user .chat-bub { background: var(--nhs-blue); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-msg.ai .chat-bub { background: var(--bg-subtle, #F0EDE8); color: var(--nhs-dark); border-bottom-left-radius: 4px; }
+    .chat-inp { display: flex; gap: 8px; padding: 12px 0 0; border-top: 1px solid var(--border, #E5E2DC); margin-top: 12px; }
+    .chat-inp input { flex: 1; }
+    .chat-disc { font-size: 11px; color: var(--nhs-muted); text-align: center; padding: 12px 0 0; line-height: 1.5; }
+    .chat-load { align-self: flex-start; display: flex; gap: 4px; padding: 12px 16px; background: var(--bg-subtle, #F0EDE8); border-radius: 12px; border-bottom-left-radius: 4px; animation: fadeIn 0.3s ease; }
+    .chat-load span { width: 6px; height: 6px; border-radius: 50%; background: var(--nhs-muted); animation: bounce 1.4s infinite ease-in-out both; }
+    .chat-load span:nth-child(1) { animation-delay: 0s; }
+    .chat-load span:nth-child(2) { animation-delay: 0.16s; }
+    .chat-load span:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    .chat-divider { border: none; border-top: 1px solid var(--border, #E5E2DC); margin: 12px 0; }
+    .btn-send-doc { width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="dashboard.html" class="btn-ghost">Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out">Sign Out</button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container-sm">
+
+    <header class="page-header">
+      <h1>Health Assistant</h1>
+      <p>Chat with AI about your symptoms and health concerns</p>
+    </header>
+
+    <div id="message"></div>
+
+    <article class="card" style="padding:16px 20px">
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs" role="log" aria-live="polite" aria-label="Chat conversation">
+          <div class="chat-msg ai">
+            <div class="chat-av ai" aria-hidden="true">AI</div>
+            <div class="chat-bub">Hi, I'm the TRM Health Assistant. Tell me about your symptoms or ask any health-related question. When you're ready, click the button below to send your details to a doctor and book an appointment.</div>
+          </div>
+        </div>
+
+        <hr class="chat-divider" aria-hidden="true">
+
+        <button class="btn-primary btn-send-doc" id="send-to-doc-btn">Send analysed health situation details to doctor and book an appointment &rarr;</button>
+
+        <hr class="chat-divider" aria-hidden="true">
+
+        <div class="chat-inp">
+          <input type="text" id="chat-input" placeholder="Type your health question..." aria-label="Type your health question" autocomplete="off">
+          <button class="btn-primary" id="send-btn">Send</button>
+        </div>
+      </div>
+      <p class="chat-disc">This information is for educational purposes only and is not a substitute for professional medical advice. Always consult your GP for health concerns. If you're experiencing a medical emergency, call 999 immediately.</p>
+    </article>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">&#183;</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">&#183;</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">&#183;</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        const d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        const l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { chatWithAI, analyseSymptoms } from './js/ai-agent.js'
+
+    const chatMsgs = document.getElementById('chat-msgs')
+    const chatInput = document.getElementById('chat-input')
+    const sendBtn = document.getElementById('send-btn')
+    const sendToDocBtn = document.getElementById('send-to-doc-btn')
+    const msgEl = document.getElementById('message')
+    let conversation = []
+    let userId = null
+
+    async function loadHistory() {
+      const { data: history } = await supabase
+        .from('chat_history_trm')
+        .select('role, message')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true })
+        .limit(50)
+
+      if (history && history.length > 0) {
+        chatMsgs.innerHTML = ''
+        conversation = []
+        for (const m of history) {
+          addMsg(m.role, m.message, false)
+          conversation.push({ role: m.role, content: m.message })
+        }
+      }
+    }
+
+    function addMsg(role, text, saveToDb = true) {
+      const div = document.createElement('div')
+      div.className = 'chat-msg ' + role
+      div.innerHTML = '<div class="chat-av ' + role + '" aria-hidden="true">' + (role === 'user' ? 'You' : 'AI') + '</div>' +
+        '<div class="chat-bub">' + text.replace(/\n/g, '<br>') + '</div>'
+      chatMsgs.appendChild(div)
+      chatMsgs.scrollTop = chatMsgs.scrollHeight
+
+      if (saveToDb && userId) {
+        supabase.from('chat_history_trm').insert({
+          user_id: userId,
+          role: role,
+          message: text
+        }).then(() => {})
+      }
+    }
+
+    function showLoading() {
+      const div = document.createElement('div')
+      div.className = 'chat-load'
+      div.id = 'chat-loading'
+      div.innerHTML = '<span></span><span></span><span></span>'
+      chatMsgs.appendChild(div)
+      chatMsgs.scrollTop = chatMsgs.scrollHeight
+    }
+
+    function removeLoading() {
+      const el = document.getElementById('chat-loading')
+      if (el) el.remove()
+    }
+
+    function showMsg(msg, type = 'error') {
+      msgEl.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + msg + '</div>'
+    }
+
+    function getConversationText() {
+      return conversation.filter(m => m.role === 'user').map(m => m.content).join('\n')
+    }
+
+    async function handleSend() {
+      const text = chatInput.value.trim()
+      if (!text) return
+
+      chatInput.value = ''
+      msgEl.innerHTML = ''
+
+      addMsg('user', text)
+      conversation.push({ role: 'user', content: text })
+
+      showLoading()
+
+      const reply = await chatWithAI(conversation, text)
+
+      removeLoading()
+
+      if (!reply || reply.startsWith('AI assistant')) {
+        showMsg(reply + ' Please ensure the AI service is configured.')
+        return
+      }
+
+      addMsg('assistant', reply)
+      conversation.push({ role: 'assistant', content: reply })
+    }
+
+    async function handleSendToDoctor() {
+      msgEl.innerHTML = ''
+
+      // Require login to send to doctor
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        sessionStorage.setItem('trm_redirect_after_login', window.location.href)
+        window.location.replace('login.html')
+        return
+      }
+      userId = session.user.id
+
+      const userMessages = conversation.filter(m => m.role === 'user')
+      if (userMessages.length === 0) {
+        showMsg('Please describe your symptoms in the chat first before sending to a doctor.')
+        return
+      }
+
+      sendToDocBtn.disabled = true
+      sendToDocBtn.textContent = 'Analysing and preparing...'
+
+      const chatSummary = conversation.map(m => (m.role === 'user' ? 'Patient: ' : 'AI: ') + m.content).join('\n')
+
+      const answers = {
+        symptoms: userMessages.map(m => m.content).join('; '),
+        duration: '',
+        severity: 5,
+        pain_location: '',
+        triggers: '',
+        relief: '',
+        medications: '',
+        additional_notes: 'Chat conversation summary:\n' + chatSummary
+      }
+
+      const brief = await analyseSymptoms({
+        symptoms: answers.symptoms,
+        duration: 'Discussed in chat',
+        severity: 5,
+        pain_location: '',
+        triggers: '',
+        relief: '',
+        medications: '',
+        additional_notes: chatSummary
+      })
+
+      const { data: qData, error: qErr } = await supabase.from('questionnaires_trm').insert({
+        user_id: userId,
+        symptoms: answers.symptoms,
+        duration: '',
+        severity: 5,
+        pain_location: '',
+        triggers: '',
+        relief: '',
+        medications: '',
+        additional_notes: chatSummary,
+        ai_brief: brief
+      }).select('id').single()
+
+      sendToDocBtn.disabled = false
+      sendToDocBtn.textContent = 'Send analysed health situation details to doctor and book an appointment \u2192'
+
+      if (qErr) {
+        showMsg('Error saving health details: ' + qErr.message)
+        return
+      }
+
+      sessionStorage.setItem('trm_booking', JSON.stringify({
+        from_chat: true,
+        questionnaire_id: qData.id
+      }))
+
+      window.location.replace('book.html')
+    }
+
+    sendBtn.addEventListener('click', handleSend)
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+    })
+    sendToDocBtn.addEventListener('click', handleSendToDoctor)
+
+    async function init() {
+      // Chat works without login — just get user if available
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        userId = session.user.id
+        await showUserName('user-name')
+        await loadHistory()
+        document.getElementById('logout-btn').style.display = 'flex'
+      } else {
+        const userNameEl = document.getElementById('user-name')
+        if (userNameEl) userNameEl.textContent = 'Guest'
+        document.getElementById('logout-btn').style.display = 'none'
+      }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) init()
+        else window.location.replace('login.html')
+      }
+    })
+
+    init()
+  </script>
+
+</body>
+</html>

@@ -28,6 +28,29 @@
     .alert-link {
       font-weight: 600;
     }
+    .choice-card {
+      text-align: center;
+      padding: 32px 24px;
+    }
+    .choice-card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--nhs-dark);
+      margin-bottom: 8px;
+    }
+    .choice-card p {
+      color: var(--nhs-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .choice-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .choice-actions .btn-ghost {
+      color: var(--nhs-muted);
+    }
   </style>
 </head>
 <body>
@@ -37,7 +60,7 @@
   <nav class="navbar" aria-label="Main navigation">
     <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
       <div class="navbar-logo" aria-hidden="true">NHS</div>
-      <span class="navbar-name">NHS Appointment Booking <span>| TRM</span></span>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| TRM</span></span>
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
@@ -61,7 +84,7 @@
 
     <div id="message"></div>
 
-    <article class="card">
+    <article class="card" id="form-card">
       <form id="book-form" aria-label="Book appointment form">
 
         <div class="form-group">
@@ -111,9 +134,22 @@
 
         <div class="divider" aria-hidden="true"></div>
 
-        <button type="submit" class="btn-primary btn-full" id="submit-btn">Confirm Booking &rarr;</button>
+        <button type="submit" class="btn-primary btn-full" id="submit-btn">Review Booking &rarr;</button>
 
       </form>
+    </article>
+
+    <article class="card is-hidden" id="choice-card">
+      <div class="choice-card">
+        <h2>Almost there!</h2>
+        <p id="questionnaire-label">Your appointment details are confirmed. Would you like to add a pre-appointment questionnaire to help your doctor prepare?</p>
+        <div class="choice-actions">
+          <button class="btn-primary btn-full" id="book-now-btn">Book Now &rarr;</button>
+          <button class="btn-secondary btn-full" id="book-questionnaire-btn">Fill Optional Questionnaire &rarr;</button>
+          <a href="chat.html" class="btn-ghost btn-full" style="text-align:center">Talk to AI Assistant &rarr;</a>
+          <button class="btn-ghost btn-full" id="back-to-form-btn">&larr; Change Details</button>
+        </div>
+      </div>
     </article>
 
     <div class="back-link">
@@ -266,6 +302,59 @@
       await loadDoctors(doctorId)
     }
 
+    const formCard = document.getElementById('form-card')
+    const choiceCard = document.getElementById('choice-card')
+
+    async function doBooking() {
+      const bookingData = sessionStorage.getItem('trm_booking')
+      if (!bookingData) {
+        showMsg('Booking information lost. Please start again.')
+        return null
+      }
+
+      const data = JSON.parse(bookingData)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        showMsg('Authentication error. Please sign in again.')
+        return null
+      }
+
+      const { data: doctor } = await supabase
+        .from('doctors_trm')
+        .select('name')
+        .eq('id', data.doctor_id)
+        .single()
+
+      const insertData = {
+        user_id: user.id,
+        doctor_id: data.doctor_id,
+        appointment_type: data.appointment_type,
+        appointment_date: data.appointment_date,
+        status: 'confirmed'
+      }
+      if (data.dependent_id) insertData.dependent_id = data.dependent_id
+
+      const { data: newAppt, error: insertErr } = await supabase
+        .from('appointments_trm')
+        .insert(insertData)
+        .select('id')
+        .single()
+
+      if (insertErr) {
+        showMsg(insertErr.message)
+        return null
+      }
+
+      // Link questionnaire if one exists (from chat or questionnaire page)
+      if (data.questionnaire_id) {
+        await supabase.from('questionnaires_trm').update({ appointment_id: newAppt.id }).eq('id', data.questionnaire_id)
+      }
+
+      await insertNotification(user.id, 'Appointment booked for ' + formatDate(data.appointment_date) + ' with ' + (doctor?.name || 'your doctor'))
+
+      return newAppt.id
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
       msgEl.innerHTML = ''
@@ -275,9 +364,10 @@
       const date = apptDate.value
       const time = apptTime.value
       const doctorId = doctorSelect.value
+      const dependentId = bookingFor.value === 'dependent' ? dependentSelect.value : ''
 
-      if (!date) {
-        showMsg('Please select a date.')
+      if (!apptType || !date || !time || !doctorId) {
+        showMsg('Please fill in all fields.')
         return
       }
 
@@ -290,56 +380,54 @@
         return
       }
 
-      submitBtn.disabled = true
-      submitBtn.textContent = 'Booking\u2026'
-
       const appointmentDate = new Date(date + 'T' + time).toISOString()
 
-      const { data: userData, error: userErr } = await supabase.auth.getUser()
-      if (userErr || !userData?.user) {
-        showMsg('Authentication error. Please sign in again.')
-        submitBtn.disabled = false
-        submitBtn.innerHTML = 'Confirm Booking &rarr;'
-        return
-      }
-
-      const userId = userData.user.id
-
-      const { data: doctor } = await supabase
-        .from('doctors_trm')
-        .select('name')
-        .eq('id', doctorId)
-        .single()
-
-      const insertData = {
-        user_id: userId,
+      // Preserve existing questionnaire_id from chat if present
+      const existingBooking = sessionStorage.getItem('trm_booking')
+      const existingData = existingBooking ? JSON.parse(existingBooking) : {}
+      sessionStorage.setItem('trm_booking', JSON.stringify({
         doctor_id: doctorId,
         appointment_type: apptType,
         appointment_date: appointmentDate,
-        status: 'confirmed'
+        dependent_id: dependentId || null,
+        from_chat: existingData.from_chat || false,
+        questionnaire_id: existingData.questionnaire_id || null
+      }))
+
+      formCard.style.display = 'none'
+      choiceCard.classList.remove('is-hidden')
+
+      // Adapt choice card if coming from chat (questionnaire already exists)
+      const qLabel = document.getElementById('questionnaire-label')
+      const qBtn = document.getElementById('book-questionnaire-btn')
+      if (existingData.from_chat) {
+        qLabel.textContent = 'Health Assistant summary is ready for your doctor.'
+        qBtn.style.display = 'none'
+      } else {
+        qLabel.textContent = 'Your appointment details are confirmed. Would you like to add a pre-appointment questionnaire to help your doctor prepare?'
+        qBtn.style.display = 'flex'
       }
+    })
 
-      const dependentId = bookingFor.value === 'dependent' ? dependentSelect.value : ''
-      if (dependentId) {
-        insertData.dependent_id = dependentId
-      }
+    document.getElementById('book-now-btn').addEventListener('click', async () => {
+      const apptId = await doBooking()
+      if (apptId) window.location.replace('confirmation.html?id=' + apptId)
+    })
 
-      const { data: newAppt, error: insertErr } = await supabase
-        .from('appointments_trm')
-        .insert(insertData)
-        .select('id')
-        .single()
+    document.getElementById('book-questionnaire-btn').addEventListener('click', () => {
+      window.location.replace('questionnaire.html')
+    })
 
-      if (insertErr) {
-        showMsg(insertErr.message)
-        submitBtn.disabled = false
-        submitBtn.innerHTML = 'Confirm Booking &rarr;'
-        return
-      }
-
-      await insertNotification(userId, 'Appointment booked for ' + formatDate(appointmentDate) + ' with ' + (doctor?.name || 'your doctor'))
-
-      window.location.replace('confirmation.html?id=' + newAppt.id)
+    document.getElementById('back-to-form-btn').addEventListener('click', () => {
+      const existing = sessionStorage.getItem('trm_booking')
+      const data = existing ? JSON.parse(existing) : {}
+      // Preserve questionnaire_id from chat, remove form data
+      sessionStorage.setItem('trm_booking', JSON.stringify({
+        from_chat: data.from_chat || false,
+        questionnaire_id: data.questionnaire_id || null
+      }))
+      choiceCard.classList.add('is-hidden')
+      formCard.style.display = 'block'
     })
 
     document.getElementById('logout-btn').addEventListener('click', logout)

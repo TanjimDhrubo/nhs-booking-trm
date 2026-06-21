@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — view patient questionnaire responses. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .admin-nav-name span { color: var(--nhs-blue); }
+    .admin-staff-badge {
+      display: inline-block;
+      background: #FFF8E7;
+      color: #856404;
+      border: 1px solid #FFE69C;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .admin-amber-bar { height: 3px; background: var(--nhs-amber); width: 100%; }
+    .q-field { margin-bottom: 20px; }
+    .q-label { font-size: 12px; font-weight: 600; color: var(--nhs-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .q-value { font-size: 15px; color: var(--nhs-dark); line-height: 1.6; }
+    .q-value.severity { font-size: 28px; font-weight: 700; color: var(--nhs-blue); }
+    .brief-box { background: var(--bg-subtle); border-radius: var(--radius-md); padding: 20px; border: 1px solid var(--border); margin-bottom: 24px; white-space: pre-wrap; font-size: 14px; line-height: 1.7; }
+    .brief-box h4 { font-size: 14px; font-weight: 700; color: var(--nhs-dark); margin-bottom: 8px; }
+    .loading { text-align: center; padding: 60px 0; }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="admin-dashboard.html" class="navbar-brand" aria-label="NHS Admin Portal">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name admin-nav-name"><abbr title="National Health Service">NHS</abbr> Admin Portal <span>| TRM</span></span>
+      <span class="admin-staff-badge">STAFF ONLY</span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="doctor-name"></span>
+      <a href="admin-dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="admin-amber-bar" aria-hidden="true"></div>
+
+  <main id="main-content" class="container">
+
+    <div id="message"></div>
+
+    <div id="content">
+      <div class="loading">Loading questionnaire...</div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">&#183;</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">&#183;</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">&#183;</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        const d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        const l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { formatDateShort } from './js/helpers.js'
+
+    const container = document.getElementById('content')
+    const msgEl = document.getElementById('message')
+
+    async function main() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { window.location.replace('admin-login.html'); return }
+
+      // Verify doctor
+      const { data: doctor } = await supabase
+        .from('doctors_trm')
+        .select('id, name')
+        .eq('email', session.user.email)
+        .single()
+
+      if (!doctor) { window.location.replace('admin-login.html'); return }
+
+      document.getElementById('doctor-name').textContent = doctor.name
+
+      const params = new URLSearchParams(window.location.search)
+      const appointmentId = params.get('appointment_id')
+      const patientId = params.get('patient_id')
+
+      if (!appointmentId && !patientId) {
+        container.innerHTML = '<div class="empty-state"><p>No questionnaire specified.</p><a href="admin-dashboard.html" class="btn-primary">Back to Dashboard</a></div>'
+        return
+      }
+
+      // Try to find questionnaire by appointment_id or user_id
+      let query = supabase.from('questionnaires_trm').select('*, appointments_trm!inner(appointment_date, appointment_type, doctor_id, profiles_trm!inner(full_name))')
+
+      if (appointmentId) {
+        query = query.eq('appointment_id', appointmentId)
+      }
+
+      const { data: questionnaires, error } = await query.order('created_at', { ascending: false }).limit(1)
+
+      if (error || !questionnaires || questionnaires.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No questionnaire found for this appointment.</p><a href="admin-dashboard.html" class="btn-primary">Back to Dashboard</a></div>'
+        return
+      }
+
+      const q = questionnaires[0]
+      const appt = q.appointments_trm
+      const severity = q.severity || 0
+
+      let briefHtml = ''
+      if (q.ai_brief) {
+        briefHtml = '<div class="brief-box"><h4>AI Analysis Brief</h4>' + q.ai_brief + '</div>'
+      }
+
+      const severityColor = severity <= 3 ? 'var(--nhs-green)' : severity <= 6 ? 'var(--nhs-amber)' : 'var(--nhs-red)'
+
+      container.innerHTML = briefHtml +
+        '<header style="margin-bottom:24px">' +
+        '  <h1 style="font-size:24px;font-weight:700;color:var(--nhs-dark);margin-bottom:4px">Patient Questionnaire</h1>' +
+        '  <p style="color:var(--nhs-muted);font-size:14px">' + (appt.profiles_trm?.full_name || 'Patient') + ' &middot; ' + (appt.appointment_date ? formatDateShort(appt.appointment_date) : '') + ' &middot; ' + (appt.appointment_type || '') + '</p>' +
+        '</header>' +
+        '<article class="card" style="padding:28px">' +
+
+        (q.symptoms ? '<div class="q-field"><div class="q-label">Main Symptom</div><div class="q-value">' + q.symptoms + '</div></div>' : '') +
+
+        (q.duration ? '<div class="q-field"><div class="q-label">Duration</div><div class="q-value">' + q.duration + '</div></div>' : '') +
+
+        (severity ? '<div class="q-field"><div class="q-label">Severity</div><div class="q-value severity" style="color:' + severityColor + '">' + severity + '/10</div></div>' : '') +
+
+        (q.pain_location ? '<div class="q-field"><div class="q-label">Pain Location</div><div class="q-value">' + q.pain_location + '</div></div>' : '') +
+
+        (q.triggers ? '<div class="q-field"><div class="q-label">Triggers / Worse</div><div class="q-value">' + q.triggers + '</div></div>' : '') +
+
+        (q.relief ? '<div class="q-field"><div class="q-label">Relief / Better</div><div class="q-value">' + q.relief + '</div></div>' : '') +
+
+        (q.medications ? '<div class="q-field"><div class="q-label">Current Medication</div><div class="q-value">' + q.medications + '</div></div>' : '') +
+
+        (q.additional_notes ? '<div class="q-field"><div class="q-label">Additional Notes</div><div class="q-value">' + q.additional_notes + '</div></div>' : '') +
+
+        '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-soft)">' +
+        '  <p style="font-size:12px;color:var(--nhs-muted)">Submitted: ' + (q.created_at ? formatDateShort(q.created_at) : 'N/A') + '</p>' +
+        '</div>' +
+        '</article>' +
+
+        '<div style="text-align:center;margin-top:24px">' +
+        '  <a href="admin-dashboard.html" class="btn-primary">&larr; Back to Dashboard</a>' +
+        '</div>'
+    }
+
+    main().catch(err => {
+      msgEl.innerHTML = '<div class="alert alert-error">Error: ' + err.message + '</div>'
+    })
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.replace('admin-login.html')
+    })
+
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) {
+        const { data } = await supabase.auth.getSession()
+        if (data.session) main()
+        else window.location.replace('admin-login.html')
+      }
+    })
+  </script>
+
+</body>
+</html>

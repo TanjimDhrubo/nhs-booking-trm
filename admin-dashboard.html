@@ -88,7 +88,7 @@
   <nav class="navbar" aria-label="Main navigation">
     <a href="admin-dashboard.html" class="navbar-brand" aria-label="NHS Admin Portal">
       <div class="navbar-logo" aria-hidden="true">NHS</div>
-      <span class="navbar-name admin-nav-name">NHS Admin Portal <span>| TRM</span></span>
+      <span class="navbar-name admin-nav-name"><abbr title="National Health Service">NHS</abbr> Admin Portal <span>| TRM</span></span>
       <span class="admin-staff-badge">STAFF ONLY</span>
     </a>
     <div class="navbar-links">
@@ -111,7 +111,7 @@
     <div id="message"></div>
 
     <header class="card">
-      <div class="greeting-large" id="greeting-text">Good morning</div>
+      <h1 class="greeting-large" id="greeting-text">Good morning</h1>
       <div class="welcome-subtitle" id="doctor-spec"></div>
       <ul class="stat-chips" style="list-style:none;padding:0;margin:0">
         <li class="stat-chip"><strong id="stat-today">0</strong> appointments today</li>
@@ -219,9 +219,18 @@
         document.getElementById('today-appointments').innerHTML = '<div class="alert alert-error">' + todayError.message + '</div>'
       }
 
+      const todayApptIds = (todayAppts || []).map(a => a.id)
+      const { data: todayQuestionnaires } = await supabase
+        .from('questionnaires_trm')
+        .select('appointment_id')
+        .in('appointment_id', todayApptIds.length ? todayApptIds : ['00000000-0000-0000-0000-000000000000'])
+
+      const todayQMap = new Set((todayQuestionnaires || []).filter(q => q.appointment_id).map(q => q.appointment_id))
+
       const todayWithNames = (todayAppts || []).map(appt => ({
         ...appt,
-        patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
+        patient_name: appt.profiles_trm?.full_name || 'Unknown Patient',
+        has_questionnaire: todayQMap.has(appt.id)
       }))
 
       function renderTable(appointments, containerId, showActions) {
@@ -239,6 +248,11 @@
         rows += '<td>' + appt.patient_name + '</td>'
         rows += '<td>' + appt.appointment_type + '</td>'
         rows += '<td><span class="badge badge-' + appt.status + '">' + appt.status + '</span></td>'
+        if (appt.has_questionnaire) {
+          rows += '<td><a href="admin-questionnaire.html?appointment_id=' + appt.id + '" style="display:inline-block;background:#DBEAFE;color:#1E40AF;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">View Questionnaire</a></td>'
+        } else {
+          rows += '<td><span style="color:var(--nhs-muted);font-size:12px">No Questionnaire</span></td>'
+        }
         if (showActions) {
           if (appt.status === 'confirmed' || appt.status === 'checked_in') {
             rows += '<td><button class="btn-secondary btn-sm mark-complete-btn" data-id="' + appt.id + '">Mark Complete</button></td>'
@@ -251,7 +265,7 @@
         rows += '</tr>'
       })
 
-      container.innerHTML = '<div class="table-wrap"><table><caption class="sr-only">Appointments list</caption><thead><tr><th scope="col">Date & Time</th><th scope="col">Patient</th><th scope="col">Type</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+      container.innerHTML = '<div class="table-wrap"><table><caption class="sr-only">Appointments list</caption><thead><tr><th scope="col">Date & Time</th><th scope="col">Patient</th><th scope="col">Type</th><th scope="col">Status</th><th scope="col">Questionnaire</th><th scope="col">Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
 
       if (showActions) {
         container.querySelectorAll('.mark-complete-btn').forEach(btn => {
@@ -298,10 +312,19 @@
       document.getElementById('week-appointments').innerHTML = '<div class="alert alert-error">' + weekError.message + '</div>'
     }
 
-    const weekWithNames = (weekAppts || []).map(appt => ({
-      ...appt,
-      patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
-    }))
+      const weekApptIds = (weekAppts || []).map(a => a.id)
+      const { data: weekQuestionnaires } = await supabase
+        .from('questionnaires_trm')
+        .select('appointment_id')
+        .in('appointment_id', weekApptIds.length ? weekApptIds : ['00000000-0000-0000-0000-000000000000'])
+
+      const weekQMap = new Set((weekQuestionnaires || []).filter(q => q.appointment_id).map(q => q.appointment_id))
+
+      const weekWithNames = (weekAppts || []).map(appt => ({
+        ...appt,
+        patient_name: appt.profiles_trm?.full_name || 'Unknown Patient',
+        has_questionnaire: weekQMap.has(appt.id)
+      }))
 
     renderTable(weekWithNames, 'week-appointments', false)
     document.getElementById('stat-week').textContent = weekWithNames.length

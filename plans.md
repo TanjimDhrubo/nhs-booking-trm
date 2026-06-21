@@ -41,7 +41,7 @@ Generate a unique NHS number automatically when a new patient signs up if one is
 
 ## 2. Pre-Appointment Questionnaire
 
-**Status:** Pending  
+**Status:** ✅ Complete  
 **Priority:** Medium  
 **Depends on:** None (new table + new page)
 
@@ -104,7 +104,7 @@ Booking → Confirmation → "Would you like to fill a pre-appointment questionn
 
 ## 3. AI Health Agent
 
-**Status:** Planned  
+**Status:** ✅ Complete  
 **Priority:** Low (biggest scope)  
 **Depends on:** Questionnaire feature (optional, but synergistic)
 
@@ -195,19 +195,27 @@ CREATE TABLE chat_history_trm (
   message TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
-
-ALTER TABLE questionnaires_trm ADD COLUMN ai_brief TEXT;
-ALTER TABLE questionnaires_trm ADD COLUMN ai_analysis JSONB;
 ```
+
+- `ai_brief` column is included directly in `questionnaires_trm` CREATE TABLE (not added via ALTER)
 
 ### Pages
 
 | Page | Description |
 |------|-------------|
-| `chat.html` | AI health chatbot with conversational interface |
+| `chat.html` | AI health chatbot with conversational interface — ask health questions, get guidance |
 | `admin-questionnaire.html` | Doctor view of questionnaire + AI brief |
-| Existing `book.html` | Add "Talk to AI" link as alternative to booking |
-| Existing `dashboard.html` | Chat history link |
+| Existing `book.html` | "Talk to AI Assistant" link on choice card |
+| Existing `dashboard.html` | "Health Assistant" card in quick actions grid |
+
+### Implementation Notes
+
+- `chatWithAI(conversation, userMessage)` — exported from `js/ai-agent.js`, maintains conversation context
+- System prompt restricts AI to health-only topics, includes disclaimer in every response
+- Chat history persisted in `chat_history_trm` table per user
+- AI provides triage advice and suggests GP booking or 999 when appropriate
+- If AI response mentions GP or booking, a "Book an Appointment" link appears after the message
+- Uses Groq API (`llama-3.3-70b-versatile`) with 0.5 temperature for conversational responses
 
 ### Disclaimer
 Every AI-generated response must include prominent disclaimer:
@@ -218,21 +226,19 @@ Every AI-generated response must include prominent disclaimer:
 ## Implementation Order
 
 ```
-Phase 1 (Next Session):
+Phase 1:
   ├── NHS Number auto-generation
   │   └── SQL trigger update + register.html changes
   │
-  └── Questionnaire
-      ├── SQL: questionnaires_trm table
-      ├── questionnaire.html (patient form)
-      ├── admin-questionnaire.html (doctor view)
-      └── Update book.html, dashboard.html, admin-dashboard.html
-
-Phase 2 (Future):
+  ├── Questionnaire
+  │   ├── SQL: questionnaires_trm table
+  │   ├── questionnaire.html (patient form)
+  │   ├── admin-questionnaire.html (doctor view)
+  │   └── Update book.html, dashboard.html, admin-dashboard.html
+  │
   └── AI Agent
-      ├── api route / edge function
-      ├── js/ai-agent.js module
-      ├── chat.html (patient chatbot)
+      ├── js/ai-agent.js (chatWithAI + analyseSymptoms exports)
+      ├── chat.html (patient health chatbot)
       ├── AI brief generation on questionnaire submit
       └── Doctor brief view on admin-questionnaire.html
 ```

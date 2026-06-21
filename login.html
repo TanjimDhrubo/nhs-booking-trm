@@ -219,6 +219,8 @@
       resetBtn.textContent = 'Send Reset Link'
       resetBtn.disabled = false
     })
+
+    window.addEventListener('pageshow', (e) => { if (e.persisted) redirectIfLoggedIn() })
   </script>
 
 </body>

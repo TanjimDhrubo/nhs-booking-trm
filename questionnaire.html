@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — optional pre-appointment symptom questionnaire. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .question-group { margin-bottom: 24px; }
+    .question-group label { display: block; font-size: 14px; font-weight: 600; color: var(--nhs-dark); margin-bottom: 6px; }
+    .question-group .hint { font-size: 13px; color: var(--nhs-muted); margin-bottom: 8px; }
+    .question-group textarea { width: 100%; min-height: 80px; resize: vertical; }
+    .question-group input[type="number"] { width: 100px; }
+    .question-group select { width: 100%; }
+    .btn-full { width: 100%; justify-content: center; }
+    .btn-ai { background: var(--nhs-green); color: #fff; }
+    .btn-ai:hover { background: #006633; }
+    .questionnaire-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+    .severity-wrap { display: flex; align-items: center; gap: 12px; }
+    .severity-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--nhs-muted); margin-top: 4px; }
+    .loading { text-align: center; padding: 40px 0; }
+    .is-hidden { display: none; }
+    .ai-section { margin-top: 20px; padding: 16px; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name"><abbr title="National Health Service">NHS</abbr> Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="book.html" class="btn-ghost">&larr; Back</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container-sm">
+
+    <header class="page-header">
+      <h1>Pre-Appointment Questionnaire</h1>
+      <p>Optional — helps your doctor prepare for a better consultation</p>
+    </header>
+
+    <div id="message"></div>
+
+    <div id="no-booking-data" class="is-hidden">
+      <div class="empty-state">
+        <p>No booking information found. Please start from the booking page.</p>
+        <a href="book.html" class="btn-primary">Book an Appointment</a>
+      </div>
+    </div>
+
+    <article class="card" id="questionnaire-card">
+      <form id="questionnaire-form" aria-label="Symptom questionnaire form">
+
+        <div class="question-group">
+          <label for="symptoms">What is your main symptom or reason for the appointment?</label>
+          <div class="hint">Describe your primary concern in a few sentences</div>
+          <textarea id="symptoms" placeholder="e.g. I have been experiencing headaches for the past two weeks..."></textarea>
+        </div>
+
+        <div class="question-group">
+          <label for="duration">How long have you had these symptoms?</label>
+          <select id="duration">
+            <option value="">Select duration&hellip;</option>
+            <option value="Less than 24 hours">Less than 24 hours</option>
+            <option value="1-3 days">1&ndash;3 days</option>
+            <option value="4-7 days">4&ndash;7 days</option>
+            <option value="1-2 weeks">1&ndash;2 weeks</option>
+            <option value="2-4 weeks">2&ndash;4 weeks</option>
+            <option value="1-3 months">1&ndash;3 months</option>
+            <option value="3-6 months">3&ndash;6 months</option>
+            <option value="6+ months">6+ months</option>
+          </select>
+        </div>
+
+        <div class="question-group">
+          <label for="severity">How severe are your symptoms? (1 = mild, 10 = severe)</label>
+          <div class="severity-wrap">
+            <input type="range" id="severity" min="1" max="10" value="5">
+            <span id="severity-value" style="font-size:24px;font-weight:700;color:var(--nhs-blue);min-width:30px">5</span>
+          </div>
+          <div class="severity-labels">
+            <span>Mild</span>
+            <span>Moderate</span>
+            <span>Severe</span>
+          </div>
+        </div>
+
+        <div class="question-group">
+          <label for="pain-location">Where is the pain or discomfort located?</label>
+          <input type="text" id="pain-location" placeholder="e.g. Lower back, left side of head, chest">
+        </div>
+
+        <div class="question-group">
+          <label for="triggers">What makes it worse?</label>
+          <textarea id="triggers" placeholder="e.g. Walking, stress, after eating, screen time"></textarea>
+        </div>
+
+        <div class="question-group">
+          <label for="relief">What makes it better?</label>
+          <textarea id="relief" placeholder="e.g. Rest, medication, lying down, heat pack"></textarea>
+        </div>
+
+        <div class="question-group">
+          <label for="medications">Are you currently taking any medication?</label>
+          <textarea id="medications" placeholder="List any medications, dosage, and how often"></textarea>
+        </div>
+
+        <div class="question-group">
+          <label for="additional-notes">Additional notes</label>
+          <textarea id="additional-notes" placeholder="Anything else your doctor should know"></textarea>
+        </div>
+
+        <div id="ai-result" class="ai-section is-hidden"></div>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <div class="questionnaire-actions">
+          <button type="submit" class="btn-primary btn-full" id="submit-book-btn">Submit Answers &amp; Book &rarr;</button>
+          <button type="button" class="btn-ai btn-full" id="ai-book-btn">Get AI Analysis &amp; Book &rarr;</button>
+        </div>
+
+        <p style="font-size:12px;color:var(--nhs-muted);text-align:center;margin-top:16px">
+          Your answers will be shared with your doctor for a better consultation.
+        </p>
+        <p style="font-size:12px;color:var(--nhs-muted);text-align:center;margin:4px 0 0">
+          AI analysis is for informational purposes only and is not medical advice.
+        </p>
+
+      </form>
+    </article>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">&#183;</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">&#183;</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">&#183;</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        const d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        const l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { formatDate, insertNotification } from './js/helpers.js'
+    import { analyseSymptoms } from './js/ai-agent.js'
+
+    const severitySlider = document.getElementById('severity')
+    const severityValue = document.getElementById('severity-value')
+    const form = document.getElementById('questionnaire-form')
+    const msgEl = document.getElementById('message')
+    const aiResult = document.getElementById('ai-result')
+    const noBooking = document.getElementById('no-booking-data')
+    const card = document.getElementById('questionnaire-card')
+    const submitBookBtn = document.getElementById('submit-book-btn')
+    const aiBookBtn = document.getElementById('ai-book-btn')
+
+    severitySlider.addEventListener('input', () => {
+      severityValue.textContent = severitySlider.value
+    })
+
+    function getAnswers() {
+      return {
+        symptoms: document.getElementById('symptoms').value.trim(),
+        duration: document.getElementById('duration').value,
+        severity: parseInt(severitySlider.value),
+        pain_location: document.getElementById('pain-location').value.trim(),
+        triggers: document.getElementById('triggers').value.trim(),
+        relief: document.getElementById('relief').value.trim(),
+        medications: document.getElementById('medications').value.trim(),
+        additional_notes: document.getElementById('additional-notes').value.trim()
+      }
+    }
+
+    async function bookAppointment(questionnaireId) {
+      const bookingData = sessionStorage.getItem('trm_booking')
+      if (!bookingData) {
+        showMsg('Booking information lost. Please start again.', 'error')
+        return null
+      }
+
+      const data = JSON.parse(bookingData)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        showMsg('Authentication error.', 'error')
+        return null
+      }
+
+      const insertData = {
+        user_id: user.id,
+        doctor_id: data.doctor_id,
+        appointment_type: data.appointment_type,
+        appointment_date: data.appointment_date,
+        status: 'confirmed'
+      }
+      if (data.dependent_id) insertData.dependent_id = data.dependent_id
+
+      const { data: newAppt, error } = await supabase
+        .from('appointments_trm')
+        .insert(insertData)
+        .select('id')
+        .single()
+
+      if (error) {
+        showMsg(error.message, 'error')
+        return null
+      }
+
+      // Link questionnaire to appointment
+      if (questionnaireId) {
+        await supabase.from('questionnaires_trm').update({ appointment_id: newAppt.id }).eq('id', questionnaireId)
+      }
+
+      const { data: doctor } = await supabase.from('doctors_trm').select('name').eq('id', data.doctor_id).single()
+
+      await insertNotification(user.id, 'Appointment booked for ' + formatDate(data.appointment_date) + ' with ' + (doctor?.name || 'your doctor'))
+
+      sessionStorage.removeItem('trm_booking')
+      return newAppt.id
+    }
+
+    function showMsg(msg, type = 'error') {
+      msgEl.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + msg + '</div>'
+    }
+
+    function setButtonsLoading(loading) {
+      submitBookBtn.disabled = loading
+      aiBookBtn.disabled = loading
+      submitBookBtn.textContent = loading ? 'Processing...' : 'Submit Answers & Book \u2192'
+      aiBookBtn.textContent = loading ? 'Analysing...' : 'Get AI Analysis & Book \u2192'
+    }
+
+    async function saveQuestionnaire(answers, aiBrief) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return null
+
+      const payload = {
+        user_id: user.id,
+        symptoms: answers.symptoms,
+        duration: answers.duration,
+        severity: answers.severity,
+        pain_location: answers.pain_location,
+        triggers: answers.triggers,
+        relief: answers.relief,
+        medications: answers.medications,
+        additional_notes: answers.additional_notes
+      }
+      if (aiBrief) payload.ai_brief = aiBrief
+
+      const { data, error } = await supabase.from('questionnaires_trm').insert(payload).select('id').single()
+      if (error) { showMsg(error.message, 'error'); return null }
+      return data.id
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      msgEl.innerHTML = ''
+      setButtonsLoading(true)
+
+      const answers = getAnswers()
+      const qId = await saveQuestionnaire(answers, null)
+      if (!qId) { setButtonsLoading(false); return }
+
+      const apptId = await bookAppointment(qId)
+      if (!apptId) { setButtonsLoading(false); return }
+
+      window.location.replace('confirmation.html?id=' + apptId)
+    })
+
+    aiBookBtn.addEventListener('click', async () => {
+      msgEl.innerHTML = ''
+      setButtonsLoading(true)
+      aiResult.classList.add('is-hidden')
+
+      const answers = getAnswers()
+      aiResult.innerHTML = '<div class="loading">Analysing your symptoms...</div>'
+      aiResult.classList.remove('is-hidden')
+
+      const brief = await analyseSymptoms(answers)
+      aiResult.innerHTML = '<h3 style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--nhs-dark)">AI Analysis</h3>' +
+        '<div style="font-size:13px;color:var(--nhs-dark);line-height:1.6;white-space:pre-wrap">' + brief + '</div>' +
+        '<p style="font-size:11px;color:var(--nhs-muted);margin-top:8px;font-style:italic">This analysis is for informational purposes only. Always consult your GP for medical advice.</p>'
+
+      const qId = await saveQuestionnaire(answers, brief)
+      if (!qId) { setButtonsLoading(false); return }
+
+      const apptId = await bookAppointment(qId)
+      if (!apptId) { setButtonsLoading(false); return }
+
+      window.location.replace('confirmation.html?id=' + apptId)
+    })
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      await showUserName('user-name')
+
+      // Check if we have booking data in sessionStorage
+      const bookingData = sessionStorage.getItem('trm_booking')
+      if (!bookingData) {
+        noBooking.classList.remove('is-hidden')
+        card.style.display = 'none'
+      }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) init()
+        else window.location.replace('login.html')
+      }
+    })
+
+    init()
+  </script>
+
+</body>
+</html>
