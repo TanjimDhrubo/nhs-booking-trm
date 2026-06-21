@@ -2,8 +2,6 @@ import { supabase } from './supabase.js'
 
 const EDGE_FUNCTION_URL = 'https://ataqzfyppitexytlitsw.supabase.co/functions/v1/ai-agent'
 
-const DISCLAIMER = 'This information is for educational purposes only and is not a substitute for professional medical advice. Always consult your GP for health concerns. If you\'re experiencing a medical emergency, call 999 immediately.'
-
 async function callEdgeFunction(payload) {
   try {
     const { data: { session } } = await supabase.auth.getSession()
@@ -33,12 +31,11 @@ async function callEdgeFunction(payload) {
 }
 
 export async function chatWithAI(conversation, userMessage) {
-  const response = await callEdgeFunction({
+  return await callEdgeFunction({
     type: 'chat',
     messages: conversation.map(m => ({ role: m.role, content: m.content })),
     userMessage,
   })
-  return response + '\n\n' + DISCLAIMER
 }
 
 export async function analyseSymptoms(answers) {
