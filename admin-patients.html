@@ -107,8 +107,9 @@
 
     window.addEventListener('pageshow', async (e) => {
       if (e.persisted) {
-        const { data: { s } } = await supabase.auth.getSession()
-        if (!s) window.location.replace('admin-login.html')
+        const { data } = await supabase.auth.getSession()
+        if (!data.session) window.location.replace('admin-login.html')
+        else init()
       }
     })
 

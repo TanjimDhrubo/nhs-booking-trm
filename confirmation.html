@@ -60,6 +60,14 @@
       text-align: center;
       padding: 60px 0;
     }
+
+    @media print {
+      body { background: #fff; }
+      .navbar, .site-footer, .trm-watermark, #logout-btn, #theme-toggle { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+      .confirm-actions { display: none !important; }
+      main.container-sm { padding-top: 0 !important; }
+    }
   </style>
 </head>
 <body>
