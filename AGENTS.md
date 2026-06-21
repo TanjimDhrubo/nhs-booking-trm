@@ -408,14 +408,17 @@ if (session) {
 ---
 
 ## KNOWN BUGS
-- index.html: buttons don't update after login (needs async session check in non-module script)
-- doctors pages: "Dr." showing twice (DB stores names with prefix already)
-- notifications.html: layout broken (uses inline styles instead of CSS classes)
-- admin-login.html: invalid credentials error (signOut before signIn can cause issues)
+- (none — all previously known bugs have been fixed)
+
+### Fixed in Latest Session (bfcache + replace)
+- All admin pages (admin-dashboard, admin-patients, admin-analytics): added `pageshow` handler, changed `window.location.href` to `window.location.replace()` on all auth redirects and logout
+- All public pages (index, doctors, 404, team): added `pageshow` handler to refresh session-aware nav on bfcache restore, with `else` branches to reset guest state
+- Auth pages (login, admin-login): post-login redirects use `window.location.replace()`, admin-login now checks if already authenticated
+- Index.html: extracted session check into `updateAuthUI()` function, replaced `var` with `const`, added `else` branch to reset nav on stale session
 
 ## MISTAKES TO NEVER MAKE
 - Never add "Dr." prefix — names already include it in DB
-- Never use var — always const/let
+- Never use var — always const/let (was violated in index.html, 404.html module scripts — both fixed)
 - Never use require() — ES modules only
 - Never use PHP, MySQL, or any server language
 - Never use non-semantic divs where semantic tags exist

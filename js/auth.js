@@ -14,9 +14,17 @@ import { supabase } from './supabase.js'
 export async function requireAuth() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
-    window.location.href = 'login.html'
+    window.location.replace('login.html')
     return null
   }
+
+  window.addEventListener('pageshow', async (e) => {
+    if (e.persisted) {
+      const { data: { session: s } } = await supabase.auth.getSession()
+      if (!s) window.location.replace('login.html')
+    }
+  })
+
   return session
 }
 
@@ -33,7 +41,7 @@ export async function getUser() {
  */
 export async function logout() {
   await supabase.auth.signOut()
-  window.location.href = 'index.html'
+  window.location.replace('index.html')
 }
 
 /**

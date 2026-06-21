@@ -205,12 +205,22 @@
       if (session) {
         document.querySelectorAll('.nav-guest').forEach(el => el.classList.add('nav-hidden'))
         document.querySelectorAll('.nav-auth').forEach(el => el.classList.remove('nav-hidden'))
+      } else {
+        document.querySelectorAll('.nav-guest').forEach(el => el.classList.remove('nav-hidden'))
+        document.querySelectorAll('.nav-auth').forEach(el => el.classList.add('nav-hidden'))
       }
+    }
+
+    async function updateSessionNav() {
+      const { data: { session } } = await supabase.auth.getSession()
+      document.querySelectorAll('.nav-guest').forEach(el => el.classList.toggle('nav-hidden', !!session))
+      document.querySelectorAll('.nav-auth').forEach(el => el.classList.toggle('nav-hidden', !session))
     }
 
     searchEl.addEventListener('input', applyFilter)
 
     init()
+    window.addEventListener('pageshow', (e) => { if (e.persisted) updateSessionNav() })
   </script>
 
 </body>

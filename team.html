@@ -270,14 +270,23 @@
     import { supabase } from './js/supabase.js'
 
 
-    const { data: { session } } = await supabase.auth.getSession()
+    async function updateAuthNav() {
+      const { data: { session } } = await supabase.auth.getSession()
 
-    if (session) {
       const bookBtn = document.getElementById('nav-book')
       const dashBtn = document.getElementById('nav-dashboard')
-      if (bookBtn) bookBtn.style.display = 'none'
-      if (dashBtn) dashBtn.style.display = 'inline-flex'
+
+      if (session) {
+        if (bookBtn) bookBtn.style.display = 'none'
+        if (dashBtn) dashBtn.style.display = 'inline-flex'
+      } else {
+        if (bookBtn) bookBtn.style.display = ''
+        if (dashBtn) dashBtn.style.display = 'none'
+      }
     }
+
+    updateAuthNav()
+    window.addEventListener('pageshow', (e) => { if (e.persisted) updateAuthNav() })
   </script>
 
 </body>

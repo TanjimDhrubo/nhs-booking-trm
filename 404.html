@@ -77,15 +77,26 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
 
-    const { data: { session } } = await supabase.auth.getSession()
+    async function updateAuthNav() {
+      const { data: { session } } = await supabase.auth.getSession()
 
-    if (session) {
-      var signin = document.querySelector('.navbar-links a[href="login.html"]')
-      var register = document.querySelector('.navbar-links a[href="register.html"]')
-      var dashLink = document.querySelector('.navbar-links a[href="dashboard.html"]')
-      if (signin) signin.style.display = 'none'
-      if (register) register.style.display = 'none'
+      const signin = document.querySelector('.navbar-links a[href="login.html"]')
+      const register = document.querySelector('.navbar-links a[href="register.html"]')
+      const dashLink = document.querySelector('.navbar-links a[href="dashboard.html"]')
+
+      if (session) {
+        if (signin) signin.style.display = 'none'
+        if (register) register.style.display = 'none'
+        if (dashLink) dashLink.style.display = 'inline-flex'
+      } else {
+        if (signin) signin.style.display = ''
+        if (register) register.style.display = ''
+        if (dashLink) dashLink.style.display = 'none'
+      }
     }
+
+    updateAuthNav()
+    window.addEventListener('pageshow', (e) => { if (e.persisted) updateAuthNav() })
   </script>
 
 </body>

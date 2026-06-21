@@ -133,6 +133,12 @@
     import { supabase } from './js/supabase.js'
 
 
+    async function redirectIfLoggedIn() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) window.location.replace('admin-dashboard.html')
+    }
+    redirectIfLoggedIn()
+
     const form = document.getElementById('admin-login-form')
 
     form.addEventListener('submit', async function(e) {
@@ -220,7 +226,7 @@
 
         msgDiv.innerHTML = '<div class="alert alert-success">Welcome, ' + doctor.name + '! Redirecting...</div>'
         setTimeout(() => {
-          window.location.href = 'admin-dashboard.html'
+          window.location.replace('admin-dashboard.html')
         }, 1000)
 
       } catch (err) {

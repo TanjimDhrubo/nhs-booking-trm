@@ -149,13 +149,21 @@
 
     const container = document.getElementById('analytics-content')
 
-    async function init() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        window.location.href = 'admin-login.html'
-        return
-      }
+    const { data: { session } } = await supabase.auth.getSession()
 
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) {
+        const { data: { s } } = await supabase.auth.getSession()
+        if (!s) window.location.replace('admin-login.html')
+      }
+    })
+
+    if (!session) {
+      window.location.replace('admin-login.html')
+      return
+    }
+
+    async function init() {
       const userEmail = session.user.email
 
       const { data: doctor, error: doctorError } = await supabase
@@ -165,7 +173,7 @@
         .single()
 
       if (doctorError || !doctor) {
-        window.location.href = 'admin-login.html'
+        window.location.replace('admin-login.html')
         return
       }
 
@@ -265,7 +273,7 @@
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut()
-      window.location.href = 'admin-login.html'
+      window.location.replace('admin-login.html')
     })
 
     init()

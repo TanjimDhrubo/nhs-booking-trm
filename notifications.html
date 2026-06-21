@@ -205,7 +205,7 @@
       if (!data || data.length === 0) {
         el.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon" aria-hidden="true">◈</div>
+            <div class="empty-state-icon" aria-hidden="true">✉</div>
             <p>No notifications yet.</p>
             <a href="book.html" class="btn-primary">Book an Appointment</a>
           </div>`
@@ -216,7 +216,7 @@
       for (const n of data) {
         html += `
           <article style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--nhs-blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">◈</span></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--nhs-blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">✉</span></div>
             <div style="flex:1">
               <p style="font-size:14px;font-weight:500;color:var(--nhs-dark);margin-bottom:4px">${n.message}</p>
               <p style="font-size:12px;color:var(--nhs-muted)"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>
