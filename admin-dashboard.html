@@ -169,64 +169,62 @@
     import { formatDate } from './js/helpers.js'
 
 
-    const { data: { session } } = await supabase.auth.getSession()
+    async function main() {
+      const { data: { session } } = await supabase.auth.getSession()
 
-    window.addEventListener('pageshow', async (e) => {
-      if (e.persisted) {
-        const { data: { s } } = await supabase.auth.getSession()
-        if (!s) window.location.replace('admin-login.html')
+      if (!session) {
+        window.location.replace('admin-login.html')
+        return
       }
-    })
 
-    if (!session) {
-      window.location.replace('admin-login.html')
-      return
-    }
+      const userEmail = session.user.email
 
-    const userEmail = session.user.email
+      const { data: doctor, error: doctorError } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('email', userEmail)
+        .single()
 
-    const { data: doctor, error: doctorError } = await supabase
-      .from('doctors_trm')
-      .select('id, name, specialisation')
-      .eq('email', userEmail)
-      .single()
+      if (doctorError || !doctor) {
+        window.location.replace('admin-login.html')
+        return
+      }
 
-    if (doctorError || !doctor) {
-      window.location.replace('admin-login.html')
-      return
-    }
+      document.getElementById('doctor-name').textContent = doctor.name
 
-    document.getElementById('doctor-name').textContent = doctor.name
+      const hour = new Date().getHours()
+      let greeting = 'Good evening'
+      if (hour < 12) greeting = 'Good morning'
+      else if (hour < 17) greeting = 'Good afternoon'
+      document.getElementById('greeting-text').textContent = greeting + ', ' + doctor.name
 
-    const hour = new Date().getHours()
-    let greeting = 'Good evening'
-    if (hour < 12) greeting = 'Good morning'
-    else if (hour < 17) greeting = 'Good afternoon'
-    document.getElementById('greeting-text').textContent = greeting + ', ' + doctor.name
+      const specEl = document.querySelector('.welcome-subtitle')
+      if (specEl) specEl.textContent = doctor.specialisation
 
-    const specEl = document.querySelector('.welcome-subtitle')
-    if (specEl) specEl.textContent = doctor.specialisation
+      // Load today's appointments with patient names (single query with join)
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const todayEnd = new Date()
+      todayEnd.setHours(23, 59, 59, 999)
 
-    // Load today's appointments with patient names (single query with join)
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+      const { data: todayAppts, error: todayError } = await supabase
+        .from('appointments_trm')
+        .select('id, appointment_type, appointment_date, status, user_id, profiles_trm!inner(full_name)')
+        .eq('doctor_id', doctor.id)
+        .gte('appointment_date', todayStart.toISOString())
+        .lte('appointment_date', todayEnd.toISOString())
+        .order('appointment_date', { ascending: true })
 
-    const { data: todayAppts, error: todayError } = await supabase
-      .from('appointments_trm')
-      .select('id, appointment_type, appointment_date, status, user_id, profiles_trm!inner(full_name)')
-      .eq('doctor_id', doctor.id)
-      .gte('appointment_date', todayStart.toISOString())
-      .lte('appointment_date', todayEnd.toISOString())
-      .order('appointment_date', { ascending: true })
+      if (todayError) {
+        document.getElementById('today-appointments').innerHTML = '<div class="alert alert-error">' + todayError.message + '</div>'
+      }
 
-    const todayWithNames = (todayAppts || []).map(appt => ({
-      ...appt,
-      patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
-    }))
+      const todayWithNames = (todayAppts || []).map(appt => ({
+        ...appt,
+        patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
+      }))
 
-    function renderTable(appointments, containerId, showActions) {
+      function renderTable(appointments, containerId, showActions) {
       const container = document.getElementById(containerId)
       
       if (!appointments || appointments.length === 0) {
@@ -296,6 +294,10 @@
       .lte('appointment_date', weekEnd.toISOString())
       .order('appointment_date', { ascending: true })
 
+    if (weekError) {
+      document.getElementById('week-appointments').innerHTML = '<div class="alert alert-error">' + weekError.message + '</div>'
+    }
+
     const weekWithNames = (weekAppts || []).map(appt => ({
       ...appt,
       patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
@@ -310,11 +312,28 @@
       .select('*', { count: 'exact', head: true })
       .eq('doctor_id', doctor.id)
 
+    if (countError) {
+      document.getElementById('message').innerHTML += '<div class="alert alert-error">Failed to load total count: ' + countError.message + '</div>'
+    }
+
     document.getElementById('stat-total').textContent = count || 0
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut()
       window.location.replace('admin-login.html')
+    })
+    }
+
+    main().catch(err => {
+      document.getElementById('message').innerHTML = '<div class="alert alert-error">Error: ' + err.message + '</div>'
+    })
+
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) {
+        const { data: { s } } = await supabase.auth.getSession()
+        if (!s) window.location.replace('admin-login.html')
+        else main()
+      }
     })
   </script>
 

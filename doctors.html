@@ -108,18 +108,6 @@
     import { supabase } from './js/supabase.js'
 
 
-    console.log('Script started')
-
-    const { data: { session } } = await supabase.auth.getSession()
-    console.log('Session:', session)
-
-    const { data, error } = await supabase
-      .from('doctors_trm')
-      .select('*')
-
-    console.log('Doctors data:', data)
-    console.log('Doctors error:', error)
-
     let allDoctors = []
     const gridEl = document.getElementById('doctors-grid')
     const searchEl = document.getElementById('search-doctors')
@@ -194,7 +182,7 @@
         .order('name')
 
       if (error) {
-        gridEl.innerHTML = '<div class="alert alert-error">Failed to load doctors.</div>'
+        gridEl.innerHTML = '<div class="alert alert-error">Failed to load doctors: ' + error.message + '</div>'
         return
       }
 
@@ -219,7 +207,9 @@
 
     searchEl.addEventListener('input', applyFilter)
 
-    init()
+    init().catch(err => {
+      gridEl.innerHTML = '<div class="alert alert-error">Error: ' + err.message + '</div>'
+    })
     window.addEventListener('pageshow', (e) => { if (e.persisted) updateSessionNav() })
   </script>
 
