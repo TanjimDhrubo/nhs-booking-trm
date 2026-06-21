@@ -103,8 +103,8 @@
     <div id="message"></div>
 
     <header class="card">
-      <div class="greeting-large" id="greeting">Good morning</div>
-      <div class="greeting-spec" id="doctor-spec"></div>
+      <div class="greeting-large" id="greeting-text">Good morning</div>
+      <div class="welcome-subtitle" id="doctor-spec"></div>
       <ul class="stat-chips" style="list-style:none;padding:0;margin:0">
         <li class="stat-chip"><strong id="stat-today">0</strong> appointments today</li>
         <li class="stat-chip"><strong id="stat-week">0</strong> this week</li>
@@ -145,7 +145,84 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
 
-    let doctorId = null
+    console.log('Admin dashboard starting...')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    console.log('Session:', session)
+
+    if (!session) {
+      console.log('No session, redirecting to login')
+      window.location.href = 'admin-login.html'
+    }
+
+    const userEmail = session.user.email
+    console.log('Logged in as:', userEmail)
+
+    const { data: doctor, error: doctorError } = await supabase
+      .from('doctors_trm')
+      .select('id, name, specialisation')
+      .eq('email', userEmail)
+      .single()
+
+    console.log('Doctor lookup result:', doctor, doctorError)
+
+    if (doctorError || !doctor) {
+      console.error('Doctor not found, redirecting')
+      window.location.href = 'admin-login.html'
+    }
+
+    document.getElementById('doctor-name').textContent = doctor.name
+
+    const hour = new Date().getHours()
+    let greeting = 'Good evening'
+    if (hour < 12) greeting = 'Good morning'
+    else if (hour < 17) greeting = 'Good afternoon'
+    document.getElementById('greeting-text').textContent = 
+      greeting + ', ' + doctor.name
+
+    const specEl = document.querySelector('.welcome-subtitle')
+    if (specEl) specEl.textContent = doctor.specialisation
+
+    console.log('Doctor ID for queries:', doctor.id)
+
+    // Load today's appointments
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    console.log('Today range:', todayStart.toISOString(), todayEnd.toISOString())
+
+    const { data: todayAppts, error: todayError } = await supabase
+      .from('appointments_trm')
+      .select('id, appointment_type, appointment_date, status, user_id')
+      .eq('doctor_id', doctor.id)
+      .gte('appointment_date', todayStart.toISOString())
+      .lte('appointment_date', todayEnd.toISOString())
+      .order('appointment_date', { ascending: true })
+
+    console.log('Today appointments raw:', todayAppts, todayError)
+
+    // Get patient names for today's appointments
+    let todayWithNames = []
+    if (todayAppts && todayAppts.length > 0) {
+      for (const appt of todayAppts) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles_trm')
+          .select('full_name')
+          .eq('id', appt.user_id)
+          .single()
+        
+        console.log('Profile lookup for', appt.user_id, ':', profile, profileError)
+        
+        todayWithNames.push({
+          ...appt,
+          patient_name: profile ? profile.full_name : 'Unknown Patient'
+        })
+      }
+    }
+
+    console.log('Today with names:', todayWithNames)
 
     function formatDate(iso) {
       return new Date(iso).toLocaleDateString('en-GB', {
@@ -155,236 +232,113 @@
       })
     }
 
-    async function loadDoctorProfile(userEmail) {
-      const { data, error } = await supabase
-        .from('doctors_trm')
-        .select('id, name, specialisation')
-        .eq('email', userEmail)
-        .single()
-
-      if (error || !data) {
-        console.error('Doctor not found:', error)
-        window.location.href = 'admin-login.html'
-        return null
-      }
-      return data
-    }
-
-    async function loadTodayAppointments(doctorId) {
-      const todayStart = new Date()
-      todayStart.setHours(0, 0, 0, 0)
-      const todayEnd = new Date()
-      todayEnd.setHours(23, 59, 59, 999)
-
-      const { data, error } = await supabase
-        .from('appointments_trm')
-        .select('id, appointment_type, appointment_date, status, user_id')
-        .eq('doctor_id', doctorId)
-        .gte('appointment_date', todayStart.toISOString())
-        .lte('appointment_date', todayEnd.toISOString())
-        .order('appointment_date', { ascending: true })
-
-      if (error) {
-        console.error('Today appointments error:', error)
-        return []
-      }
-
-      const appointmentsWithPatients = await Promise.all(
-        (data || []).map(async (appt) => {
-          const { data: profile } = await supabase
-            .from('profiles_trm')
-            .select('full_name')
-            .eq('id', appt.user_id)
-            .single()
-
-          return {
-            ...appt,
-            patient_name: profile ? profile.full_name : 'Unknown Patient'
-          }
-        })
-      )
-
-      return appointmentsWithPatients
-    }
-
-    async function loadWeekAppointments(doctorId) {
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0, 0, 0, 0)
-
-      const weekEnd = new Date()
-      weekEnd.setDate(weekEnd.getDate() + 7)
-      weekEnd.setHours(23, 59, 59, 999)
-
-      const { data, error } = await supabase
-        .from('appointments_trm')
-        .select('id, appointment_type, appointment_date, status, user_id')
-        .eq('doctor_id', doctorId)
-        .gte('appointment_date', tomorrow.toISOString())
-        .lte('appointment_date', weekEnd.toISOString())
-        .order('appointment_date', { ascending: true })
-
-      if (error) {
-        console.error('Week appointments error:', error)
-        return []
-      }
-
-      const appointmentsWithPatients = await Promise.all(
-        (data || []).map(async (appt) => {
-          const { data: profile } = await supabase
-            .from('profiles_trm')
-            .select('full_name')
-            .eq('id', appt.user_id)
-            .single()
-
-          return {
-            ...appt,
-            patient_name: profile ? profile.full_name : 'Unknown Patient'
-          }
-        })
-      )
-
-      return appointmentsWithPatients
-    }
-
-    function renderAppointments(appointments, containerId, showActions) {
+    function renderTable(appointments, containerId, showActions) {
       const container = document.getElementById(containerId)
-
+      
       if (!appointments || appointments.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <p>No appointments scheduled.</p>
-          </div>`
+        container.innerHTML = '<div class="empty-state"><p>No appointments scheduled.</p></div>'
         return
       }
 
-      const rows = appointments.map(appt => `
-        <tr>
-          <td>
-            <time datetime="${appt.appointment_date}">
-              ${formatDate(appt.appointment_date)}
-            </time>
-          </td>
-          <td>${appt.patient_name}</td>
-          <td>${appt.appointment_type}</td>
-          <td>
-            <span class="badge badge-${appt.status}">
-              ${appt.status}
-            </span>
-          </td>
-          ${showActions ? `
-          <td>
-            ${appt.status === 'confirmed' || appt.status === 'checked_in' ? `
-              <button class="btn-secondary btn-sm"
-                data-id="${appt.id}">
-                Mark Complete
-              </button>
-            ` : `<span style="color:#9CA3AF;font-size:13px">Done</span>`}
-          </td>` : '<td>-</td>'}
-        </tr>
-      `).join('')
+      let rows = ''
+      appointments.forEach(appt => {
+        rows += '<tr>'
+        rows += '<td><time datetime="' + appt.appointment_date + '">' + formatDate(appt.appointment_date) + '</time></td>'
+        rows += '<td>' + appt.patient_name + '</td>'
+        rows += '<td>' + appt.appointment_type + '</td>'
+        rows += '<td><span class="badge badge-' + appt.status + '">' + appt.status + '</span></td>'
+        if (showActions) {
+          if (appt.status === 'confirmed' || appt.status === 'checked_in') {
+            rows += '<td><button class="btn-secondary btn-sm mark-complete-btn" data-id="' + appt.id + '">Mark Complete</button></td>'
+          } else {
+            rows += '<td><span style="color:#9CA3AF;font-size:13px">Done</span></td>'
+          }
+        } else {
+          rows += '<td>-</td>'
+        }
+        rows += '</tr>'
+      })
 
-      container.innerHTML = `
-        <div class="table-wrap">
-          <table>
-            <caption class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">${containerId === 'today-appointments' ? "Today's" : 'This week\'s'} appointments</caption>
-            <thead>
-              <tr>
-                <th scope="col">Date & Time</th>
-                <th scope="col">Patient</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
-                <th scope="col">Action</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>`
+      container.innerHTML = '<div class="table-wrap"><table><caption class="sr-only">Appointments list</caption><thead><tr><th scope="col">Date & Time</th><th scope="col">Patient</th><th scope="col">Type</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
 
       if (showActions) {
-        container.querySelectorAll('button[data-id]').forEach(btn => {
-          btn.addEventListener('click', async () => {
+        container.querySelectorAll('.mark-complete-btn').forEach(btn => {
+          btn.addEventListener('click', async function() {
             const id = btn.getAttribute('data-id')
             btn.disabled = true
             btn.textContent = 'Updating...'
-
             const { error } = await supabase
               .from('appointments_trm')
               .update({ status: 'completed' })
               .eq('id', id)
-
             if (error) {
+              alert('Error: ' + error.message)
               btn.disabled = false
               btn.textContent = 'Mark Complete'
-              alert('Failed to update: ' + error.message)
             } else {
-              btn.closest('tr').querySelector('.badge').textContent = 'completed'
-              btn.closest('tr').querySelector('.badge').className = 'badge badge-completed'
-              btn.closest('td').innerHTML = '<span style="color:#9CA3AF;font-size:13px">Done</span>'
+              location.reload()
             }
           })
         })
       }
     }
 
-    async function loadStats(doctorId) {
-      const { count, error } = await supabase
-        .from('appointments_trm')
-        .select('id', { count: 'exact', head: true })
-        .eq('doctor_id', doctorId)
+    renderTable(todayWithNames, 'today-appointments', true)
+    document.getElementById('stat-today').textContent = todayWithNames.length
 
-      if (!error) {
-        document.getElementById('stat-total').textContent = count || 0
+    // Load week appointments
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    const weekEnd = new Date()
+    weekEnd.setDate(weekEnd.getDate() + 7)
+    weekEnd.setHours(23, 59, 59, 999)
+
+    const { data: weekAppts, error: weekError } = await supabase
+      .from('appointments_trm')
+      .select('id, appointment_type, appointment_date, status, user_id')
+      .eq('doctor_id', doctor.id)
+      .gte('appointment_date', tomorrow.toISOString())
+      .lte('appointment_date', weekEnd.toISOString())
+      .order('appointment_date', { ascending: true })
+
+    console.log('Week appointments raw:', weekAppts, weekError)
+
+    let weekWithNames = []
+    if (weekAppts && weekAppts.length > 0) {
+      for (const appt of weekAppts) {
+        const { data: profile } = await supabase
+          .from('profiles_trm')
+          .select('full_name')
+          .eq('id', appt.user_id)
+          .single()
+        
+        weekWithNames.push({
+          ...appt,
+          patient_name: profile ? profile.full_name : 'Unknown Patient'
+        })
       }
     }
 
-    async function init() {
-      const { data: { session }, error: sessionErr } = await supabase.auth.getSession()
-      if (sessionErr || !session) {
-        window.location.href = 'admin-login.html'
-        return
-      }
+    renderTable(weekWithNames, 'week-appointments', false)
+    document.getElementById('stat-week').textContent = weekWithNames.length
 
-      const doctor = await loadDoctorProfile(session.user.email)
-      if (!doctor) return
+    // Total count
+    const { count, error: countError } = await supabase
+      .from('appointments_trm')
+      .select('*', { count: 'exact', head: true })
+      .eq('doctor_id', doctor.id)
 
-      doctorId = doctor.id
+    console.log('Total count:', count, countError)
+    document.getElementById('stat-total').textContent = count || 0
 
-      document.getElementById('doctor-name').textContent = doctor.name
-      document.getElementById('doctor-spec').textContent = doctor.specialisation
-
-      const hour = new Date().getHours()
-      let greeting = 'Good evening'
-      if (hour < 12) greeting = 'Good morning'
-      else if (hour < 17) greeting = 'Good afternoon'
-      document.getElementById('greeting').textContent = greeting + ', ' + doctor.name
-
-      const today = new Date()
-      const headingEl = document.getElementById('today-heading')
-      headingEl.textContent = "Today's Appointments — " + today.toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      })
-
-      const [todayAppts, weekAppts] = await Promise.all([
-        loadTodayAppointments(doctorId),
-        loadWeekAppointments(doctorId)
-      ])
-
-      document.getElementById('stat-today').textContent = todayAppts.length
-      document.getElementById('stat-week').textContent = weekAppts.length
-
-      renderAppointments(todayAppts, 'today-appointments', true)
-      renderAppointments(weekAppts, 'week-appointments', false)
-
-      await loadStats(doctorId)
-    }
-
+    // Logout
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut()
       window.location.href = 'admin-login.html'
     })
 
-    init()
+    console.log('Admin dashboard fully loaded')
   </script>
 
 </body>
