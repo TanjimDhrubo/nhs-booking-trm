@@ -150,7 +150,7 @@
 
 
     async function init() {
-      const user = await requireAuth()
+      const session = await requireAuth()
       await showUserName('user-name')
 
       document.getElementById('logout-btn').addEventListener('click', () => {
@@ -274,7 +274,7 @@
           : doctorName
 
         await insertNotification(
-          user.id,
+          session.user.id,
           'Your ' + appointment.appointment_type + ' has been rescheduled to ' + formatDateShort(newISO) + ' with ' + selectedDoctorName + '.'
         )
 

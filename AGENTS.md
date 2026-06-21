@@ -410,11 +410,13 @@ if (session) {
 ## KNOWN BUGS
 - (none — all previously known bugs have been fixed)
 
-### Fixed in Latest Session (bfcache + replace)
+### Fixed in Latest Session (bfcache + replace + requireAuth)
 - All admin pages (admin-dashboard, admin-patients, admin-analytics): added `pageshow` handler, changed `window.location.href` to `window.location.replace()` on all auth redirects and logout
 - All public pages (index, doctors, 404, team): added `pageshow` handler to refresh session-aware nav on bfcache restore, with `else` branches to reset guest state
 - Auth pages (login, admin-login): post-login redirects use `window.location.replace()`, admin-login now checks if already authenticated
 - Index.html: extracted session check into `updateAuthUI()` function, replaced `var` with `const`, added `else` branch to reset nav on stale session
+- reschedule.html: fixed `requireAuth()` returning session (not user) — renamed `user` to `session`, changed `user.id` to `session.user.id` in `insertNotification()` call
+- Doctor credentials verified: all 6 doctors authenticate successfully against Supabase Auth and match their doctors_trm records
 
 ## MISTAKES TO NEVER MAKE
 - Never add "Dr." prefix — names already include it in DB
@@ -430,4 +432,5 @@ if (session) {
 - Never use pure white as page background
 - Never regenerate style.css, supabase.js, auth.js unless asked
 - Never use inline onclick handlers — always addEventListener
+- Never assume `requireAuth()` returns a user object — it returns `session`, use `session.user.id`
 - Year is 2026 not 2025 — never write 2025 in any file
