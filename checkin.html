@@ -17,10 +17,16 @@
       min-width: 80px;
       flex-shrink: 0;
     }
+    .appt-qr {
+      flex-shrink: 0;
+    }
     .checkin-done {
       font-size: 13px;
       font-weight: 600;
       white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+      .appt-qr { display: none; }
     }
   </style>
 </head>
@@ -125,12 +131,6 @@
     function showMsg(msg, type) {
       msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
     }
-      const start = new Date(date)
-      start.setHours(0, 0, 0, 0)
-      const end = new Date(date)
-      end.setHours(23, 59, 59, 999)
-      return { start: start.toISOString(), end: end.toISOString() }
-    }
 
     async function loadTodayAppointments() {
       const el = document.getElementById('today-list')
@@ -172,6 +172,10 @@
       }
 
       let html = ''
+      function qrUrl(id) {
+        return 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=NHS-' + id.slice(0,8).toUpperCase()
+      }
+
       for (const a of appts) {
         const doc = a.doctors_trm
         const docName = doc ? doc.name : 'Unknown'
@@ -179,6 +183,9 @@
 
         html += '<article class="appt-card" id="appt-' + a.id + '">'
         html += '  <div class="time-display"><time datetime="' + a.appointment_date + '">' + formatTime(a.appointment_date) + '</time></div>'
+        html += '  <div class="appt-qr">'
+        html += '    <img src="' + qrUrl(a.id) + '" alt="QR code" width="70" height="70" loading="lazy" style="border-radius:6px;border:1px solid var(--border);display:block">'
+        html += '  </div>'
         html += '  <div class="appt-info">'
         html += '    <div class="appt-doctor">' + docName + '</div>'
         html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + a.appointment_type + '</div>'
