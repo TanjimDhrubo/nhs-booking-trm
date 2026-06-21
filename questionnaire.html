@@ -290,7 +290,8 @@
       setButtonsLoading(true)
 
       const answers = getAnswers()
-      const qId = await saveQuestionnaire(answers, null)
+      const brief = await analyseSymptoms(answers)
+      const qId = await saveQuestionnaire(answers, brief)
       if (!qId) { setButtonsLoading(false); return }
 
       const apptId = await bookAppointment(qId)
