@@ -70,14 +70,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -97,6 +99,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { formatDate, renderBadge, insertNotification } from './js/helpers.js'
 
 
     let allAppointments = []
@@ -109,20 +112,6 @@
     const filterUpcoming = document.getElementById('filter-upcoming')
     const filterPast = document.getElementById('filter-past')
     const filterCancelled = document.getElementById('filter-cancelled')
-
-    function formatDate(iso) {
-      return new Date(iso).toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric',
-        month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    }
-
-    function renderBadge(status) {
-      const cls = 'badge badge-' + status.replace('_', '').toLowerCase()
-      const label = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
-      return '<span class="' + cls + '">' + label + '</span>'
-    }
 
     function showMsg(msg, type = 'error') {
       msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
@@ -192,11 +181,7 @@
             return
           }
 
-          await supabase.from('notifications_trm').insert({
-            user_id: userId,
-            message: 'Your appointment on ' + formatDate(date) + ' has been cancelled',
-            type: 'in-app'
-          })
+          await insertNotification(userId, 'Your appointment on ' + formatDate(date) + ' has been cancelled')
 
           showMsg('Appointment cancelled.', 'success')
 

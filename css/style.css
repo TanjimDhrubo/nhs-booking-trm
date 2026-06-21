@@ -24,6 +24,7 @@
   --shadow-sm:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md:      0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
   --shadow-lg:      0 8px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-hover-blue: 0 20px 40px rgba(0,94,184,0.12);
   --radius-sm:      6px;
   --radius-md:      12px;
   --radius-lg:      18px;
@@ -202,6 +203,16 @@ img { max-width: 100%; display: block; }
 
 .card:hover {
   box-shadow: var(--shadow-md);
+}
+
+.card-interactive {
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  box-shadow: var(--shadow-hover-blue);
+  border-color: rgba(0,94,184,0.25);
+  transform: translateY(-6px) scale(1.02);
 }
 
 .card-title {
@@ -1555,4 +1566,12 @@ td,
 .section-heading,
 .section-header h2 {
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ---------- prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

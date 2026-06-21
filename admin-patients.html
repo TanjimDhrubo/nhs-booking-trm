@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — view all patients in the system. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .search-bar {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 0;
+    }
+    .patient-link {
+      color: var(--nhs-blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .patient-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="admin-dashboard.html" class="navbar-brand" aria-label="NHS Admin Portal">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name admin-nav-name">NHS Admin Portal <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
+      <span class="admin-staff-badge">STAFF ONLY</span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="doctor-name"></span>
+      <a href="admin-dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="admin-amber-bar" aria-hidden="true"></div>
+
+  <main id="main-content" class="container">
+
+    <header class="page-header">
+      <h1>Patients</h1>
+      <p>View registered patients and their appointment history</p>
+    </header>
+
+    <div class="search-bar">
+      <label for="patient-search" class="visually-hidden">Search patients</label>
+      <input type="text" id="patient-search" placeholder="Search by name or NHS number..." style="width:100%">
+    </div>
+
+    <div id="patients-content">
+      <div class="loading">Loading patients...</div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { formatDate } from './js/helpers.js'
+
+    const container = document.getElementById('patients-content')
+    const searchInput = document.getElementById('patient-search')
+
+    let allPatients = []
+
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        window.location.href = 'admin-login.html'
+        return
+      }
+
+      const userEmail = session.user.email
+
+      const { data: doctor } = await supabase
+        .from('doctors_trm')
+        .select('id, name')
+        .eq('email', userEmail)
+        .single()
+
+      if (!doctor) {
+        window.location.href = 'admin-login.html'
+        return
+      }
+
+      document.getElementById('doctor-name').textContent = doctor.name
+
+      const { data: profiles } = await supabase
+        .from('profiles_trm')
+        .select('id, full_name, date_of_birth, nhs_number, created_at')
+        .order('full_name')
+
+      if (!profiles || profiles.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No patients registered yet.</p></div>'
+        return
+      }
+
+      const { data: apptCounts } = await supabase
+        .from('appointments_trm')
+        .select('user_id')
+
+      const counts = {}
+      if (apptCounts) {
+        for (const a of apptCounts) {
+          counts[a.user_id] = (counts[a.user_id] || 0) + 1
+        }
+      }
+
+      allPatients = profiles.map(p => ({
+        ...p,
+        appointment_count: counts[p.id] || 0
+      }))
+
+      renderPatients(allPatients)
+    }
+
+    function renderPatients(patients) {
+      if (patients.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No patients match your search.</p></div>'
+        return
+      }
+
+      let rows = ''
+      for (const p of patients) {
+        const dob = p.date_of_birth
+          ? new Date(p.date_of_birth).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '—'
+
+        rows += '<tr>'
+        rows += '<td><a href="admin-dashboard.html?patient=' + p.id + '" class="patient-link">' + (p.full_name || 'Unknown') + '</a></td>'
+        rows += '<td>' + (p.nhs_number || '—') + '</td>'
+        rows += '<td>' + dob + '</td>'
+        rows += '<td>' + p.appointment_count + '</td>'
+        rows += '<td>' + (p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—') + '</td>'
+        rows += '</tr>'
+      }
+
+      container.innerHTML = '<div class="table-wrap"><table><caption class="sr-only">All registered patients</caption><thead><tr><th scope="col">Name</th><th scope="col">NHS Number</th><th scope="col">Date of Birth</th><th scope="col">Appointments</th><th scope="col">Registered</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+    }
+
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase()
+      if (!q) {
+        renderPatients(allPatients)
+        return
+      }
+      const filtered = allPatients.filter(p =>
+        (p.full_name && p.full_name.toLowerCase().includes(q)) ||
+        (p.nhs_number && p.nhs_number.includes(q))
+      )
+      renderPatients(filtered)
+    })
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.href = 'admin-login.html'
+    })
+
+    init()
+  </script>
+
+</body>
+</html>

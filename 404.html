@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="Page not found — NHS Appointment Booking System by TRM">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name">
+        <abbr title="National Health Service">NHS</abbr> 
+        Appointment Booking <span>| TRM</span>
+      </span>
+    </a>
+    <div class="navbar-links">
+      <a href="login.html" class="btn-secondary">Sign In</a>
+      <a href="register.html" class="btn-primary">Register</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container" style="padding-top:120px;padding-bottom:120px;text-align:center">
+
+    <div style="max-width:520px;margin:0 auto">
+      <div style="font-size:96px;font-weight:800;color:var(--nhs-blue);line-height:1;letter-spacing:-4px;margin-bottom:8px">404</div>
+      <h1 style="font-size:28px;font-weight:700;color:var(--nhs-dark);margin-bottom:12px">Page not found</h1>
+      <p style="font-size:16px;color:var(--nhs-muted);margin-bottom:36px;line-height:1.6">
+        The page you are looking for might have been moved or no longer exists.
+        Please check the address or use the links below.
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="index.html" class="btn-primary" style="font-size:15px;padding:12px 28px">Go Home &rarr;</a>
+        <a href="dashboard.html" class="btn-secondary" style="font-size:15px;padding:12px 28px">My Dashboard</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (session) {
+      var signin = document.querySelector('.navbar-links a[href="login.html"]')
+      var register = document.querySelector('.navbar-links a[href="register.html"]')
+      var dashLink = document.querySelector('.navbar-links a[href="dashboard.html"]')
+      if (signin) signin.style.display = 'none'
+      if (register) register.style.display = 'none'
+    }
+  </script>
+
+</body>
+</html>

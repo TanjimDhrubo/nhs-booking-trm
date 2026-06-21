@@ -53,6 +53,22 @@
 
     <div id="message"></div>
 
+    <section aria-labelledby="heading-dependent-select" style="margin-bottom:16px">
+      <div class="form-group" style="margin-bottom:0">
+        <label for="checkin-for">Checking in for</label>
+        <select id="checkin-for">
+          <option value="self">Myself</option>
+          <option value="dependent">A dependent / family member</option>
+        </select>
+      </div>
+      <div class="form-group" id="checkin-dependent-group" style="display:none;margin-bottom:0">
+        <label for="checkin-dependent">Select Dependent</label>
+        <select id="checkin-dependent">
+          <option value="">Loading dependents...</option>
+        </select>
+      </div>
+    </section>
+
     <section aria-labelledby="heading-today">
       <h2 id="heading-today">Today's Appointments</h2>
       <div id="today-list">
@@ -71,14 +87,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -98,42 +116,15 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { formatDate, formatTime, formatTimeShort, renderBadge, getDayBounds, insertNotification } from './js/helpers.js'
 
 
     let userId = null
     const msgEl = document.getElementById('message')
 
-    function formatDate(iso) {
-      return new Date(iso).toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric',
-        month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    }
-
-    function formatTime(iso) {
-      return new Date(iso).toLocaleTimeString('en-US', {
-        hour: '2-digit', minute: '2-digit', hour12: true
-      })
-    }
-
-    function formatTimeShort(iso) {
-      return new Date(iso).toLocaleTimeString('en-GB', {
-        hour: '2-digit', minute: '2-digit'
-      })
-    }
-
-    function renderBadge(status) {
-      const cls = 'badge badge-' + status.replace('_', '').toLowerCase()
-      const label = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
-      return '<span class="' + cls + '">' + label + '</span>'
-    }
-
     function showMsg(msg, type) {
       msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
     }
-
-    function getDayBounds(date) {
       const start = new Date(date)
       start.setHours(0, 0, 0, 0)
       const end = new Date(date)
@@ -148,7 +139,7 @@
       const now = new Date()
       const { start, end } = getDayBounds(now)
 
-      const { data: appts, error } = await supabase
+      let todayQuery = supabase
         .from('appointments_trm')
         .select('*, doctors_trm(name, specialisation)')
         .eq('user_id', userId)
@@ -156,6 +147,14 @@
         .gte('appointment_date', start)
         .lte('appointment_date', end)
         .order('appointment_date')
+
+      if (activeDependentId) {
+        todayQuery = todayQuery.eq('dependent_id', activeDependentId)
+      } else {
+        todayQuery = todayQuery.is('dependent_id', null)
+      }
+
+      const { data: appts, error } = await todayQuery
 
       if (error) {
         el.innerHTML = '<div class="alert alert-error">Failed to load appointments.</div>'
@@ -229,11 +228,7 @@
             return
           }
 
-          await supabase.from('notifications_trm').insert({
-            user_id: userId,
-            message: 'You successfully checked in for your appointment with ' + docName + ' at ' + formatTimeShort(apptTime),
-            type: 'in-app'
-          })
+          await insertNotification(userId, 'You successfully checked in for your appointment with ' + docName + ' at ' + formatTimeShort(apptTime))
 
           const card = document.getElementById('appt-' + apptId)
           if (card) {
@@ -259,7 +254,7 @@
       weekEnd.setDate(weekEnd.getDate() + 7)
       weekEnd.setHours(23, 59, 59, 999)
 
-      const { data: appts, error } = await supabase
+      let weekQuery = supabase
         .from('appointments_trm')
         .select('*, doctors_trm(name, specialisation)')
         .eq('user_id', userId)
@@ -267,6 +262,14 @@
         .gte('appointment_date', tomorrow.toISOString())
         .lte('appointment_date', weekEnd.toISOString())
         .order('appointment_date')
+
+      if (activeDependentId) {
+        weekQuery = weekQuery.eq('dependent_id', activeDependentId)
+      } else {
+        weekQuery = weekQuery.is('dependent_id', null)
+      }
+
+      const { data: appts, error } = await weekQuery
 
       if (error) {
         el.innerHTML = '<div class="alert alert-error">Failed to load upcoming appointments.</div>'
@@ -300,6 +303,58 @@
       }
 
       el.innerHTML = html
+    }
+
+    const checkinFor = document.getElementById('checkin-for')
+    const checkinDependentGroup = document.getElementById('checkin-dependent-group')
+    const checkinDependent = document.getElementById('checkin-dependent')
+
+    let activeDependentId = null
+
+    checkinFor.addEventListener('change', () => {
+      if (checkinFor.value === 'dependent') {
+        checkinDependentGroup.style.display = 'block'
+        loadCheckinDependents()
+      } else {
+        checkinDependentGroup.style.display = 'none'
+        activeDependentId = null
+        reloadAll()
+      }
+    })
+
+    checkinDependent.addEventListener('change', () => {
+      activeDependentId = checkinDependent.value || null
+      reloadAll()
+    })
+
+    async function loadCheckinDependents() {
+      checkinDependent.innerHTML = '<option value="">Loading dependents...</option>'
+
+      const { data: dependents, error } = await supabase
+        .from('dependents_trm')
+        .select('id, full_name')
+        .eq('guardian_id', userId)
+        .order('full_name')
+
+      if (error || !dependents || dependents.length === 0) {
+        checkinDependent.innerHTML = '<option value="">No dependents added yet</option>'
+        return
+      }
+
+      checkinDependent.innerHTML = '<option value="">Select a dependent...</option>'
+      for (const d of dependents) {
+        const opt = document.createElement('option')
+        opt.value = d.id
+        opt.textContent = d.full_name
+        checkinDependent.appendChild(opt)
+      }
+    }
+
+    function reloadAll() {
+      Promise.all([
+        loadTodayAppointments(),
+        loadUpcomingAppointments()
+      ])
     }
 
     async function init() {

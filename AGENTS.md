@@ -37,7 +37,9 @@ D:\test run\
 │   └── style.css            ✅ COMPLETE — do not touch unless asked
 ├── js/
 │   ├── supabase.js          ✅ COMPLETE — do not touch unless asked
-│   └── auth.js              ✅ COMPLETE — do not touch unless asked
+│   ├── auth.js              ✅ COMPLETE — do not touch unless asked
+│   ├── theme.js             ✅ COMPLETE — do not touch unless asked
+│   └── helpers.js           ✅ COMPLETE — shared module (formatDate, renderBadge, showMsg, generateTimeSlots, etc.)
 ├── index.html               ✅ Complete
 ├── login.html               ✅ Complete
 ├── register.html            ✅ Complete
@@ -51,7 +53,13 @@ D:\test run\
 ├── privacy.html             ✅ Complete
 ├── admin-login.html         ✅ Complete
 ├── admin-dashboard.html     ✅ Complete
-└── team.html                ⬜ Pending — TRM team portfolio page
+├── design.md                ✅ Complete
+├── 404.html                 ✅ Complete — branded error page
+├── profile.html             ✅ Complete — patient profile/settings page
+├── confirmation.html        ✅ Complete — post-booking confirmation with print
+├── admin-patients.html      ✅ Complete — admin view all patients with search
+├── admin-analytics.html     ✅ Complete — admin appointment analytics with stats
+└── team.html                ✅ Complete — TRM team portfolio page
 
 ---
 
@@ -78,6 +86,20 @@ import { requireAuth, showUserName, logout } from './js/auth.js'
 - Appointment status values: confirmed / cancelled / completed / checked_in
 - RLS enabled on all tables — users only access their own data
 - doctors_trm is publicly readable by all (including unauthenticated users)
+- dependents_trm: id (uuid), guardian_id (uuid FK auth.users), full_name, date_of_birth, nhs_number, created_at
+- appointments_trm.dependent_id (uuid FK dependents_trm, nullable) — set when booking for a dependent
+- Run this SQL in Supabase SQL Editor to create dependents_trm table and add dependent_id column:
+  ```sql
+  CREATE TABLE dependents_trm (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    guardian_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name TEXT NOT NULL,
+    date_of_birth DATE,
+    nhs_number TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+  );
+  ALTER TABLE appointments_trm ADD COLUMN dependent_id UUID REFERENCES dependents_trm(id) ON DELETE SET NULL;
+  ```
 
 ---
 
@@ -224,7 +246,7 @@ Every HTML file must follow this exact structure:
     <p>
       <span>© 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by TRM</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
       <span aria-hidden="true">·</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">·</span>
@@ -232,7 +254,7 @@ Every HTML file must follow this exact structure:
     </p>
   </footer>
 
-  <div class="trm-watermark" aria-hidden="true">Developed by TRM</div>
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
   <script type="module">
     // page JS here — always use addEventListener not onclick
@@ -246,15 +268,23 @@ Every HTML file must follow this exact structure:
 
 ## REUSABLE JS PATTERNS
 
-### Date formatter:
+### Shared helpers (import from js/helpers.js):
 ```js
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    weekday: 'long', day: 'numeric',
-    month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  })
-}
+import { formatDate, renderBadge, showMsg, generateTimeSlots, insertNotification } from './js/helpers.js'
+```
+
+Available exports:
+- `formatDate(iso)` — full date/time display
+- `formatDateShort(iso)` — date only
+- `formatTime(iso)` / `formatTimeShort(iso)` — time formats
+- `renderBadge(status)` — status badge HTML
+- `showMsg(elementId, message, type)` — alert display
+- `generateTimeSlots()` — array of {label, value} time slots
+- `getDayBounds(date)` — {start, end} ISO strings for day
+- `timeAgo(isoString)` — relative time string
+- `insertNotification(userId, message)` — silent notification insert
+- `getTomorrow()` — tomorrow's date string
+- `getDay(iso)` / `getMonth(iso)` — date parts
 ```
 
 ### Loading state:
@@ -367,15 +397,21 @@ if (session) {
 | privacy.html | ✅ Complete |
 | admin-login.html | ✅ Complete |
 | admin-dashboard.html | ✅ Complete |
-| team.html | ⬜ Pending |
+| design.md                | ✅ Complete |
+| team.html                | ✅ Complete — TRM team portfolio page
+| 404.html                 | ✅ Complete — branded error page with navigation links
+| profile.html             | ✅ Complete — patient profile/settings page
+| confirmation.html        | ✅ Complete — post-booking confirmation with print
+| admin-patients.html      | ✅ Complete — admin view all patients with search
+| admin-analytics.html     | ✅ Complete — admin appointment analytics with stats |
 
 ---
 
-## KNOWN BUGS — BEING FIXED
-- index.html: buttons don't update after login ← fixing
-- doctors pages: "Dr." showing twice ← fixing
-- notifications.html: layout broken ← fixing
-- admin-login.html: invalid credentials error ← fixing
+## KNOWN BUGS
+- index.html: buttons don't update after login (needs async session check in non-module script)
+- doctors pages: "Dr." showing twice (DB stores names with prefix already)
+- notifications.html: layout broken (uses inline styles instead of CSS classes)
+- admin-login.html: invalid credentials error (signOut before signIn can cause issues)
 
 ## MISTAKES TO NEVER MAKE
 - Never add "Dr." prefix — names already include it in DB

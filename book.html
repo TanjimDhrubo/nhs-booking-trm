@@ -94,6 +94,21 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label for="booking-for">Who is this for?</label>
+          <select id="booking-for">
+            <option value="self">Myself</option>
+            <option value="dependent">A dependent / family member</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="dependent-group" style="display:none">
+          <label for="dependent-select">Select Dependent</label>
+          <select id="dependent-select">
+            <option value="">Loading dependents&hellip;</option>
+          </select>
+        </div>
+
         <div class="divider" aria-hidden="true"></div>
 
         <button type="submit" class="btn-primary btn-full" id="submit-btn">Confirm Booking &rarr;</button>
@@ -107,14 +122,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -134,6 +151,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { formatDate, generateTimeSlots, insertNotification } from './js/helpers.js'
 
 
     const form = document.getElementById('book-form')
@@ -148,30 +166,10 @@
       msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
     }
 
-    function formatDate(iso) {
-      return new Date(iso).toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric',
-        month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    }
-
     function populateTimes() {
-      const times = []
-      for (let h = 9; h <= 16; h++) {
-        for (let m = 0; m < 60; m += 30) {
-          if (h === 16 && m === 30) continue
-          const date = new Date()
-          date.setHours(h, m, 0, 0)
-          const label = date.toLocaleTimeString('en-US', {
-            hour: '2-digit', minute: '2-digit', hour12: true
-          })
-          const value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')
-          times.push({ label, value })
-        }
-      }
+      const slots = generateTimeSlots()
       apptTime.innerHTML = '<option value="">Select time&hellip;</option>'
-      for (const t of times) {
+      for (const t of slots) {
         const opt = document.createElement('option')
         opt.value = t.value
         opt.textContent = t.label
@@ -214,6 +212,45 @@
           preselectMsg.classList.remove('is-hidden')
           preselectMsg.innerHTML = 'Booking with <strong>' + doc.name + '</strong>. You can change below.'
         }
+      }
+    }
+
+    const bookingFor = document.getElementById('booking-for')
+    const dependentGroup = document.getElementById('dependent-group')
+    const dependentSelect = document.getElementById('dependent-select')
+
+    bookingFor.addEventListener('change', () => {
+      if (bookingFor.value === 'dependent') {
+        dependentGroup.style.display = 'block'
+        loadDependents()
+      } else {
+        dependentGroup.style.display = 'none'
+      }
+    })
+
+    async function loadDependents() {
+      dependentSelect.innerHTML = '<option value="">Loading dependents...</option>'
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: dependents, error } = await supabase
+        .from('dependents_trm')
+        .select('id, full_name')
+        .eq('guardian_id', user.id)
+        .order('full_name')
+
+      if (error || !dependents || dependents.length === 0) {
+        dependentSelect.innerHTML = '<option value="">No dependents added yet</option>'
+        return
+      }
+
+      dependentSelect.innerHTML = '<option value="">Select a dependent...</option>'
+      for (const d of dependents) {
+        const opt = document.createElement('option')
+        opt.value = d.id
+        opt.textContent = d.full_name
+        dependentSelect.appendChild(opt)
       }
     }
 
@@ -274,15 +311,24 @@
         .eq('id', doctorId)
         .single()
 
-      const { error: insertErr } = await supabase
+      const insertData = {
+        user_id: userId,
+        doctor_id: doctorId,
+        appointment_type: apptType,
+        appointment_date: appointmentDate,
+        status: 'confirmed'
+      }
+
+      const dependentId = bookingFor.value === 'dependent' ? dependentSelect.value : ''
+      if (dependentId) {
+        insertData.dependent_id = dependentId
+      }
+
+      const { data: newAppt, error: insertErr } = await supabase
         .from('appointments_trm')
-        .insert({
-          user_id: userId,
-          doctor_id: doctorId,
-          appointment_type: apptType,
-          appointment_date: appointmentDate,
-          status: 'confirmed'
-        })
+        .insert(insertData)
+        .select('id')
+        .single()
 
       if (insertErr) {
         showMsg(insertErr.message)
@@ -291,17 +337,9 @@
         return
       }
 
-      await supabase.from('notifications_trm').insert({
-        user_id: userId,
-        message: 'Appointment booked for ' + formatDate(appointmentDate) + ' with ' + (doctor?.name || 'your doctor'),
-        type: 'in-app'
-      })
+      await insertNotification(userId, 'Appointment booked for ' + formatDate(appointmentDate) + ' with ' + (doctor?.name || 'your doctor'))
 
-      msgEl.innerHTML = '<div class="alert alert-success">Appointment booked successfully! <span class="sym" aria-hidden="true">✓</span> <a href="dashboard.html" class="alert-link">View Dashboard &rarr;</a></div>'
-
-      form.reset()
-      submitBtn.disabled = false
-      submitBtn.innerHTML = 'Confirm Booking &rarr;'
+      window.location.href = 'confirmation.html?id=' + newAppt.id
     })
 
     document.getElementById('logout-btn').addEventListener('click', logout)

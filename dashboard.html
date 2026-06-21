@@ -156,6 +156,13 @@
             <div class="action-desc">Browse specialist doctors</div>
           </div>
         </a>
+        <a href="profile.html" class="action-card">
+          <div class="action-icon"><span class="sym" aria-hidden="true">⚙</span></div>
+          <div>
+            <div class="action-title">My Profile</div>
+            <div class="action-desc">Manage your details</div>
+          </div>
+        </a>
         <a href="privacy.html" class="action-card">
           <div class="action-icon"><span class="sym" aria-hidden="true">⛨</span></div>
           <div>
@@ -178,14 +185,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -205,29 +214,8 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { formatDate, getDay, getMonth, renderBadge, insertNotification } from './js/helpers.js'
 
-
-    function formatDate(iso) {
-      return new Date(iso).toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric',
-        month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    }
-
-    function getDay(iso) {
-      return new Date(iso).getDate()
-    }
-
-    function getMonth(iso) {
-      return new Date(iso).toLocaleDateString('en-GB', { month: 'short' })
-    }
-
-    function renderBadge(status) {
-      const cls = 'badge badge-' + status.replace('_', '').toLowerCase()
-      const label = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
-      return '<span class="' + cls + '">' + label + '</span>'
-    }
 
     async function loadAppointments(userId) {
       const el = document.getElementById('appointments-list')
@@ -277,11 +265,39 @@
         html += '  <div class="appt-actions">'
         html +=      renderBadge(a.status)
         html += '    <a href="reschedule.html?id=' + a.id + '" class="btn-ghost btn-sm">Reschedule</a>'
+        if (a.status === 'confirmed') {
+          html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + a.id + '" data-date="' + a.appointment_date + '" data-doc="' + (doc ? doc.name : '') + '">Cancel</button>'
+        }
         html += '  </div>'
         html += '</article>'
       }
 
       el.innerHTML = html
+
+      document.querySelectorAll('.dash-cancel-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id
+          const date = btn.dataset.date
+          const doc = btn.dataset.doc
+
+          if (!confirm('Cancel your ' + (doc ? 'appointment with ' + doc : 'appointment') + ' on ' + formatDate(date) + '?')) return
+
+          const { error } = await supabase
+            .from('appointments_trm')
+            .update({ status: 'cancelled' })
+            .eq('id', id)
+
+          if (error) {
+            alert('Failed to cancel appointment.')
+            return
+          }
+
+          await insertNotification(userId, 'Your appointment on ' + formatDate(date) + ' with ' + doc + ' has been cancelled.')
+
+          await loadAppointments(userId)
+          await loadStats(userId)
+        })
+      })
     }
 
     async function loadStats(userId) {

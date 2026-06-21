@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — manage your profile and account settings. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .profile-section + .profile-section {
+      margin-top: 32px;
+    }
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container-sm">
+
+    <header class="page-header">
+      <h1>My Profile</h1>
+      <p>Manage your personal details and account settings</p>
+    </header>
+
+    <div id="message"></div>
+
+    <section aria-labelledby="heading-personal" class="profile-section">
+      <article class="card">
+        <h2 id="heading-personal" style="font-size:16px;font-weight:700;margin-bottom:16px">Personal Information</h2>
+
+        <form id="profile-form" aria-label="Profile edit form">
+          <div class="form-group">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="date-of-birth">Date of Birth</label>
+            <input type="date" id="date-of-birth" required>
+          </div>
+
+          <div class="form-group">
+            <label for="nhs-number">NHS Number</label>
+            <input type="text" id="nhs-number" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit NHS number">
+          </div>
+
+          <div class="divider" aria-hidden="true"></div>
+
+          <button type="submit" class="btn-primary btn-full" id="save-btn">Save Changes &rarr;</button>
+        </form>
+      </article>
+    </section>
+
+    <section aria-labelledby="heading-account" class="profile-section">
+      <article class="card">
+        <h2 id="heading-account" style="font-size:16px;font-weight:700;margin-bottom:16px">Account</h2>
+
+        <div class="form-group">
+          <label for="account-email">Email Address</label>
+          <input type="email" id="account-email" disabled style="background:var(--bg-subtle);cursor:not-allowed">
+        </div>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <button class="btn-secondary btn-full" id="change-password-btn" style="justify-content:center">Change Password</button>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { showMsg } from './js/helpers.js'
+
+    const msgEl = document.getElementById('message')
+
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      document.getElementById('account-email').value = user.email
+
+      const { data: profile } = await supabase
+        .from('profiles_trm')
+        .select('full_name, date_of_birth, nhs_number')
+        .eq('id', user.id)
+        .single()
+
+      if (profile) {
+        document.getElementById('full-name').value = profile.full_name || ''
+        document.getElementById('date-of-birth').value = profile.date_of_birth || ''
+        document.getElementById('nhs-number').value = profile.nhs_number || ''
+      }
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      msgEl.innerHTML = ''
+
+      const fullName = document.getElementById('full-name').value.trim()
+      const dateOfBirth = document.getElementById('date-of-birth').value
+      const nhsNumber = document.getElementById('nhs-number').value.trim()
+      const saveBtn = document.getElementById('save-btn')
+
+      if (!fullName) {
+        showMsg('message', 'Please enter your full name.', 'error')
+        return
+      }
+
+      saveBtn.disabled = true
+      saveBtn.textContent = 'Saving...'
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        showMsg('message', 'Authentication error. Please sign in again.', 'error')
+        saveBtn.disabled = false
+        saveBtn.innerHTML = 'Save Changes &rarr;'
+        return
+      }
+
+      const { error } = await supabase
+        .from('profiles_trm')
+        .upsert({
+          id: user.id,
+          full_name: fullName,
+          date_of_birth: dateOfBirth || null,
+          nhs_number: nhsNumber || null
+        })
+
+      if (error) {
+        showMsg('message', error.message, 'error')
+        saveBtn.disabled = false
+        saveBtn.innerHTML = 'Save Changes &rarr;'
+        return
+      }
+
+      showMsg('message', 'Profile updated successfully!', 'success')
+      saveBtn.disabled = false
+      saveBtn.innerHTML = 'Save Changes &rarr;'
+    })
+
+    document.getElementById('change-password-btn').addEventListener('click', async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !user.email) return
+
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email)
+      if (error) {
+        showMsg('message', 'Failed to send reset email: ' + error.message, 'error')
+      } else {
+        showMsg('message', 'Password reset link sent to your email.', 'success')
+      }
+    })
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      await showUserName('user-name')
+
+      await loadProfile()
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    init()
+  </script>
+
+</body>
+</html>

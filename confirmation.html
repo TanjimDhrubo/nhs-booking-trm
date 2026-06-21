@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — your appointment is confirmed. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .confirm-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(0,127,59,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      color: var(--nhs-green);
+    }
+    .confirm-id {
+      font-size: 13px;
+      color: var(--nhs-muted);
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      margin-bottom: 24px;
+    }
+    .confirm-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-soft);
+      font-size: 14px;
+    }
+    .confirm-detail-row:last-child {
+      border-bottom: none;
+    }
+    .confirm-detail-label {
+      color: var(--nhs-muted);
+      font-weight: 500;
+    }
+    .confirm-detail-value {
+      color: var(--nhs-dark);
+      font-weight: 600;
+      text-align: right;
+    }
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+    .confirm-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name">NHS Appointment Booking <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="user-name"></span>
+      <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container-sm" style="padding-top:60px">
+
+    <div id="confirmation-content">
+      <div class="loading">Loading confirmation...</div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { formatDate } from './js/helpers.js'
+
+    const container = document.getElementById('confirmation-content')
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      await showUserName('user-name')
+
+      const params = new URLSearchParams(window.location.search)
+      const apptId = params.get('id')
+
+      if (!apptId) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No appointment reference found.</p>
+            <a href="book.html" class="btn-primary">Book an Appointment</a>
+          </div>`
+        return
+      }
+
+      const { data: appt, error } = await supabase
+        .from('appointments_trm')
+        .select('*, doctors_trm(name, specialisation)')
+        .eq('id', apptId)
+        .single()
+
+      if (error || !appt) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>Appointment not found.</p>
+            <a href="dashboard.html" class="btn-primary">Go to Dashboard</a>
+          </div>`
+        return
+      }
+
+      const doc = appt.doctors_trm
+      const docName = doc ? doc.name : 'Your Doctor'
+      const docSpec = doc ? doc.specialisation : ''
+
+      container.innerHTML = `
+        <article class="card" style="text-align:center;padding:40px 32px">
+          <div class="confirm-icon" aria-hidden="true">&#10003;</div>
+          <h1 style="font-size:24px;font-weight:700;color:var(--nhs-dark);margin-bottom:4px">Appointment Confirmed</h1>
+          <p style="color:var(--nhs-muted);font-size:15px;margin-bottom:4px">Your appointment has been booked successfully</p>
+          <div class="confirm-id">Ref: NHS-${appt.id.slice(0,8).toUpperCase()}</div>
+
+          <div style="background:var(--bg-subtle);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:24px;text-align:left">
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Doctor</span>
+              <span class="confirm-detail-value">${docName}</span>
+            </div>
+            ${docSpec ? `
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Specialisation</span>
+              <span class="confirm-detail-value">${docSpec}</span>
+            </div>` : ''}
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Date &amp; Time</span>
+              <span class="confirm-detail-value"><time datetime="${appt.appointment_date}">${formatDate(appt.appointment_date)}</time></span>
+            </div>
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Type</span>
+              <span class="confirm-detail-value">${appt.appointment_type}</span>
+            </div>
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Status</span>
+              <span class="confirm-detail-value"><span class="badge badge-confirmed">Confirmed</span></span>
+            </div>
+          </div>
+
+          <div class="confirm-actions">
+            <a href="dashboard.html" class="btn-primary btn-full">Go to Dashboard &rarr;</a>
+            <button class="btn-secondary btn-full" id="print-btn">Print Confirmation</button>
+          </div>
+        </article>`
+
+      document.getElementById('print-btn').addEventListener('click', () => {
+        window.print()
+      })
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    init()
+  </script>
+
+</body>
+</html>

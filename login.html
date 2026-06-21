@@ -80,8 +80,22 @@
             <label for="password">Password</label>
             <input type="password" id="password" placeholder="Your password" required>
           </div>
+          <div style="text-align:right;margin-top:-12px;margin-bottom:16px">
+            <button type="button" id="forgot-link" style="background:none;border:none;font-size:13px;color:var(--nhs-blue);cursor:pointer;text-decoration:underline;padding:4px 0">Forgot your password?</button>
+          </div>
           <button type="submit" class="btn-primary btn-full" id="submit-btn">Sign In &rarr;</button>
         </form>
+
+        <div id="forgot-form" style="display:none">
+          <div class="divider-text">reset password</div>
+          <p style="font-size:14px;color:var(--nhs-muted);margin-bottom:16px;text-align:center">Enter your email and we'll send a reset link.</p>
+          <div class="form-group">
+            <label for="reset-email">Email address</label>
+            <input type="email" id="reset-email" placeholder="your@email.com">
+          </div>
+          <button class="btn-secondary btn-full" id="reset-btn" style="justify-content:center">Send Reset Link</button>
+          <div id="reset-msg"></div>
+        </div>
 
         <div class="divider-text">or</div>
 
@@ -94,14 +108,16 @@
       </div>
     </main>
 
-    <footer>
-      <span>&copy; 2026 NHS Appointment Booking System</span>
-      <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-      <span aria-hidden="true">·</span>
-      <a href="privacy.html">Privacy Policy</a>
-      <span aria-hidden="true">·</span>
-      <a href="team.html">Meet the Team</a>
+    <footer class="site-footer" role="contentinfo">
+      <p>
+        <span>&copy; 2026 NHS Appointment Booking System</span>
+        <span aria-hidden="true">·</span>
+        <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+        <span aria-hidden="true">·</span>
+        <a href="privacy.html">Privacy Policy</a>
+        <span aria-hidden="true">·</span>
+        <a href="team.html">Meet the Team</a>
+      </p>
     </footer>
 
     <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -166,6 +182,42 @@
       }
 
       window.location.href = 'dashboard.html'
+    })
+
+    const forgotLink = document.getElementById('forgot-link')
+    const forgotForm = document.getElementById('forgot-form')
+    const resetBtn = document.getElementById('reset-btn')
+    const resetEmail = document.getElementById('reset-email')
+    const resetMsg = document.getElementById('reset-msg')
+
+    forgotLink.addEventListener('click', () => {
+      forgotForm.style.display = forgotForm.style.display === 'none' ? 'block' : 'none'
+    })
+
+    resetBtn.addEventListener('click', async () => {
+      const email = resetEmail.value.trim()
+      if (!email) {
+        resetMsg.innerHTML = '<div class="alert alert-error">Please enter your email.</div>'
+        return
+      }
+
+      resetBtn.disabled = true
+      resetBtn.textContent = 'Sending...'
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/login.html'
+      })
+
+      if (error) {
+        resetMsg.innerHTML = '<div class="alert alert-error">' + error.message + '</div>'
+        resetBtn.disabled = false
+        resetBtn.textContent = 'Send Reset Link'
+        return
+      }
+
+      resetMsg.innerHTML = '<div class="alert alert-success">Reset link sent! Check your email.</div>'
+      resetBtn.textContent = 'Send Reset Link'
+      resetBtn.disabled = false
     })
   </script>
 

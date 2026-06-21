@@ -232,14 +232,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -260,7 +262,7 @@
     var menuBtn = document.getElementById('menu-btn')
     var menuPopup = document.getElementById('menu-popup')
 
-    menuBtn.onclick = function(e) {
+    menuBtn.addEventListener('click', function(e) {
       e.stopPropagation()
       if (menuPopup.style.display === 'block') {
         menuPopup.style.display = 'none'
@@ -269,14 +271,14 @@
         menuPopup.style.display = 'block'
         menuBtn.setAttribute('aria-expanded', 'true')
       }
-    }
+    })
 
-    document.onclick = function(e) {
+    document.addEventListener('click', function(e) {
       if (e.target !== menuBtn) {
         menuPopup.style.display = 'none'
         menuBtn.setAttribute('aria-expanded', 'false')
       }
-    }
+    })
 
     var cards = {
       'card-book':    { page: 'book.html',         auth: true  },
@@ -293,13 +295,13 @@
       var el = document.getElementById(id)
       var route = cards[id]
       if (el) {
-        el.onclick = function() {
+        el.addEventListener('click', function() {
           if (route.auth && !window.userLoggedIn) {
             window.location.href = 'login.html'
           } else {
             window.location.href = route.page
           }
-        }
+        })
       }
     })
 

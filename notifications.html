@@ -149,14 +149,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -176,21 +178,8 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
+    import { timeAgo } from './js/helpers.js'
 
-
-    function timeAgo(isoString) {
-      const diff = Date.now() - new Date(isoString).getTime()
-      const mins = Math.floor(diff / 60000)
-      const hours = Math.floor(diff / 3600000)
-      const days = Math.floor(diff / 86400000)
-      if (mins < 1) return 'Just now'
-      if (mins < 60) return mins + ' minutes ago'
-      if (hours < 24) return hours + ' hours ago'
-      if (days === 1) return 'Yesterday'
-      return new Date(isoString).toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      })
-    }
 
     async function loadNotifications() {
       const { data: { user } } = await supabase.auth.getUser()

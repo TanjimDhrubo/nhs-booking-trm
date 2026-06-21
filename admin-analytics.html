@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="TRM">
+  <meta name="description" content="NHS Appointment Booking System — admin analytics and reports. Developed by TRM.">
+  <title>NHS Booking | TRM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+    }
+    .stat-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--nhs-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .stat-card .stat-num {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--nhs-blue);
+      letter-spacing: -1px;
+    }
+    .stat-card .stat-num.amber { color: var(--nhs-amber); }
+    .stat-card .stat-num.green { color: var(--nhs-green); }
+    .stat-card .stat-sub {
+      font-size: 13px;
+      color: var(--nhs-muted);
+      margin-top: 4px;
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .breakdown-table th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--nhs-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    .breakdown-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-soft);
+      font-size: 14px;
+      color: var(--nhs-dark);
+    }
+    .breakdown-table .bar-wrap {
+      background: var(--bg-subtle);
+      border-radius: 20px;
+      height: 8px;
+      overflow: hidden;
+      max-width: 200px;
+    }
+    .breakdown-table .bar-fill {
+      height: 100%;
+      border-radius: 20px;
+      background: var(--nhs-blue);
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="admin-dashboard.html" class="navbar-brand" aria-label="NHS Admin Portal">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name admin-nav-name">NHS Admin Portal <a href="team.html" style="color:var(--nhs-blue);text-decoration:none;font-weight:700;display:inline" aria-label="Meet the TRM team">| TRM</a></span>
+      <span class="admin-staff-badge">STAFF ONLY</span>
+    </a>
+    <div class="navbar-links">
+      <span class="navbar-user" id="doctor-name"></span>
+      <a href="admin-dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="admin-amber-bar" aria-hidden="true"></div>
+
+  <main id="main-content" class="container">
+
+    <header class="page-header">
+      <h1>Analytics</h1>
+      <p>Appointment trends and statistics</p>
+    </header>
+
+    <div id="analytics-content">
+      <div class="loading">Loading analytics...</div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { formatDateShort } from './js/helpers.js'
+
+    const container = document.getElementById('analytics-content')
+
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        window.location.href = 'admin-login.html'
+        return
+      }
+
+      const userEmail = session.user.email
+
+      const { data: doctor, error: doctorError } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('email', userEmail)
+        .single()
+
+      if (doctorError || !doctor) {
+        window.location.href = 'admin-login.html'
+        return
+      }
+
+      document.getElementById('doctor-name').textContent = doctor.name
+
+      const { data: allAppts } = await supabase
+        .from('appointments_trm')
+        .select('id, appointment_type, appointment_date, status, created_at')
+        .eq('doctor_id', doctor.id)
+        .order('appointment_date', { ascending: false })
+
+      if (!allAppts || allAppts.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No appointment data yet.</p></div>'
+        return
+      }
+
+      const total = allAppts.length
+      const completed = allAppts.filter(a => a.status === 'completed').length
+      const cancelled = allAppts.filter(a => a.status === 'cancelled').length
+      const checkedIn = allAppts.filter(a => a.status === 'checked_in').length
+      const confirmed = allAppts.filter(a => a.status === 'confirmed').length
+
+      const cancellationRate = total > 0 ? ((cancelled / total) * 100).toFixed(1) : '0.0'
+
+      const typeCounts = {}
+      for (const a of allAppts) {
+        typeCounts[a.appointment_type] = (typeCounts[a.appointment_type] || 0) + 1
+      }
+
+      const typeEntries = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])
+      const maxTypeCount = typeEntries.length > 0 ? typeEntries[0][1] : 1
+
+      const now = new Date()
+      const thisMonth = allAppts.filter(a => {
+        const d = new Date(a.appointment_date)
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      }).length
+
+      container.innerHTML = `
+        <div class="analytics-grid">
+          <div class="stat-card">
+            <h3>Total Appointments</h3>
+            <div class="stat-num">${total}</div>
+            <div class="stat-sub">All time</div>
+          </div>
+          <div class="stat-card">
+            <h3>Completed</h3>
+            <div class="stat-num green">${completed}</div>
+            <div class="stat-sub">${total > 0 ? ((completed / total) * 100).toFixed(0) : 0}% completion rate</div>
+          </div>
+          <div class="stat-card">
+            <h3>This Month</h3>
+            <div class="stat-num">${thisMonth}</div>
+            <div class="stat-sub">Appointments this month</div>
+          </div>
+          <div class="stat-card">
+            <h3>Cancellation Rate</h3>
+            <div class="stat-num amber">${cancellationRate}%</div>
+            <div class="stat-sub">${cancelled} cancelled of ${total}</div>
+          </div>
+        </div>
+
+        <section aria-labelledby="heading-breakdown">
+          <h2 id="heading-breakdown" style="font-size:18px;font-weight:700;color:var(--nhs-dark);margin-bottom:16px">Appointment Type Breakdown</h2>
+          <article class="card" style="padding:0;overflow:hidden">
+            <table class="breakdown-table">
+              <caption class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Breakdown of appointments by type</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Count</th>
+                  <th scope="col">Proportion</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${typeEntries.map(([type, count]) => `
+                  <tr>
+                    <td><strong>${type}</strong></td>
+                    <td>${count}</td>
+                    <td>
+                      <div class="bar-wrap" style="display:inline-block;vertical-align:middle">
+                        <div class="bar-fill" style="width:${(count / maxTypeCount) * 100}%"></div>
+                      </div>
+                      <span style="font-size:12px;color:var(--nhs-muted);margin-left:8px">${((count / total) * 100).toFixed(0)}%</span>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <div style="margin-top:24px;text-align:center">
+          <a href="admin-dashboard.html" class="btn-ghost">&larr; Back to Dashboard</a>
+        </div>`
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.href = 'admin-login.html'
+    })
+
+    init()
+  </script>
+
+</body>
+</html>

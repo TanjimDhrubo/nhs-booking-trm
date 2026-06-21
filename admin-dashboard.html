@@ -93,6 +93,9 @@
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="doctor-name"></span>
+      <a href="admin-patients.html" class="btn-ghost">Patients</a>
+      <a href="admin-analytics.html" class="btn-ghost">Analytics</a>
+      <a href="admin-dashboard.html" class="btn-ghost">Dashboard</a>
       <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
         <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
         <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
@@ -135,14 +138,16 @@
 
   </main>
 
-  <footer>
-    <span>&copy; 2026 NHS Appointment Booking System</span>
-    <span aria-hidden="true">·</span>
-    <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
-    <span aria-hidden="true">·</span>
-    <a href="privacy.html">Privacy Policy</a>
-    <span aria-hidden="true">·</span>
-    <a href="team.html">Meet the Team</a>
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
   </footer>
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
@@ -161,20 +166,17 @@
 
   <script type="module">
     import { supabase } from './js/supabase.js'
+    import { formatDate } from './js/helpers.js'
 
-
-    console.log('Admin dashboard starting...')
 
     const { data: { session } } = await supabase.auth.getSession()
-    console.log('Session:', session)
 
     if (!session) {
-      console.log('No session, redirecting to login')
       window.location.href = 'admin-login.html'
+      return
     }
 
     const userEmail = session.user.email
-    console.log('Logged in as:', userEmail)
 
     const { data: doctor, error: doctorError } = await supabase
       .from('doctors_trm')
@@ -182,11 +184,9 @@
       .eq('email', userEmail)
       .single()
 
-    console.log('Doctor lookup result:', doctor, doctorError)
-
     if (doctorError || !doctor) {
-      console.error('Doctor not found, redirecting')
       window.location.href = 'admin-login.html'
+      return
     }
 
     document.getElementById('doctor-name').textContent = doctor.name
@@ -195,60 +195,29 @@
     let greeting = 'Good evening'
     if (hour < 12) greeting = 'Good morning'
     else if (hour < 17) greeting = 'Good afternoon'
-    document.getElementById('greeting-text').textContent = 
-      greeting + ', ' + doctor.name
+    document.getElementById('greeting-text').textContent = greeting + ', ' + doctor.name
 
     const specEl = document.querySelector('.welcome-subtitle')
     if (specEl) specEl.textContent = doctor.specialisation
 
-    console.log('Doctor ID for queries:', doctor.id)
-
-    // Load today's appointments
+    // Load today's appointments with patient names (single query with join)
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
 
-    console.log('Today range:', todayStart.toISOString(), todayEnd.toISOString())
-
     const { data: todayAppts, error: todayError } = await supabase
       .from('appointments_trm')
-      .select('id, appointment_type, appointment_date, status, user_id')
+      .select('id, appointment_type, appointment_date, status, user_id, profiles_trm!inner(full_name)')
       .eq('doctor_id', doctor.id)
       .gte('appointment_date', todayStart.toISOString())
       .lte('appointment_date', todayEnd.toISOString())
       .order('appointment_date', { ascending: true })
 
-    console.log('Today appointments raw:', todayAppts, todayError)
-
-    // Get patient names for today's appointments
-    let todayWithNames = []
-    if (todayAppts && todayAppts.length > 0) {
-      for (const appt of todayAppts) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles_trm')
-          .select('full_name')
-          .eq('id', appt.user_id)
-          .single()
-        
-        console.log('Profile lookup for', appt.user_id, ':', profile, profileError)
-        
-        todayWithNames.push({
-          ...appt,
-          patient_name: profile ? profile.full_name : 'Unknown Patient'
-        })
-      }
-    }
-
-    console.log('Today with names:', todayWithNames)
-
-    function formatDate(iso) {
-      return new Date(iso).toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric',
-        month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    }
+    const todayWithNames = (todayAppts || []).map(appt => ({
+      ...appt,
+      patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
+    }))
 
     function renderTable(appointments, containerId, showActions) {
       const container = document.getElementById(containerId)
@@ -314,29 +283,16 @@
 
     const { data: weekAppts, error: weekError } = await supabase
       .from('appointments_trm')
-      .select('id, appointment_type, appointment_date, status, user_id')
+      .select('id, appointment_type, appointment_date, status, user_id, profiles_trm!inner(full_name)')
       .eq('doctor_id', doctor.id)
       .gte('appointment_date', tomorrow.toISOString())
       .lte('appointment_date', weekEnd.toISOString())
       .order('appointment_date', { ascending: true })
 
-    console.log('Week appointments raw:', weekAppts, weekError)
-
-    let weekWithNames = []
-    if (weekAppts && weekAppts.length > 0) {
-      for (const appt of weekAppts) {
-        const { data: profile } = await supabase
-          .from('profiles_trm')
-          .select('full_name')
-          .eq('id', appt.user_id)
-          .single()
-        
-        weekWithNames.push({
-          ...appt,
-          patient_name: profile ? profile.full_name : 'Unknown Patient'
-        })
-      }
-    }
+    const weekWithNames = (weekAppts || []).map(appt => ({
+      ...appt,
+      patient_name: appt.profiles_trm?.full_name || 'Unknown Patient'
+    }))
 
     renderTable(weekWithNames, 'week-appointments', false)
     document.getElementById('stat-week').textContent = weekWithNames.length
@@ -347,16 +303,12 @@
       .select('*', { count: 'exact', head: true })
       .eq('doctor_id', doctor.id)
 
-    console.log('Total count:', count, countError)
     document.getElementById('stat-total').textContent = count || 0
 
-    // Logout
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut()
       window.location.href = 'admin-login.html'
     })
-
-    console.log('Admin dashboard fully loaded')
   </script>
 
 </body>
