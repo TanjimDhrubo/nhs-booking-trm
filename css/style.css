@@ -957,7 +957,7 @@ footer a:hover {
 /* Gradient hero background */
 .hero-section {
   position: relative;
-  background: linear-gradient(135deg, #F9F7F4 0%, #EEF4FC 50%, #F0F9F4 100%);
+  background: linear-gradient(135deg, #F9F7F4 0%, #EEF4FC 60%, #F0F9F4 100%);
   padding: 80px 24px 60px;
   overflow: hidden;
   text-align: center;
@@ -1149,3 +1149,410 @@ footer a:hover {
 }
 .feature-icon .sym { font-size: 24px; }
 .action-icon .sym { font-size: 20px; }
+
+/* ============================================
+   Dark Mode — Toggle via .dark on :root
+   ============================================ */
+
+:root.dark {
+  --bg-page:        #16162a;
+  --bg-card:        #1e1e3a;
+  --bg-subtle:      #252545;
+  --border:         #2e2e52;
+  --border-soft:    #252545;
+  --nhs-blue:       #4a9eff;
+  --nhs-blue-mid:   #3a8eef;
+  --nhs-dark:       #c8d0e0;
+  --nhs-muted:      #8a90a8;
+  --nhs-blue-soft:  #1a1a40;
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:      0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:      0 8px 32px rgba(0,0,0,0.6);
+}
+
+:root.dark body {
+  background: var(--bg-page);
+  color: var(--nhs-dark);
+}
+
+:root.dark .navbar {
+  background: var(--bg-card);
+  border-bottom-color: var(--border);
+}
+
+:root.dark .navbar-name {
+  color: var(--nhs-dark);
+}
+
+:root.dark .card,
+:root.dark .feature-card,
+:root.dark .doctor-card,
+:root.dark .action-card,
+:root.dark .appt-card,
+:root.dark .auth-card {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+:root.dark .table-wrap {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+:root.dark table thead {
+  background: var(--bg-subtle);
+}
+
+:root.dark th,
+:root.dark td {
+  color: var(--nhs-dark);
+  border-bottom-color: var(--border-soft);
+}
+
+:root.dark tr:hover td {
+  background: var(--bg-subtle);
+}
+
+:root.dark .btn-secondary {
+  background: transparent;
+  color: var(--nhs-blue);
+  border-color: var(--nhs-blue);
+}
+
+:root.dark .btn-secondary:hover {
+  background: var(--nhs-blue-soft);
+}
+
+:root.dark .btn-ghost {
+  color: var(--nhs-muted);
+}
+
+:root.dark .btn-ghost:hover {
+  background: var(--bg-subtle);
+  color: var(--nhs-dark);
+}
+
+:root.dark footer {
+  background: var(--bg-card);
+  border-top-color: var(--border);
+  color: var(--nhs-muted);
+}
+
+:root.dark input,
+:root.dark select {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--nhs-dark);
+}
+
+:root.dark input:focus,
+:root.dark select:focus {
+  border-color: var(--nhs-blue);
+  box-shadow: 0 0 0 3px rgba(0,94,184,0.25);
+}
+
+:root.dark .stat-chip {
+  background: var(--bg-subtle);
+  color: var(--nhs-dark);
+}
+
+:root.dark .page-header h1 {
+  color: var(--nhs-dark);
+}
+
+:root.dark .page-header p {
+  color: var(--nhs-muted);
+}
+
+:root.dark .greeting-card {
+  background: linear-gradient(135deg, #1a1a40 0%, var(--bg-page) 100%);
+  border-color: var(--border);
+}
+
+:root.dark .greeting-large {
+  color: var(--nhs-dark);
+}
+
+:root.dark .greeting-spec {
+  color: var(--nhs-muted);
+}
+
+:root.dark .section-heading,
+:root.dark .section-header h2 {
+  color: var(--nhs-dark);
+}
+
+:root.dark .loading {
+  color: var(--nhs-muted);
+}
+
+:root.dark .empty-state {
+  color: var(--nhs-muted);
+}
+
+:root.dark .empty-state-icon {
+  opacity: 0.3;
+}
+
+:root.dark .alert-info {
+  background: #1a1a40;
+  border-color: #2a2a5a;
+  color: #8ab4f8;
+}
+
+:root.dark .alert-success {
+  background: #1a2a2a;
+  border-color: #2a4a3a;
+  color: #6fcf97;
+}
+
+:root.dark .alert-error {
+  background: #2a1a1a;
+  border-color: #4a2a2a;
+  color: #f28b82;
+}
+
+:root.dark .alert-warning {
+  background: #2a2a1a;
+  border-color: #4a4a2a;
+  color: #f5d742;
+}
+
+:root.dark .badge-confirmed {
+  background: #1a2a5a;
+  color: #8ab4f8;
+}
+
+:root.dark .badge-cancelled {
+  background: #3a1a1a;
+  color: #f28b82;
+}
+
+:root.dark .badge-completed {
+  background: #1a3a2a;
+  color: #6fcf97;
+}
+
+:root.dark .badge-checked_in {
+  background: #1a3a2a;
+  color: #6fcf97;
+}
+
+:root.dark .badge-pending {
+  background: #3a3a1a;
+  color: #f5d742;
+}
+
+:root.dark .hero-section {
+  background: linear-gradient(135deg, #16162a 0%, #1a1a40 60%, #1a2a2a 100%);
+}
+
+:root.dark .stats-bar {
+  background: rgba(30,30,58,0.9);
+  border-color: rgba(0,94,184,0.15);
+}
+
+:root.dark .team-card {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+:root.dark .privacy-card {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+:root.dark .contact-details {
+  background: var(--bg-subtle);
+}
+
+:root.dark .toggle-slider {
+  background: #3a3a5a;
+}
+
+:root.dark .divider {
+  background: var(--border);
+}
+
+:root.dark .admin-staff-badge {
+  background: #3a3a1a;
+  border-color: #5a5a2a;
+  color: #f5d742;
+}
+
+:root.dark .admin-amber-bar {
+  background: #b8860b;
+}
+
+:root.dark .staff-badge {
+  background: #3a3a1a;
+  border-color: #5a5a2a;
+  color: #f5d742;
+}
+
+:root.dark .admin-card {
+  border-top-color: #b8860b;
+}
+
+:root.dark #menu-popup {
+  background: var(--bg-card);
+  border-color: var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+:root.dark #menu-popup a {
+  color: var(--nhs-dark);
+}
+
+:root.dark #menu-popup a:hover {
+  background: var(--bg-subtle);
+}
+
+:root.dark .trm-watermark {
+  color: var(--nhs-muted);
+  opacity: 0.25;
+}
+
+:root.dark .navbar-links a {
+  color: var(--nhs-muted);
+}
+
+:root.dark .navbar-links a:hover {
+  color: var(--nhs-dark);
+  background: var(--bg-subtle);
+}
+
+:root.dark .navbar-user {
+  color: var(--nhs-dark);
+}
+
+:root.dark .doctor-avatar {
+  background: var(--bg-subtle);
+  color: var(--nhs-dark);
+}
+
+:root.dark #menu-btn {
+  border-color: var(--border) !important;
+  color: var(--nhs-muted) !important;
+}
+
+:root.dark .feature-icon,
+:root.dark .action-icon {
+  background: var(--bg-subtle);
+}
+
+:root.dark .toggle-wrap input:checked + .toggle-slider {
+  background: var(--nhs-blue);
+}
+
+/* ---------- Theme Toggle Button ---------- */
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-subtle);
+  border-color: var(--nhs-blue);
+}
+
+.theme-toggle-btn .theme-icon {
+  position: absolute;
+  font-size: 18px;
+  line-height: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.theme-toggle-btn .icon-sun {
+  opacity: 0;
+  transform: scale(0.5) rotate(-90deg);
+}
+
+.theme-toggle-btn .icon-moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+:root.dark .theme-toggle-btn .icon-sun {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+:root.dark .theme-toggle-btn .icon-moon {
+  opacity: 0;
+  transform: scale(0.5) rotate(90deg);
+}
+
+:root.dark #theme-label {
+  color: var(--nhs-muted);
+}
+
+:root.dark .staff-info a {
+  color: #8ab4f8;
+}
+
+:root.dark .badge,
+:root.dark .alert {
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:root.dark .hero-actions .btn-primary {
+  background: var(--nhs-blue);
+}
+
+:root.dark .hero-actions .btn-primary:hover {
+  background: var(--nhs-blue-mid);
+}
+
+:root.dark .greeting-card .stat-chip strong {
+  color: var(--nhs-blue);
+}
+
+:root.dark .stat-chip strong {
+  color: var(--nhs-blue);
+}
+
+/* Smooth transitions for theme changes */
+body,
+.navbar,
+.card,
+.feature-card,
+.doctor-card,
+.action-card,
+.appt-card,
+footer,
+input,
+select,
+.badge,
+.alert,
+.table-wrap,
+th,
+td,
+.page-header h1,
+.page-header p,
+.empty-state,
+.loading,
+.btn-secondary,
+.btn-ghost,
+.trm-watermark,
+.navbar-links a,
+.navbar-name,
+.theme-toggle-btn,
+#menu-popup,
+.greeting-card,
+.greeting-large,
+.greeting-spec,
+.section-heading,
+.section-header h2 {
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}

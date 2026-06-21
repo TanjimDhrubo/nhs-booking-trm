@@ -8,6 +8,7 @@
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
     .toggle-wrap {
       position: relative;
@@ -60,6 +61,10 @@
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
       <a href="dashboard.html" class="btn-ghost">&larr; Dashboard</a>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
       <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
@@ -156,9 +161,22 @@
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
+
 
     function timeAgo(isoString) {
       const diff = Date.now() - new Date(isoString).getTime()
@@ -209,10 +227,10 @@
       for (const n of data) {
         html += `
           <article style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
-            <div style="width:40px;height:40px;border-radius:50%;background:#E8F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">◈</span></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--nhs-blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">◈</span></div>
             <div style="flex:1">
-              <p style="font-size:14px;font-weight:500;color:#1A2332;margin-bottom:4px">${n.message}</p>
-              <p style="font-size:12px;color:#6B7280"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>
+              <p style="font-size:14px;font-weight:500;color:var(--nhs-dark);margin-bottom:4px">${n.message}</p>
+              <p style="font-size:12px;color:var(--nhs-muted)"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>
             </div>
           </article>`
       }

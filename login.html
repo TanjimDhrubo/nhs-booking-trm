@@ -8,6 +8,7 @@
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
     .btn-full {
       width: 100%;
@@ -50,7 +51,14 @@
 
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <div class="auth-page">
+  <div class="auth-page" style="position:relative">
+
+    <div style="position:absolute;top:20px;right:24px;z-index:10">
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+    </div>
 
     <main id="main-content">
       <div class="auth-card">
@@ -98,10 +106,23 @@
 
     <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
+    <script>
+      (function(){
+        var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+        if(b)b.addEventListener('click',function(){
+          var d=document.documentElement.classList.toggle('dark');
+          localStorage.setItem('trm-theme',d?'dark':'light');
+          var l=document.getElementById('theme-label');
+          if(l)l.textContent=d?'On':'Off';
+        });
+      })();
+    </script>
+
   </div>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
+
 
     const form = document.getElementById('login-form')
     const msgEl = document.getElementById('message')

@@ -8,6 +8,7 @@
   <meta name="author" content="TRM">
   <title>NHS Booking | TRM</title>
   <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
     .admin-nav-name span {
       color: var(--nhs-blue);
@@ -92,6 +93,10 @@
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="doctor-name"></span>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
       <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
     </div>
   </nav>
@@ -142,8 +147,21 @@
 
   <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
 
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        var d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        var l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
   <script type="module">
     import { supabase } from './js/supabase.js'
+
 
     console.log('Admin dashboard starting...')
 
@@ -251,7 +269,7 @@
           if (appt.status === 'confirmed' || appt.status === 'checked_in') {
             rows += '<td><button class="btn-secondary btn-sm mark-complete-btn" data-id="' + appt.id + '">Mark Complete</button></td>'
           } else {
-            rows += '<td><span style="color:#9CA3AF;font-size:13px">Done</span></td>'
+            rows += '<td><span style="color:var(--nhs-muted);font-size:13px">Done</span></td>'
           }
         } else {
           rows += '<td>-</td>'
