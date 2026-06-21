@@ -1,6 +1,7 @@
 # NHS Appointment Booking System — TRM
 ## Context for AI Assistants (OpenCode / Claude / Cursor)
 ## READ THIS ENTIRE FILE BEFORE WRITING ANY CODE
+## PLANNED FEATURES → see plans.md (NHS number auto-gen, questionnaire, AI agent)
 
 ---
 

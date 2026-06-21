@@ -132,7 +132,11 @@
           email,
           password,
           options: {
-            data: { full_name: fullName }
+            data: {
+              full_name: fullName,
+              date_of_birth: dob || null,
+              nhs_number: nhsNumber || null
+            }
           }
         })
 
@@ -150,25 +154,22 @@
           return
         }
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 2000))
 
-        const { error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles_trm')
-          .upsert({
-            id: authData.user.id,
-            full_name: fullName,
-            date_of_birth: dob || null,
-            nhs_number: nhsNumber || null
-          }, {
-            onConflict: 'id'
-          })
+          .select('nhs_number')
+          .eq('id', authData.user.id)
+          .single()
 
-        if (profileError) {
-          console.error('Profile error:', profileError)
-          msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! Please check your email to verify your account, then sign in.</div>'
-        } else {
-          msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! Please check your email to verify your account, then sign in.</div>'
-        }
+        const displayNhs = profile?.nhs_number || nhsNumber || 'auto-generated'
+
+        msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! You can now sign in.</div>' +
+          '<div class="card" style="margin-top:16px;padding:16px;text-align:center;background:var(--bg-subtle)">' +
+          '<p style="font-size:13px;color:var(--nhs-muted);margin-bottom:4px">Your NHS Number</p>' +
+          '<p style="font-size:22px;font-weight:700;color:var(--nhs-dark);letter-spacing:1px">' + displayNhs.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') + '</p>' +
+          '<p style="font-size:12px;color:var(--nhs-muted);margin-top:4px">Keep this number safe for your appointments</p></div>' +
+          '<a href="login.html" class="btn-primary" style="display:block;text-align:center;margin-top:16px">Sign In &rarr;</a>'
 
         submitBtn.textContent = 'Account Created!'
         
