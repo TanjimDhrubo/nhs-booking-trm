@@ -124,11 +124,11 @@
 
     <script>
       (function(){
-        var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+        const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
         if(b)b.addEventListener('click',function(){
-          var d=document.documentElement.classList.toggle('dark');
+          const d=document.documentElement.classList.toggle('dark');
           localStorage.setItem('trm-theme',d?'dark':'light');
-          var l=document.getElementById('theme-label');
+          const l=document.getElementById('theme-label');
           if(l)l.textContent=d?'On':'Off';
         });
       })();

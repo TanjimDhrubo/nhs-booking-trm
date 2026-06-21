@@ -127,7 +127,7 @@
         </div>
 
         <h1 style="font-size:clamp(42px,6vw,72px);font-weight:800;letter-spacing:-2.5px;line-height:1.08;color:var(--nhs-dark);margin-bottom:20px">
-          Book your NHS<br>appointment <span style="color:var(--nhs-blue)">online</span>
+          Book your NHS <span style="display:block">appointment <span style="color:var(--nhs-blue)">online</span></span>
         </h1>
 
         <p style="font-size:18px;color:var(--nhs-muted);max-width:480px;margin:0 auto 40px;line-height:1.7">
@@ -248,19 +248,19 @@
 
   <script>
     (function(){
-      var b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
       if(b)b.addEventListener('click',function(){
-        var d=document.documentElement.classList.toggle('dark');
+        const d=document.documentElement.classList.toggle('dark');
         localStorage.setItem('trm-theme',d?'dark':'light');
-        var l=document.getElementById('theme-label');
+        const l=document.getElementById('theme-label');
         if(l)l.textContent=d?'On':'Off';
       });
     })();
   </script>
 
   <script>
-    var menuBtn = document.getElementById('menu-btn')
-    var menuPopup = document.getElementById('menu-popup')
+    const menuBtn = document.getElementById('menu-btn')
+    const menuPopup = document.getElementById('menu-popup')
 
     menuBtn.addEventListener('click', function(e) {
       e.stopPropagation()
@@ -280,7 +280,7 @@
       }
     })
 
-    var cards = {
+    const cards = {
       'card-book':    { page: 'book.html',         auth: true  },
       'card-checkin': { page: 'checkin.html',       auth: true  },
       'card-history': { page: 'history.html',       auth: true  },
@@ -292,12 +292,12 @@
     window.userLoggedIn = false
 
     Object.keys(cards).forEach(function(id) {
-      var el = document.getElementById(id)
-      var route = cards[id]
+      const el = document.getElementById(id)
+      const route = cards[id]
       if (el) {
         el.addEventListener('click', function() {
           if (route.auth && !window.userLoggedIn) {
-            window.location.href = 'login.html'
+            window.location.replace('login.html')
           } else {
             window.location.href = route.page
           }

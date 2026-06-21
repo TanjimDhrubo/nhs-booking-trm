@@ -414,11 +414,16 @@ if (session) {
 - All admin pages (admin-dashboard, admin-patients, admin-analytics): added `pageshow` handler, changed `window.location.href` to `window.location.replace()` on all auth redirects and logout
 - All public pages (index, doctors, 404, team): added `pageshow` handler to refresh session-aware nav on bfcache restore, with `else` branches to reset guest state
 - Auth pages (login, admin-login): post-login redirects use `window.location.replace()`, admin-login now checks if already authenticated
-- Index.html: extracted session check into `updateAuthUI()` function, replaced `var` with `const`, added `else` branch to reset nav on stale session
+- Index.html: extracted session check into `updateAuthUI()` function, replaced `var` with `const`, added `else` branch to reset nav on stale session; fixed `<br>` in hero heading; added pageshow handler for bfcache
 - reschedule.html: fixed `requireAuth()` returning session (not user) — renamed `user` to `session`, changed `user.id` to `session.user.id` in `insertNotification()` call
 - Doctor credentials verified: all 6 doctors authenticate successfully against Supabase Auth and match their doctors_trm records
 - confirmation.html: added `@media print` CSS to hide navbar, footer, watermark, and buttons during print
 - admin-dashboard.html, admin-patients.html, admin-analytics.html: fixed pageshow handler destructuring bug (`{ data: { s } }` → `{ data }` then `data.session`) causing admin login redirect loop; added `else init()`/`else main()` to refresh data on bfcache restore
+- All 3 remaining `window.location.href` changed to `.replace()` on auth redirects (index.html:300, book.html:342)
+- All 8 protected pages (dashboard, book, history, checkin, reschedule, notifications, profile, confirmation) added pageshow handlers for bfcache protection
+- All `var` in JS changed to `const` across all 19 HTML files (theme toggle scripts, index.html feature card handlers, menu code)
+- privacy.html: removed empty module script block
+- Signup fixed: `handle_new_user_trm()` trigger function updated with SECURITY DEFINER to allow `supabase_auth_admin` to write to `public.profiles_trm`
 
 ## MISTAKES TO NEVER MAKE
 - Never add "Dr." prefix — names already include it in DB
