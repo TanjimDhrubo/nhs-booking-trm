@@ -863,9 +863,42 @@ footer a:hover {
   .appt-card { flex-direction: column; align-items: flex-start; }
 }
 
+@media (max-width: 640px) {
+  .navbar-name {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .navbar-user {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .navbar-links a.btn-primary,
+  .navbar-links a.btn-secondary {
+    display: none;
+  }
+  .navbar-links a.btn-ghost {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   .hero h1 { font-size: 26px; }
   .hero { padding: 40px 16px; }
+  .navbar-name {
+    max-width: 110px;
+    font-size: 13px;
+  }
+  .navbar-user {
+    max-width: 70px;
+  }
+  .admin-staff-badge {
+    display: none;
+  }
 }
 
 /* ============================================
