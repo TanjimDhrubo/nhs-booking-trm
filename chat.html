@@ -68,13 +68,23 @@
         <div class="chat-msgs" id="chat-msgs" role="log" aria-live="polite" aria-label="Chat conversation">
           <div class="chat-msg ai">
             <div class="chat-av ai" aria-hidden="true">AI</div>
-            <div class="chat-bub">Hi, I'm the TRM Health Assistant. Tell me about your symptoms or ask any health-related question. When you're ready, I'll analyse your situation and send a summary to your doctor — so they already understand your condition before your appointment. Just click the button below to send it and book.</div>
+            <div class="chat-bub">Hi, I'm the TRM Health Assistant. Describe your symptoms and I'll help analyse them. When you're ready, you can send a summary to your doctor and book an appointment — so they already understand your condition before you arrive.</div>
           </div>
         </div>
 
         <hr class="chat-divider" aria-hidden="true">
 
-        <button class="btn-primary btn-send-doc" id="send-to-doc-btn">Send AI analysis to doctor (so they're ready for you) &amp; book appointment &rarr;</button>
+        <button class="btn-primary btn-send-doc" id="send-to-doc-btn">Send analysed health situation to doctor &amp; book appointment &rarr;</button>
+
+        <details class="chat-info" style="margin:8px 0 0;font-size:13px;color:var(--nhs-muted)">
+          <summary style="cursor:pointer;font-weight:500">Why send this to my doctor?</summary>
+          <p style="margin:8px 0 0;line-height:1.6">When you send your analysis, your doctor receives a clear summary of your symptoms, duration, and relevant details <strong>before</strong> your appointment. This means:</p>
+          <ul style="margin:6px 0 0;padding-left:20px;line-height:1.8">
+            <li>Your doctor already understands your situation when you walk in</li>
+            <li>No need to repeat everything from scratch during consultation</li>
+            <li>More time for actual discussion, diagnosis, and treatment</li>
+          </ul>
+        </details>
 
         <hr class="chat-divider" aria-hidden="true">
 
@@ -268,7 +278,7 @@
       }).select('id').single()
 
       sendToDocBtn.disabled = false
-      sendToDocBtn.textContent = 'Send AI analysis to doctor (so they\u2019re ready for you) & book appointment \u2192'
+      sendToDocBtn.textContent = 'Send analysed health situation to doctor & book appointment \u2192'
 
       if (qErr) {
         showMsg('Error saving health details: ' + qErr.message)
