@@ -68,13 +68,13 @@
         <div class="chat-msgs" id="chat-msgs" role="log" aria-live="polite" aria-label="Chat conversation">
           <div class="chat-msg ai">
             <div class="chat-av ai" aria-hidden="true">AI</div>
-            <div class="chat-bub">Hi, I'm the TRM Health Assistant. Tell me about your symptoms or ask any health-related question. When you're ready, click the button below to send your details to a doctor and book an appointment.</div>
+            <div class="chat-bub">Hi, I'm the TRM Health Assistant. Tell me about your symptoms or ask any health-related question. When you're ready, I'll analyse your situation and send a summary to your doctor — so they already understand your condition before your appointment. Just click the button below to send it and book.</div>
           </div>
         </div>
 
         <hr class="chat-divider" aria-hidden="true">
 
-        <button class="btn-primary btn-send-doc" id="send-to-doc-btn">Send analysed health situation details to doctor and book an appointment &rarr;</button>
+        <button class="btn-primary btn-send-doc" id="send-to-doc-btn">Send AI analysis to doctor (so they're ready for you) &amp; book appointment &rarr;</button>
 
         <hr class="chat-divider" aria-hidden="true">
 
@@ -268,7 +268,7 @@
       }).select('id').single()
 
       sendToDocBtn.disabled = false
-      sendToDocBtn.textContent = 'Send analysed health situation details to doctor and book an appointment \u2192'
+      sendToDocBtn.textContent = 'Send AI analysis to doctor (so they\u2019re ready for you) & book appointment \u2192'
 
       if (qErr) {
         showMsg('Error saving health details: ' + qErr.message)
