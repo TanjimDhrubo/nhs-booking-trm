@@ -6,7 +6,7 @@
   <meta name="description" content="NHS Appointment Booking System — view your notifications and activity summary. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, notifications, alerts">
   <meta name="author" content="TRM">
-  <title>NHS Booking | TRM</title>
+  <title>NHS Booking — Notifications</title>
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -219,7 +219,7 @@
           <article style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
             <div style="width:40px;height:40px;border-radius:50%;background:var(--nhs-blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">✉</span></div>
             <div style="flex:1">
-              <p style="font-size:14px;font-weight:500;color:var(--nhs-dark);margin-bottom:4px">${n.message}</p>
+              <p style="font-size:14px;font-weight:500;color:var(--nhs-dark);margin-bottom:4px">${n.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
               <p style="font-size:12px;color:var(--nhs-muted)"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>
             </div>
           </article>`

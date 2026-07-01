@@ -6,7 +6,7 @@
   <meta name="description" content="NHS Appointment Booking System — book an appointment with your preferred doctor. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, book appointment, doctor">
   <meta name="author" content="TRM">
-  <title>NHS Booking | TRM</title>
+  <title>NHS Booking — Book Appointment</title>
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -246,7 +246,16 @@
         const doc = doctors.find(d => d.id === selectedId)
         if (doc) {
           preselectMsg.classList.remove('is-hidden')
-          preselectMsg.innerHTML = 'Booking with <strong>' + doc.name + '</strong>. You can change below.'
+            preselectMsg.innerHTML = ''
+            const p1 = document.createElement('span')
+            p1.textContent = 'Booking with '
+            const pStr = document.createElement('strong')
+            pStr.textContent = doc.name
+            const p2 = document.createElement('span')
+            p2.textContent = '. You can change below.'
+            preselectMsg.appendChild(p1)
+            preselectMsg.appendChild(pStr)
+            preselectMsg.appendChild(p2)
         }
       }
     }

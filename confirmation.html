@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — your appointment is confirmed. Developed by TRM.">
-  <title>NHS Booking | TRM</title>
+  <title>NHS Booking — Confirmed</title>
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -177,12 +177,14 @@
 
       let briefHtml = ''
       if (questionnaire?.ai_brief) {
-        briefHtml = `
-          <div style="background:var(--bg-subtle);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:24px;text-align:left">
-            <h2 style="font-size:14px;font-weight:700;color:var(--nhs-dark);margin-bottom:8px">AI Symptom Summary</h2>
-            <div style="font-size:13px;color:var(--nhs-dark);line-height:1.6;white-space:pre-wrap">${questionnaire.ai_brief}</div>
-            <p style="font-size:11px;color:var(--nhs-muted);margin-top:8px;font-style:italic">This analysis is for informational purposes only. Always consult your GP for medical advice.</p>
-          </div>`
+        const d = document.createElement('div')
+        const d2 = document.createElement('div')
+        d2.textContent = questionnaire.ai_brief
+        d2.style.cssText = 'font-size:13px;color:var(--nhs-dark);line-height:1.6;white-space:pre-wrap'
+        briefHtml = '<div style="background:var(--bg-subtle);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:24px;text-align:left">' +
+          '<h2 style="font-size:14px;font-weight:700;color:var(--nhs-dark);margin-bottom:8px">AI Symptom Summary</h2>' +
+          d2.outerHTML +
+          '<p style="font-size:11px;color:var(--nhs-muted);margin-top:8px;font-style:italic">This analysis is for informational purposes only. Always consult your GP for medical advice.</p></div>'
       }
 
       container.innerHTML = `

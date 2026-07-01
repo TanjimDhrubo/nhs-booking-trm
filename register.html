@@ -6,7 +6,7 @@
   <meta name="description" content="NHS Appointment Booking System — create an account to book and manage your NHS appointments online. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, register, sign up">
   <meta name="author" content="TRM">
-  <title>NHS Booking | TRM</title>
+  <title>NHS Booking — Register</title>
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
 </head>
@@ -151,7 +151,11 @@
         })
 
         if (authError) {
-          msgDiv.innerHTML = `<div class="alert alert-error">${authError.message}</div>`
+          msgDiv.innerHTML = ''
+          const ae = document.createElement('div')
+          ae.className = 'alert alert-error'
+          ae.textContent = authError.message
+          msgDiv.appendChild(ae)
           submitBtn.disabled = false
           submitBtn.textContent = 'Create Account'
           return
@@ -174,12 +178,13 @@
 
         const displayNhs = profile?.nhs_number || nhsNumber || 'auto-generated'
 
-        msgDiv.innerHTML = '<div class="alert alert-success">Account created successfully! You can now sign in.</div>' +
-          '<div class="card" style="margin-top:16px;padding:16px;text-align:center;background:var(--bg-subtle)">' +
-          '<p style="font-size:13px;color:var(--nhs-muted);margin-bottom:4px">Your NHS Number</p>' +
-          '<p style="font-size:22px;font-weight:700;color:var(--nhs-dark);letter-spacing:1px">' + displayNhs.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') + '</p>' +
-          '<p style="font-size:12px;color:var(--nhs-muted);margin-top:4px">Keep this number safe for your appointments</p></div>' +
-          '<a href="login.html" class="btn-primary" style="display:block;text-align:center;margin-top:16px">Sign In &rarr;</a>'
+        msgDiv.innerHTML = ''
+        const da = document.createElement('div'); da.className = 'alert alert-success'; da.textContent = 'Account created successfully! You can now sign in.'; msgDiv.appendChild(da)
+        const card = document.createElement('div'); card.className = 'card'; card.style.cssText = 'margin-top:16px;padding:16px;text-align:center;background:var(--bg-subtle)'; msgDiv.appendChild(card)
+        const lbl = document.createElement('p'); lbl.style.cssText = 'font-size:13px;color:var(--nhs-muted);margin-bottom:4px'; lbl.textContent = 'Your NHS Number'; card.appendChild(lbl)
+        const nhsEl = document.createElement('p'); nhsEl.style.cssText = 'font-size:22px;font-weight:700;color:var(--nhs-dark);letter-spacing:1px'; nhsEl.textContent = displayNhs.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); card.appendChild(nhsEl)
+        const tip = document.createElement('p'); tip.style.cssText = 'font-size:12px;color:var(--nhs-muted);margin-top:4px'; tip.textContent = 'Keep this number safe for your appointments'; card.appendChild(tip)
+        const lnk = document.createElement('a'); lnk.href = 'login.html'; lnk.className = 'btn-primary'; lnk.style.cssText = 'display:block;text-align:center;margin-top:16px'; lnk.textContent = 'Sign In \u2192'; msgDiv.appendChild(lnk)
 
         submitBtn.textContent = 'Account Created!'
         

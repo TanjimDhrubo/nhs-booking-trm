@@ -1601,6 +1601,12 @@ td,
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* ---------- Focus-visible for keyboard users ---------- */
+*:focus-visible {
+  outline: 2px solid var(--nhs-blue);
+  outline-offset: 2px;
+}
+
 /* ---------- prefers-reduced-motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

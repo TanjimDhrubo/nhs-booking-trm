@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — view patient questionnaire responses. Developed by TRM.">
-  <title>NHS Booking | TRM</title>
+  <title>NHS Booking — Questionnaire Review</title>
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -95,7 +95,7 @@
 
   <script type="module">
     import { supabase } from './js/supabase.js'
-    import { formatDateShort } from './js/helpers.js'
+    import { formatDateShort, showMsg } from './js/helpers.js'
 
     const container = document.getElementById('content')
     const msgEl = document.getElementById('message')
@@ -142,9 +142,14 @@
       const appt = q.appointments_trm
       const severity = q.severity || 0
 
+      function esc(str) {
+        if (!str) return ''
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      }
+
       let briefHtml = ''
       if (q.ai_brief) {
-        briefHtml = '<div class="brief-box"><h4>AI Analysis Brief</h4>' + q.ai_brief + '</div>'
+        briefHtml = '<div class="brief-box"><h4>AI Analysis Brief</h4>' + esc(q.ai_brief) + '</div>'
       }
 
       const severityColor = severity <= 3 ? 'var(--nhs-green)' : severity <= 6 ? 'var(--nhs-amber)' : 'var(--nhs-red)'
@@ -156,21 +161,21 @@
         '</header>' +
         '<article class="card" style="padding:28px">' +
 
-        (q.symptoms ? '<div class="q-field"><div class="q-label">Main Symptom</div><div class="q-value">' + q.symptoms + '</div></div>' : '') +
+        (q.symptoms ? '<div class="q-field"><div class="q-label">Main Symptom</div><div class="q-value">' + esc(q.symptoms) + '</div></div>' : '') +
 
-        (q.duration ? '<div class="q-field"><div class="q-label">Duration</div><div class="q-value">' + q.duration + '</div></div>' : '') +
+        (q.duration ? '<div class="q-field"><div class="q-label">Duration</div><div class="q-value">' + esc(q.duration) + '</div></div>' : '') +
 
         (severity ? '<div class="q-field"><div class="q-label">Severity</div><div class="q-value severity" style="color:' + severityColor + '">' + severity + '/10</div></div>' : '') +
 
-        (q.pain_location ? '<div class="q-field"><div class="q-label">Pain Location</div><div class="q-value">' + q.pain_location + '</div></div>' : '') +
+        (q.pain_location ? '<div class="q-field"><div class="q-label">Pain Location</div><div class="q-value">' + esc(q.pain_location) + '</div></div>' : '') +
 
-        (q.triggers ? '<div class="q-field"><div class="q-label">Triggers / Worse</div><div class="q-value">' + q.triggers + '</div></div>' : '') +
+        (q.triggers ? '<div class="q-field"><div class="q-label">Triggers / Worse</div><div class="q-value">' + esc(q.triggers) + '</div></div>' : '') +
 
-        (q.relief ? '<div class="q-field"><div class="q-label">Relief / Better</div><div class="q-value">' + q.relief + '</div></div>' : '') +
+        (q.relief ? '<div class="q-field"><div class="q-label">Relief / Better</div><div class="q-value">' + esc(q.relief) + '</div></div>' : '') +
 
-        (q.medications ? '<div class="q-field"><div class="q-label">Current Medication</div><div class="q-value">' + q.medications + '</div></div>' : '') +
+        (q.medications ? '<div class="q-field"><div class="q-label">Current Medication</div><div class="q-value">' + esc(q.medications) + '</div></div>' : '') +
 
-        (q.additional_notes ? '<div class="q-field"><div class="q-label">Additional Notes</div><div class="q-value">' + q.additional_notes + '</div></div>' : '') +
+        (q.additional_notes ? '<div class="q-field"><div class="q-label">Additional Notes</div><div class="q-value">' + esc(q.additional_notes) + '</div></div>' : '') +
 
         '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-soft)">' +
         '  <p style="font-size:12px;color:var(--nhs-muted)">Submitted: ' + (q.created_at ? formatDateShort(q.created_at) : 'N/A') + '</p>' +
@@ -183,7 +188,11 @@
     }
 
     main().catch(err => {
-      msgEl.innerHTML = '<div class="alert alert-error">Error: ' + err.message + '</div>'
+      msgEl.innerHTML = ''
+        const errDiv = document.createElement('div')
+        errDiv.className = 'alert alert-error'
+        errDiv.textContent = 'Error: ' + err.message
+        msgEl.appendChild(errDiv)
     })
 
     document.getElementById('logout-btn').addEventListener('click', async () => {

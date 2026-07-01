@@ -50,7 +50,12 @@ export function renderBadge(status) {
 export function showMsg(elementId, message, type) {
   const el = document.getElementById(elementId)
   if (!el) return
-  el.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + message + '</div>'
+  el.innerHTML = ''
+  const div = document.createElement('div')
+  div.className = 'alert alert-' + type
+  div.setAttribute('role', 'alert')
+  div.textContent = message
+  el.appendChild(div)
 }
 
 export function generateTimeSlots() {

@@ -6,7 +6,7 @@
   <meta name="description" content="NHS Appointment Booking System — staff portal login for doctors and administrators. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, staff, admin, doctor login">
   <meta name="author" content="TRM">
-  <title>NHS Booking | TRM</title>
+  <title>NHS Booking — Staff Sign In</title>
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -131,6 +131,7 @@
 
   <script type="module">
     import { supabase } from './js/supabase.js'
+    import { showMsg } from './js/helpers.js'
 
 
     async function redirectIfLoggedIn() {
@@ -170,10 +171,15 @@
         console.log('Auth result:', authData, authError)
 
         if (authError) {
-          msgDiv.innerHTML = '<div class="alert alert-error">' +
-            'Login failed: ' + authError.message +
-            '<br><small>Make sure you are using your NHS staff email' +
-            ' and correct password.</small></div>'
+          msgDiv.innerHTML = ''
+          const ae = document.createElement('div')
+          ae.className = 'alert alert-error'
+          ae.textContent = 'Login failed: ' + authError.message
+          const sm = document.createElement('small')
+          sm.textContent = 'Make sure you are using your NHS staff email and correct password.'
+          ae.appendChild(document.createElement('br'))
+          ae.appendChild(sm)
+          msgDiv.appendChild(ae)
           submitBtn.disabled = false
           submitBtn.textContent = 'Sign In to Staff Portal'
           return
@@ -189,28 +195,21 @@
         const userEmail = authData.user.email.toLowerCase()
         console.log('Looking for doctor with email:', userEmail)
 
-        const { data: doctorData, error: doctorError } = await supabase
+        const { data: doctor, error: doctorError } = await supabase
           .from('doctors_trm')
           .select('id, name, specialisation, email')
-          .limit(20)
+          .eq('email', userEmail)
+          .maybeSingle()
 
-        console.log('All doctors:', doctorData, doctorError)
+        console.log('Doctor match:', doctor, doctorError)
 
         if (doctorError) {
-          msgDiv.innerHTML = `<div class="alert alert-error">
-            Database error: ${doctorError.message}
-          </div>`
+          showMsg('message', 'Database error: ' + doctorError.message, 'error')
           await supabase.auth.signOut()
           submitBtn.disabled = false
           submitBtn.textContent = 'Sign In to Staff Portal'
           return
         }
-
-        const doctor = doctorData ? doctorData.find(d =>
-          d.email && d.email.toLowerCase() === userEmail
-        ) : null
-
-        console.log('Found doctor:', doctor)
 
         if (!doctor) {
           await supabase.auth.signOut()
@@ -222,7 +221,11 @@
           return
         }
 
-        msgDiv.innerHTML = '<div class="alert alert-success">Welcome, ' + doctor.name + '! Redirecting...</div>'
+        msgDiv.innerHTML = ''
+        const w = document.createElement('div')
+        w.className = 'alert alert-success'
+        w.textContent = 'Welcome, ' + doctor.name + '! Redirecting...'
+        msgDiv.appendChild(w)
         setTimeout(() => {
           window.location.replace('admin-dashboard.html')
         }, 1000)
