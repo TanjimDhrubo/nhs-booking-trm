@@ -1,2 +1,4 @@
 node_modules/
 *.local
+.playwright-mcp/
+*.png

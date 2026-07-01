@@ -6,6 +6,7 @@
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — manage your profile and account settings. Developed by TRM.">
   <title>NHS Booking — My Profile</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -45,7 +46,7 @@
       <p>Manage your personal details and account settings</p>
     </header>
 
-    <div id="message"></div>
+    <div id="message" aria-live="polite"></div>
 
     <section aria-labelledby="heading-personal" class="profile-section">
       <article class="card">

@@ -7,6 +7,7 @@
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, book appointment, doctor">
   <meta name="author" content="TRM">
   <title>NHS Booking — Book Appointment</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -82,7 +83,7 @@
 
     <div id="doctor-preselect-msg" class="alert alert-info is-hidden"></div>
 
-    <div id="message"></div>
+    <div id="message" aria-live="polite"></div>
 
     <article class="card" id="form-card">
       <form id="book-form" aria-label="Book appointment form">
@@ -199,7 +200,11 @@
     const preselectMsg = document.getElementById('doctor-preselect-msg')
 
     function showMsg(msg, type = 'error') {
-      msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
+      msgEl.innerHTML = ''
+      const d = document.createElement('div')
+      d.className = 'alert alert-' + type
+      d.textContent = msg
+      msgEl.appendChild(d)
     }
 
     function populateTimes() {

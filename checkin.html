@@ -7,6 +7,7 @@
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, check in, queue">
   <meta name="author" content="TRM">
   <title>NHS Booking — Check-In</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -57,7 +58,7 @@
       <p id="today-label">Today is <time datetime="">&nbsp;</time></p>
     </header>
 
-    <div id="message"></div>
+    <div id="message" aria-live="polite"></div>
 
     <section aria-labelledby="heading-dependent-select" style="margin-bottom:16px">
       <div class="form-group" style="margin-bottom:0">
@@ -129,7 +130,11 @@
     const msgEl = document.getElementById('message')
 
     function showMsg(msg, type) {
-      msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
+      msgEl.innerHTML = ''
+      const d = document.createElement('div')
+      d.className = 'alert alert-' + type
+      d.textContent = msg
+      msgEl.appendChild(d)
     }
 
     async function loadTodayAppointments() {

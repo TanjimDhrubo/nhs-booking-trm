@@ -6,6 +6,7 @@
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — AI health assistant chatbot. Developed by TRM.">
   <title>NHS Booking — AI Chat</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -61,7 +62,7 @@
       <p>Chat with AI about your symptoms and health concerns</p>
     </header>
 
-    <div id="message"></div>
+    <div id="message" aria-live="polite"></div>
 
     <article class="card" style="padding:16px 20px">
       <div class="chat-wrap">
@@ -197,7 +198,12 @@
     }
 
     function showMsg(msg, type = 'error') {
-      msgEl.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + msg + '</div>'
+      msgEl.innerHTML = ''
+      const d = document.createElement('div')
+      d.className = 'alert alert-' + type
+      d.setAttribute('role', 'alert')
+      d.textContent = msg
+      msgEl.appendChild(d)
     }
 
     function getConversationText() {

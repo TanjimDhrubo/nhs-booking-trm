@@ -7,6 +7,7 @@
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, admin, doctor dashboard, staff">
   <meta name="author" content="TRM">
   <title>NHS Booking — Staff Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -108,7 +109,7 @@
 
   <main id="main-content" class="container">
 
-    <div id="message"></div>
+    <div id="message" aria-live="polite"></div>
 
     <header class="card">
       <h1 class="greeting-large" id="greeting-text">Good morning</h1>
@@ -216,7 +217,7 @@
         .order('appointment_date', { ascending: true })
 
       if (todayError) {
-        document.getElementById('today-appointments').innerHTML = '<div class="alert alert-error">' + todayError.message + '</div>'
+        const td = document.getElementById('today-appointments'); td.innerHTML = ''; const tde = document.createElement('div'); tde.className = 'alert alert-error'; tde.textContent = todayError.message; td.appendChild(tde)
       }
 
       const todayApptIds = (todayAppts || []).map(a => a.id)
@@ -309,7 +310,7 @@
       .order('appointment_date', { ascending: true })
 
     if (weekError) {
-      document.getElementById('week-appointments').innerHTML = '<div class="alert alert-error">' + weekError.message + '</div>'
+      const wd = document.getElementById('week-appointments'); wd.innerHTML = ''; const wde = document.createElement('div'); wde.className = 'alert alert-error'; wde.textContent = weekError.message; wd.appendChild(wde)
     }
 
       const weekApptIds = (weekAppts || []).map(a => a.id)
@@ -336,7 +337,7 @@
       .eq('doctor_id', doctor.id)
 
     if (countError) {
-      document.getElementById('message').innerHTML += '<div class="alert alert-error">Failed to load total count: ' + countError.message + '</div>'
+      const me = document.createElement('div'); me.className = 'alert alert-error'; me.textContent = 'Failed to load total count: ' + countError.message; document.getElementById('message').appendChild(me)
     }
 
     document.getElementById('stat-total').textContent = count || 0
@@ -348,7 +349,7 @@
     }
 
     main().catch(err => {
-      document.getElementById('message').innerHTML = '<div class="alert alert-error">Error: ' + err.message + '</div>'
+      const me2 = document.createElement('div'); me2.className = 'alert alert-error'; me2.textContent = 'Error: ' + err.message; document.getElementById('message').appendChild(me2)
     })
 
     window.addEventListener('pageshow', async (e) => {

@@ -7,6 +7,7 @@
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, staff, admin, doctor login">
   <meta name="author" content="TRM">
   <title>NHS Booking — Staff Sign In</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -76,7 +77,7 @@
           <p class="auth-subtitle">NHS Booking Admin Portal | TRM</p>
         </header>
 
-        <div id="message"></div>
+        <div id="message" aria-live="polite"></div>
 
         <form id="admin-login-form" aria-label="Staff login form">
           <div class="form-group">

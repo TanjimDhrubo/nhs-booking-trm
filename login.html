@@ -7,6 +7,7 @@
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, sign in, login">
   <meta name="author" content="TRM">
   <title>NHS Booking — Sign In</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -69,7 +70,7 @@
           <p class="auth-subtitle">Sign in to your NHS Booking account | TRM</p>
         </header>
 
-        <div id="message"></div>
+        <div id="message" aria-live="polite"></div>
 
         <form id="login-form" aria-label="Sign in form">
           <div class="form-group">
@@ -145,7 +146,11 @@
     const submitBtn = document.getElementById('submit-btn')
 
     function showMsg(msg, type = 'error') {
-      msgEl.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>'
+      msgEl.innerHTML = ''
+      const d = document.createElement('div')
+      d.className = 'alert alert-' + type
+      d.textContent = msg
+      msgEl.appendChild(d)
     }
 
     async function redirectIfLoggedIn() {
@@ -209,7 +214,7 @@
       })
 
       if (error) {
-        resetMsg.innerHTML = '<div class="alert alert-error">' + error.message + '</div>'
+        resetMsg.innerHTML = ''; const re = document.createElement('div'); re.className = 'alert alert-error'; re.textContent = error.message; resetMsg.appendChild(re)
         resetBtn.disabled = false
         resetBtn.textContent = 'Send Reset Link'
         return

@@ -6,6 +6,7 @@
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — optional pre-appointment symptom questionnaire. Developed by TRM.">
   <title>NHS Booking — Questionnaire</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
   <style>
@@ -53,7 +54,7 @@
       <p>Optional — helps your doctor prepare for a better consultation</p>
     </header>
 
-    <div id="message"></div>
+    <div id="message" aria-live="polite"></div>
 
     <div id="no-booking-data" class="is-hidden">
       <div class="empty-state">
@@ -316,9 +317,15 @@
       aiResult.classList.remove('is-hidden')
 
       const brief = await analyseSymptoms(answers)
-      aiResult.innerHTML = '<h3 style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--nhs-dark)">AI Analysis</h3>' +
-        '<div style="font-size:13px;color:var(--nhs-dark);line-height:1.6;white-space:pre-wrap">' + brief + '</div>' +
-        '<p style="font-size:11px;color:var(--nhs-muted);margin-top:8px;font-style:italic">This analysis is for informational purposes only. Always consult your GP for medical advice.</p>'
+      aiResult.innerHTML = '<h3 style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--nhs-dark)">AI Analysis</h3>'
+      const briefEl = document.createElement('div')
+      briefEl.style.cssText = 'font-size:13px;color:var(--nhs-dark);line-height:1.6;white-space:pre-wrap'
+      briefEl.textContent = brief
+      aiResult.appendChild(briefEl)
+      const disc = document.createElement('p')
+      disc.style.cssText = 'font-size:11px;color:var(--nhs-muted);margin-top:8px;font-style:italic'
+      disc.textContent = 'This analysis is for informational purposes only. Always consult your GP for medical advice.'
+      aiResult.appendChild(disc)
 
       const qId = await saveQuestionnaire(answers, brief)
       if (!qId) { setButtonsLoading(false); return }
