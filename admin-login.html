@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="NHS Appointment Booking System — staff portal login for doctors and administrators. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, staff, admin, doctor login">
@@ -82,11 +83,11 @@
         <form id="admin-login-form" aria-label="Staff login form">
           <div class="form-group">
             <label for="email">Email address</label>
-            <input type="email" id="email" placeholder="your.name@nhs-trm.com" required>
+            <input type="email" id="email" placeholder="your.name@nhs-trm.com" required autocomplete="username">
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" required>
+            <input type="password" id="password" required autocomplete="current-password">
           </div>
           <button type="submit" class="btn-primary btn-full">Sign In to Staff Portal</button>
         </form>
@@ -169,8 +170,6 @@
             password
           })
 
-        console.log('Auth result:', authData, authError)
-
         if (authError) {
           msgDiv.innerHTML = ''
           const ae = document.createElement('div')
@@ -194,15 +193,12 @@
         }
 
         const userEmail = authData.user.email.toLowerCase()
-        console.log('Looking for doctor with email:', userEmail)
 
         const { data: doctor, error: doctorError } = await supabase
           .from('doctors_trm')
           .select('id, name, specialisation, email')
           .eq('email', userEmail)
           .maybeSingle()
-
-        console.log('Doctor match:', doctor, doctorError)
 
         if (doctorError) {
           showMsg('message', 'Database error: ' + doctorError.message, 'error')
@@ -232,7 +228,6 @@
         }, 1000)
 
       } catch (err) {
-        console.error('Unexpected error:', err)
         msgDiv.innerHTML = '<div class="alert alert-error">Unexpected error. Please try again.</div>'
         submitBtn.disabled = false
         submitBtn.textContent = 'Sign In to Staff Portal'

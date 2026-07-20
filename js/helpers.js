@@ -6,6 +6,16 @@
 
 import { supabase } from './supabase.js'
 
+export function escapeHtml(str) {
+  if (str === null || str === undefined) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric',
@@ -42,8 +52,9 @@ export function getMonth(iso) {
 }
 
 export function renderBadge(status) {
-  const cls = 'badge badge-' + status.replace('_', '').toLowerCase()
-  const label = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
+  const safeStatus = escapeHtml(status || 'unknown')
+  const cls = 'badge badge-' + safeStatus.replace('_', '').toLowerCase()
+  const label = safeStatus.charAt(0).toUpperCase() + safeStatus.slice(1).replace('_', ' ')
   return '<span class="' + cls + '">' + label + '</span>'
 }
 

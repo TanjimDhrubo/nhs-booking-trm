@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="NHS Appointment Booking System — admin dashboard for doctors to manage patient appointments. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, admin, doctor dashboard, staff">
@@ -123,7 +124,7 @@
 
     <section aria-labelledby="today-heading">
       <h2 class="section-heading" id="today-heading">Today's Appointments</h2>
-      <div id="today-appointments">
+      <div id="today-appointments" aria-live="polite">
         <div class="loading">Loading</div>
       </div>
     </section>
@@ -132,7 +133,7 @@
 
     <section aria-labelledby="week-heading">
       <h2 class="section-heading" id="week-heading">This Week</h2>
-      <div id="week-appointments">
+      <div id="week-appointments" aria-live="polite">
         <div class="loading">Loading</div>
       </div>
     </section>
@@ -167,7 +168,7 @@
 
   <script type="module">
     import { supabase } from './js/supabase.js'
-    import { formatDate } from './js/helpers.js'
+    import { formatDate, escapeHtml } from './js/helpers.js'
 
 
     async function main() {
@@ -245,18 +246,18 @@
       let rows = ''
       appointments.forEach(appt => {
         rows += '<tr>'
-        rows += '<td><time datetime="' + appt.appointment_date + '">' + formatDate(appt.appointment_date) + '</time></td>'
-        rows += '<td>' + appt.patient_name + '</td>'
-        rows += '<td>' + appt.appointment_type + '</td>'
-        rows += '<td><span class="badge badge-' + appt.status + '">' + appt.status + '</span></td>'
+        rows += '<td><time datetime="' + escapeHtml(appt.appointment_date) + '">' + escapeHtml(formatDate(appt.appointment_date)) + '</time></td>'
+        rows += '<td>' + escapeHtml(appt.patient_name) + '</td>'
+        rows += '<td>' + escapeHtml(appt.appointment_type) + '</td>'
+        rows += '<td><span class="badge badge-' + escapeHtml(appt.status) + '">' + escapeHtml(appt.status) + '</span></td>'
         if (appt.has_questionnaire) {
-          rows += '<td><a href="admin-questionnaire.html?appointment_id=' + appt.id + '" style="display:inline-block;background:#DBEAFE;color:#1E40AF;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">View Questionnaire</a></td>'
+          rows += '<td><a href="admin-questionnaire.html?appointment_id=' + encodeURIComponent(appt.id) + '" style="display:inline-block;background:#DBEAFE;color:#1E40AF;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">View Questionnaire</a></td>'
         } else {
           rows += '<td><span style="color:var(--nhs-muted);font-size:12px">No Questionnaire</span></td>'
         }
         if (showActions) {
           if (appt.status === 'confirmed' || appt.status === 'checked_in') {
-            rows += '<td><button class="btn-secondary btn-sm mark-complete-btn" data-id="' + appt.id + '">Mark Complete</button></td>'
+            rows += '<td><button class="btn-secondary btn-sm mark-complete-btn" data-id="' + escapeHtml(appt.id) + '">Mark Complete</button></td>'
           } else {
             rows += '<td><span style="color:var(--nhs-muted);font-size:13px">Done</span></td>'
           }

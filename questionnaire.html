@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — optional pre-appointment symptom questionnaire. Developed by TRM.">
@@ -259,7 +260,12 @@
     }
 
     function showMsg(msg, type = 'error') {
-      msgEl.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + msg + '</div>'
+      msgEl.innerHTML = ''
+      const div = document.createElement('div')
+      div.className = 'alert alert-' + type
+      div.setAttribute('role', 'alert')
+      div.textContent = msg
+      msgEl.appendChild(div)
     }
 
     function setButtonsLoading(loading) {

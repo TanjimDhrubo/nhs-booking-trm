@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="NHS Appointment Booking System — your personal dashboard to manage appointments. Developed by TRM.">
   <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, dashboard, manage appointments">
@@ -186,7 +187,7 @@
         <h2 id="heading-upcoming">Upcoming Appointments</h2>
         <a href="book.html" class="btn-secondary btn-sm">Book New &rarr;</a>
       </div>
-      <div id="appointments-list">
+      <div id="appointments-list" aria-live="polite">
         <div class="loading">Loading</div>
       </div>
     </section>
@@ -222,7 +223,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
-    import { formatDate, getDay, getMonth, renderBadge, insertNotification } from './js/helpers.js'
+    import { formatDate, getDay, getMonth, renderBadge, insertNotification, escapeHtml } from './js/helpers.js'
 
 
     async function loadAppointments(userId) {
@@ -268,14 +269,14 @@
         html += '    <div class="month">' + getMonth(a.appointment_date) + '</div>'
         html += '  </div>'
         html += '  <div class="appt-info">'
-        html += '    <h3 class="appt-doctor">' + docName + '</h3>'
-        html += '    <div class="appt-meta">' + docSpec + ' &middot; ' + a.appointment_type + '</div>'
+        html += '    <h3 class="appt-doctor">' + escapeHtml(docName) + '</h3>'
+        html += '    <div class="appt-meta">' + escapeHtml(docSpec) + ' &middot; ' + escapeHtml(a.appointment_type) + '</div>'
         html += '  </div>'
         html += '  <div class="appt-actions">'
         html +=      renderBadge(a.status)
-        html += '    <a href="reschedule.html?id=' + a.id + '" class="btn-ghost btn-sm">Reschedule</a>'
+        html += '    <a href="reschedule.html?id=' + encodeURIComponent(a.id) + '" class="btn-ghost btn-sm">Reschedule</a>'
         if (a.status === 'confirmed') {
-          html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + a.id + '" data-date="' + a.appointment_date + '" data-doc="' + (doc ? doc.name : '') + '">Cancel</button>'
+          html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + escapeHtml(a.id) + '" data-date="' + escapeHtml(a.appointment_date) + '" data-doc="' + escapeHtml(doc ? doc.name : '') + '">Cancel</button>'
         }
         html += '  </div>'
         html += '</article>'

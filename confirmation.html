@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="TRM">
   <meta name="description" content="NHS Appointment Booking System — your appointment is confirmed. Developed by TRM.">
@@ -128,7 +129,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
-    import { formatDate } from './js/helpers.js'
+    import { formatDate, escapeHtml } from './js/helpers.js'
 
     const container = document.getElementById('confirmation-content')
 
@@ -193,25 +194,25 @@
           <div class="confirm-icon" aria-hidden="true">&#10003;</div>
           <h1 style="font-size:24px;font-weight:700;color:var(--nhs-dark);margin-bottom:4px">Appointment Confirmed</h1>
           <p style="color:var(--nhs-muted);font-size:15px;margin-bottom:4px">Your appointment has been booked successfully</p>
-          <div class="confirm-id">Ref: NHS-${appt.id.slice(0,8).toUpperCase()}</div>
+          <div class="confirm-id">Ref: NHS-${escapeHtml(appt.id.slice(0,8).toUpperCase())}</div>
 
           <div style="background:var(--bg-subtle);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:24px;text-align:left">
             <div class="confirm-detail-row">
               <span class="confirm-detail-label">Doctor</span>
-              <span class="confirm-detail-value">${docName}</span>
+              <span class="confirm-detail-value">${escapeHtml(docName)}</span>
             </div>
             ${docSpec ? `
             <div class="confirm-detail-row">
               <span class="confirm-detail-label">Specialisation</span>
-              <span class="confirm-detail-value">${docSpec}</span>
+              <span class="confirm-detail-value">${escapeHtml(docSpec)}</span>
             </div>` : ''}
             <div class="confirm-detail-row">
               <span class="confirm-detail-label">Date &amp; Time</span>
-              <span class="confirm-detail-value"><time datetime="${appt.appointment_date}">${formatDate(appt.appointment_date)}</time></span>
+              <span class="confirm-detail-value"><time datetime="${escapeHtml(appt.appointment_date)}">${escapeHtml(formatDate(appt.appointment_date))}</time></span>
             </div>
             <div class="confirm-detail-row">
               <span class="confirm-detail-label">Type</span>
-              <span class="confirm-detail-value">${appt.appointment_type}</span>
+              <span class="confirm-detail-value">${escapeHtml(appt.appointment_type)}</span>
             </div>
             <div class="confirm-detail-row">
               <span class="confirm-detail-label">Status</span>
@@ -223,8 +224,8 @@
 
           <div style="margin:24px 0;text-align:center">
             <p style="font-size:13px;color:var(--nhs-muted);margin-bottom:8px;font-weight:600">CHECK-IN QR CODE</p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=NHS-${appt.id.slice(0,8).toUpperCase()}"
-                 alt="QR code for appointment NHS-${appt.id.slice(0,8).toUpperCase()}"
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=NHS-${escapeHtml(appt.id.slice(0,8).toUpperCase())}"
+                 alt="QR code for appointment NHS-${escapeHtml(appt.id.slice(0,8).toUpperCase())}"
                  style="border-radius:var(--radius-md);border:2px solid var(--border)"
                  width="150" height="150"
                  loading="lazy">
