@@ -64,5 +64,25 @@ export async function showUserName(elementId) {
   }
 
   const el = document.getElementById(elementId)
-  if (el) el.textContent = 'Hello, ' + data.full_name
+  if (!el) return
+
+  el.textContent = 'Hello, ' + data.full_name
+
+  const nav = el.closest('.navbar-links')
+  if (!nav || nav.querySelector(':scope > .navbar-avatar')) return
+
+  const avatar = document.createElement('a')
+  avatar.href = 'profile.html'
+  avatar.className = 'navbar-avatar'
+  avatar.setAttribute('aria-label', 'Go to your profile')
+  avatar.title = data.full_name
+  avatar.textContent = getInitials(data.full_name)
+  nav.insertBefore(avatar, el)
+}
+
+function getInitials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return '?'
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }

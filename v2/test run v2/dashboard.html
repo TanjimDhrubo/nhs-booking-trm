@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NHS Appointment Booking System — your personal dashboard to manage appointments. Developed by TRM.">
+  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, dashboard, manage appointments">
+  <meta name="author" content="TRM">
+  <title>NHS Booking — My Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <style>
+    /* ---- Hero (status strip) ---- */
+    .dash-hero {
+      background: linear-gradient(135deg, var(--nhs-blue-soft) 0%, var(--bg-page) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    .dash-hero h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.6px;
+      line-height: 1.15;
+      color: var(--nhs-dark);
+      margin: 4px 0 8px;
+    }
+    .dash-hero-line {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--nhs-muted);
+      margin: 0 0 22px;
+    }
+    .dash-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* ---- Two-column row: Next appointment + Quick actions ---- */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+      align-items: start;
+    }
+    .dash-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .dash-section-head h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--nhs-dark);
+      margin: 0;
+    }
+    .dash-section-head a {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--nhs-blue);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .dash-section-head a:hover { text-decoration: underline; }
+
+    /* ---- Next appointment card ---- */
+    .next-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      height: 100%;
+    }
+    .next-card .next-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .next-date {
+      background: var(--nhs-blue-soft);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+    .next-date .day {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--nhs-blue);
+      line-height: 1;
+    }
+    .next-date .month {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--nhs-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .next-info { flex: 1; min-width: 180px; }
+    .next-doctor {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--nhs-dark);
+      margin: 0 0 3px;
+    }
+    .next-spec {
+      font-size: 14px;
+      color: var(--nhs-muted);
+      margin: 0 0 6px;
+    }
+    .next-time {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--nhs-blue);
+    }
+    .next-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ---- Quick actions (compact) ---- */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .qa-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 18px 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--nhs-dark);
+      transition: var(--transition);
+    }
+    .qa-item:hover {
+      border-color: var(--nhs-blue);
+      color: var(--nhs-blue);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .qa-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--nhs-blue-soft);
+      color: var(--nhs-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qa-icon .sym { width: 20px; height: 20px; }
+    .qa-label { font-size: 12.5px; font-weight: 600; }
+
+    /* ---- Recent activity ---- */
+    .activity-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      height: 100%;
+    }
+    .activity-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .activity-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+      background: var(--nhs-blue);
+    }
+    .activity-msg {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--nhs-dark);
+      margin: 0 0 3px;
+      line-height: 1.45;
+    }
+    .activity-time { font-size: 12px; color: var(--nhs-muted); }
+
+    /* ---- Navbar avatar ---- */
+    .navbar-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--nhs-blue);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: opacity 0.2s ease;
+    }
+    .navbar-avatar:hover { opacity: 0.85; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 900px) {
+      .dash-grid { grid-template-columns: 1fr; }
+      .dash-hero { padding: 26px; }
+      .dash-hero h1 { font-size: 27px; }
+    }
+    @media (max-width: 768px) {
+      .navbar-links a.navbar-avatar { display: inline-flex !important; }
+    }
+    @media (max-width: 640px) {
+      .navbar-user { display: none; }
+      .dash-hero { padding: 22px 18px; }
+      .quick-actions { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
+      <div class="navbar-logo" aria-hidden="true">NHS</div>
+      <span class="navbar-name"><abbr title="National Health Service" style="text-decoration:none">NHS</abbr> Appointment Booking <span>| TRM</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="profile.html" class="navbar-avatar" id="user-avatar" aria-label="Go to your profile"></a>
+      <span class="navbar-user" id="user-name"></span>
+      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
+        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
+      </button>
+      <button class="btn-ghost" id="logout-btn" aria-label="Sign out of your account">Sign Out</button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container">
+
+    <header class="dash-hero" aria-label="Today's overview">
+      <span class="story-eyebrow">Your dashboard</span>
+      <h1 id="greeting-text">Good morning</h1>
+      <p class="dash-hero-line" id="hero-line">Loading your health overview&hellip;</p>
+      <div class="dash-hero-actions" id="hero-actions"></div>
+    </header>
+
+    <div class="dash-grid">
+
+      <section aria-labelledby="heading-next">
+        <div class="dash-section-head">
+          <span class="story-eyebrow">Next up</span>
+        </div>
+        <div id="next-card" class="next-card">
+          <div class="loading">Loading</div>
+        </div>
+      </section>
+
+      <section aria-labelledby="heading-quick">
+        <div class="dash-section-head">
+          <span class="story-eyebrow">Quick actions</span>
+        </div>
+        <div class="quick-actions">
+          <a href="book.html" class="qa-item">
+            <span class="qa-icon"><svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18h6"/><path d="M16 2v3"/><path d="M19 15v6"/><path d="M21 11.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8.3"/><path d="M3 9h18"/><path d="M8 2v3"/></svg></span>
+            <span class="qa-label">Book</span>
+          </a>
+          <a href="doctors.html" class="qa-item">
+            <span class="qa-icon"><svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span>
+            <span class="qa-label">Doctors</span>
+          </a>
+          <a href="chat.html" class="qa-item">
+            <span class="qa-icon"><svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>
+            <span class="qa-label">AI Assistant</span>
+          </a>
+          <a href="history.html" class="qa-item">
+            <span class="qa-icon"><svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
+            <span class="qa-label">History</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="dash-grid">
+
+      <section aria-labelledby="heading-upcoming">
+        <div class="dash-section-head">
+          <h2 id="heading-upcoming">Upcoming Appointments</h2>
+          <a href="book.html">Book New &rarr;</a>
+        </div>
+        <div id="appointments-list" aria-live="polite">
+          <div class="loading">Loading</div>
+        </div>
+      </section>
+
+      <section aria-labelledby="heading-activity">
+        <div class="dash-section-head">
+          <h2 id="heading-activity">Recent Activity</h2>
+          <a href="notifications.html">View all &rarr;</a>
+        </div>
+        <div class="activity-card">
+          <ul class="activity-list" id="activity-list" aria-live="polite">
+            <div class="loading">Loading</div>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      <span>&copy; 2026 NHS Appointment Booking System</span>
+      <span aria-hidden="true">·</span>
+      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span aria-hidden="true">·</span>
+      <a href="team.html">Meet the Team</a>
+    </p>
+  </footer>
+
+  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
+
+  <script>
+    (function(){
+      const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
+      if(b)b.addEventListener('click',function(){
+        const d=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('trm-theme',d?'dark':'light');
+        const l=document.getElementById('theme-label');
+        if(l)l.textContent=d?'On':'Off';
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+    import { requireAuth, logout } from './js/auth.js'
+    import { formatDate, formatTime, getDay, getMonth, renderBadge, insertNotification, escapeHtml } from './js/helpers.js'
+
+    let userId = null
+
+    function getInitials(name) {
+      const parts = name.trim().split(/\s+/)
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+    }
+
+    function dayLabel(iso) {
+      const d = new Date(iso)
+      const today = new Date()
+      const startToday = new Date(today)
+      startToday.setHours(0, 0, 0, 0)
+      const startD = new Date(d)
+      startD.setHours(0, 0, 0, 0)
+      const diff = Math.round((startD - startToday) / 86400000)
+      if (diff === 0) return 'today'
+      if (diff === 1) return 'tomorrow'
+      if (diff === 2) return 'in two days'
+      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })
+    }
+
+    function activityDot(message) {
+      const m = (message || '').toLowerCase()
+      if (m.includes('cancelled')) return 'var(--nhs-red)'
+      if (m.includes('checked in')) return 'var(--nhs-green)'
+      if (m.includes('reminder')) return '#B45309'
+      if (m.includes('confirmed') || m.includes('booked')) return 'var(--nhs-blue)'
+      return 'var(--nhs-muted)'
+    }
+
+    async function loadProfile() {
+      const { data: profile } = await supabase
+        .from('profiles_trm')
+        .select('full_name')
+        .eq('id', userId)
+        .single()
+
+      const name = profile && profile.full_name ? profile.full_name : ''
+      const avatarEl = document.getElementById('user-avatar')
+      if (avatarEl) {
+        avatarEl.textContent = name ? getInitials(name) : '?'
+        avatarEl.title = name
+      }
+      const nameEl = document.getElementById('user-name')
+      if (nameEl) nameEl.textContent = name ? 'Hello, ' + name.split(' ')[0] : ''
+      return name
+    }
+
+    async function loadAppointments() {
+      const el = document.getElementById('appointments-list')
+      el.innerHTML = '<div class="loading">Loading</div>'
+
+      const now = new Date().toISOString()
+
+      const { data: appts, error } = await supabase
+        .from('appointments_trm')
+        .select('*, doctors_trm(name, specialisation)')
+        .eq('user_id', userId)
+        .gte('appointment_date', now)
+        .neq('status', 'cancelled')
+        .order('appointment_date')
+
+      if (error) {
+        el.innerHTML = '<div class="alert alert-error">Failed to load appointments.</div>'
+        return null
+      }
+
+      const today = new Date()
+      const todayStart = new Date(today); todayStart.setHours(0, 0, 0, 0)
+      const todayEnd = new Date(today); todayEnd.setHours(23, 59, 59, 999)
+      const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7); weekEnd.setHours(23, 59, 59, 999)
+
+      const todayAppts = (appts || []).filter(a => {
+        const t = new Date(a.appointment_date)
+        return t >= todayStart && t <= todayEnd && a.status === 'confirmed'
+      })
+      const nextAppt = (appts && appts.length) ? appts[0] : null
+      const weekCount = (appts || []).filter(a => new Date(a.appointment_date) <= weekEnd).length
+
+      renderHero(todayAppts, nextAppt, weekCount)
+      renderNextCard(nextAppt)
+      renderUpcoming(appts || [])
+      return appts || []
+    }
+
+    function renderHero(todayAppts, nextAppt, weekCount) {
+      const lineEl = document.getElementById('hero-line')
+      const actionsEl = document.getElementById('hero-actions')
+      let line = ''
+
+      if (todayAppts.length) {
+        line = 'You have ' + todayAppts.length + ' appointment' + (todayAppts.length > 1 ? 's' : '') + ' today'
+        if (todayAppts[0]) line += ' &mdash; your first is at ' + formatTime(todayAppts[0].appointment_date)
+        line += '.'
+        actionsEl.innerHTML = '' +
+          '<a href="checkin.html" class="btn-primary">Check In &rarr;</a>' +
+          '<a href="reschedule.html?id=' + encodeURIComponent(todayAppts[0].id) + '" class="btn-secondary">View details</a>'
+      } else if (nextAppt) {
+        if (weekCount > 1) {
+          line = 'You have ' + weekCount + ' appointments coming up this week.'
+        } else {
+          line = 'Your next appointment is ' + dayLabel(nextAppt.appointment_date) + ' at ' + formatTime(nextAppt.appointment_date) + '.'
+        }
+        actionsEl.innerHTML = '<a href="book.html" class="btn-primary">Book appointment &rarr;</a>'
+      } else {
+        line = 'No appointments on the horizon &mdash; book your next visit.'
+        actionsEl.innerHTML = '' +
+          '<a href="book.html" class="btn-primary">Book appointment &rarr;</a>' +
+          '<a href="doctors.html" class="btn-secondary">Find a doctor</a>'
+      }
+
+      lineEl.innerHTML = line
+    }
+
+    function renderNextCard(nextAppt) {
+      const el = document.getElementById('next-card')
+
+      if (!nextAppt) {
+        el.innerHTML = '' +
+          '<div class="empty-state">' +
+          '  <div class="empty-state-icon" aria-hidden="true">&#128197;</div>' +
+          '  <p>No upcoming appointments.</p>' +
+          '  <a href="book.html" class="btn-primary">Book an appointment &rarr;</a>' +
+          '</div>'
+        return
+      }
+
+      const doc = nextAppt.doctors_trm
+      const docName = doc ? doc.name : 'Unknown Doctor'
+      const docSpec = doc ? doc.specialisation : ''
+
+      el.innerHTML = '' +
+        '<div class="next-row">' +
+        '  <div class="next-date">' +
+        '    <div class="day">' + getDay(nextAppt.appointment_date) + '</div>' +
+        '    <div class="month">' + getMonth(nextAppt.appointment_date) + '</div>' +
+        '  </div>' +
+        '  <div class="next-info">' +
+        '    <h3 class="next-doctor">' + escapeHtml(docName) + '</h3>' +
+        '    <p class="next-spec">' + escapeHtml(docSpec) + ' &middot; ' + escapeHtml(nextAppt.appointment_type) + '</p>' +
+        '    <span class="next-time">' + dayLabel(nextAppt.appointment_date) + ' &middot; ' + formatTime(nextAppt.appointment_date) + '</span>' +
+        '  </div>' +
+        '  ' + renderBadge(nextAppt.status) +
+        '</div>' +
+        '<div class="next-actions">' +
+        '  <a href="reschedule.html?id=' + encodeURIComponent(nextAppt.id) + '" class="btn-ghost btn-sm">Reschedule</a>' +
+        '</div>'
+    }
+
+    function renderUpcoming(appts) {
+      const el = document.getElementById('appointments-list')
+
+      if (!appts.length) {
+        el.innerHTML = '' +
+          '<div class="empty-state">' +
+          '  <div class="empty-state-icon" aria-hidden="true">&#9644;</div>' +
+          '  <p>No upcoming appointments.</p>' +
+          '  <a href="book.html" class="btn-primary">Book Now</a>' +
+          '</div>'
+        return
+      }
+
+      let html = ''
+      for (const a of appts) {
+        const doc = a.doctors_trm
+        const docName = doc ? doc.name : 'Unknown Doctor'
+        const docSpec = doc ? doc.specialisation : ''
+
+        html += '<article class="appt-card">'
+        html += '  <div class="date-block">'
+        html += '    <div class="day">' + getDay(a.appointment_date) + '</div>'
+        html += '    <div class="month">' + getMonth(a.appointment_date) + '</div>'
+        html += '  </div>'
+        html += '  <div class="appt-info">'
+        html += '    <h3 class="appt-doctor">' + escapeHtml(docName) + '</h3>'
+        html += '    <div class="appt-meta">' + escapeHtml(docSpec) + ' &middot; ' + escapeHtml(a.appointment_type) + '</div>'
+        html += '  </div>'
+        html += '  <div class="appt-actions">'
+        html +=      renderBadge(a.status)
+        html += '    <a href="reschedule.html?id=' + encodeURIComponent(a.id) + '" class="btn-ghost btn-sm">Reschedule</a>'
+        if (a.status === 'confirmed') {
+          html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + escapeHtml(a.id) + '" data-date="' + escapeHtml(a.appointment_date) + '" data-doc="' + escapeHtml(doc ? doc.name : '') + '">Cancel</button>'
+        }
+        html += '  </div>'
+        html += '</article>'
+      }
+
+      el.innerHTML = html
+
+      document.querySelectorAll('.dash-cancel-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id
+          const date = btn.dataset.date
+          const doc = btn.dataset.doc
+
+          if (!confirm('Cancel your ' + (doc ? 'appointment with ' + doc : 'appointment') + ' on ' + formatDate(date) + '?')) return
+
+          const { error } = await supabase
+            .from('appointments_trm')
+            .update({ status: 'cancelled' })
+            .eq('id', id)
+
+          if (error) {
+            alert('Failed to cancel appointment.')
+            return
+          }
+
+          await insertNotification(userId, 'Your appointment on ' + formatDate(date) + ' with ' + doc + ' has been cancelled.')
+
+          await loadAppointments()
+        })
+      })
+    }
+
+    async function loadRecentActivity() {
+      const el = document.getElementById('activity-list')
+
+      const { data: notifs, error } = await supabase
+        .from('notifications_trm')
+        .select('message, sent_at')
+        .eq('user_id', userId)
+        .order('sent_at', { ascending: false })
+        .limit(5)
+
+      if (error) {
+        el.innerHTML = '<li class="activity-msg">Failed to load activity.</li>'
+        return
+      }
+
+      if (!notifs || !notifs.length) {
+        el.innerHTML = '<li class="activity-msg">No recent activity yet.</li>'
+        return
+      }
+
+      let html = ''
+      for (const n of notifs) {
+        html += '<li class="activity-item">'
+        html += '  <span class="activity-dot" style="background:' + activityDot(n.message) + '" aria-hidden="true"></span>'
+        html += '  <div>'
+        html += '    <p class="activity-msg">' + escapeHtml(n.message) + '</p>'
+        html += '    <p class="activity-time"><time datetime="' + escapeHtml(n.sent_at) + '">' + timeAgoLabel(n.sent_at) + '</time></p>'
+        html += '  </div>'
+        html += '</li>'
+      }
+      el.innerHTML = html
+    }
+
+    function timeAgoLabel(iso) {
+      const diff = Date.now() - new Date(iso).getTime()
+      const mins = Math.floor(diff / 60000)
+      const hours = Math.floor(diff / 3600000)
+      const days = Math.floor(diff / 86400000)
+      if (mins < 1) return 'Just now'
+      if (mins < 60) return mins + ' minutes ago'
+      if (hours < 24) return hours + ' hours ago'
+      if (days === 1) return 'Yesterday'
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    }
+
+    async function init() {
+      const session = await requireAuth()
+      if (!session) return
+
+      userId = session.user.id
+
+      const hour = new Date().getHours()
+      let greeting = 'Good evening'
+      if (hour < 12) greeting = 'Good morning'
+      else if (hour < 17) greeting = 'Good afternoon'
+
+      const name = await loadProfile()
+      const first = name ? name.split(' ')[0] : ''
+      document.getElementById('greeting-text').textContent = greeting + (first ? ', ' + first : '')
+
+      await Promise.all([
+        loadAppointments(),
+        loadRecentActivity()
+      ])
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout)
+
+    window.addEventListener('pageshow', async (e) => {
+      if (e.persisted) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) init()
+        else window.location.replace('login.html')
+      }
+    })
+
+    init()
+  </script>
+
+</body>
+</html>

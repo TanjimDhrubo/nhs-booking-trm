@@ -194,9 +194,15 @@
         .order('sent_at', { ascending: false })
         .limit(50)
 
-      document.getElementById('stat-total').textContent = data ? data.length : 0
-      document.getElementById('stat-booked').textContent = data ? data.filter(n => n.message.toLowerCase().includes('booked')).length : 0
-      document.getElementById('stat-checkins').textContent = data ? data.filter(n => n.message.toLowerCase().includes('checked in')).length : 0
+      const [totalRes, bookedRes, checkinsRes] = await Promise.all([
+        supabase.from('notifications_trm').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('appointments_trm').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('appointments_trm').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'checked_in')
+      ])
+
+      document.getElementById('stat-total').textContent = totalRes.count || 0
+      document.getElementById('stat-booked').textContent = bookedRes.count || 0
+      document.getElementById('stat-checkins').textContent = checkinsRes.count || 0
 
       const el = document.getElementById('notif-list')
 
@@ -219,7 +225,7 @@
       for (const n of data) {
         html += `
           <article style="display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #F3F4F6">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--nhs-blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><span class="sym" aria-hidden="true">✉</span></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--nhs-blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0" aria-hidden="true"><svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
             <div style="flex:1">
               <p style="font-size:14px;font-weight:500;color:var(--nhs-dark);margin-bottom:4px">${n.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
               <p style="font-size:12px;color:var(--nhs-muted)"><time datetime="${n.sent_at}">${timeAgo(n.sent_at)}</time></p>

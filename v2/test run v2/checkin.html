@@ -247,7 +247,7 @@
           if (card) {
             const actions = card.querySelector('.appt-actions')
             if (actions) {
-              actions.innerHTML = '<div class="alert alert-success checkin-done"><span class="sym" aria-hidden="true">✓</span> Checked in at <time datetime="' + nowStr + '">' + formatTimeShort(nowStr) + '</time></div>'
+              actions.innerHTML = '<div class="alert alert-success checkin-done"><svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Checked in at <time datetime="' + nowStr + '">' + formatTimeShort(nowStr) + '</time></div>'
             }
           }
         })
