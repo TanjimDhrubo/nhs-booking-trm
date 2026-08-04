@@ -255,12 +255,17 @@
         } else {
           rows += '<td><span style="color:var(--nhs-muted);font-size:12px">No Questionnaire</span></td>'
         }
-        if (showActions) {
-          if (appt.status === 'confirmed' || appt.status === 'checked_in') {
-            rows += '<td><button class="btn-secondary btn-sm mark-complete-btn" data-id="' + escapeHtml(appt.id) + '">Mark Complete</button></td>'
-          } else {
-            rows += '<td><span style="color:var(--nhs-muted);font-size:13px">Done</span></td>'
-          }
+        let actions = ''
+        if (appt.status === 'confirmed') {
+          actions += '<a class="btn-secondary btn-sm" href="reschedule.html?appointment_id=' + encodeURIComponent(appt.id) + '&staff=1">Reschedule</a>'
+        }
+        if (showActions && (appt.status === 'confirmed' || appt.status === 'checked_in')) {
+          actions += '<button class="btn-secondary btn-sm mark-complete-btn" data-id="' + escapeHtml(appt.id) + '">Mark Complete</button>'
+        }
+        if (actions) {
+          rows += '<td style="white-space:nowrap">' + actions + '</td>'
+        } else if (showActions) {
+          rows += '<td><span style="color:var(--nhs-muted);font-size:13px">Done</span></td>'
         } else {
           rows += '<td>-</td>'
         }

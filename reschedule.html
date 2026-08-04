@@ -56,7 +56,7 @@
     </a>
     <div class="navbar-links">
       <span class="navbar-user" id="user-name"></span>
-      <a href="history.html" class="btn-ghost">&larr; History</a>
+      <a href="history.html" class="btn-ghost" id="nav-back-link">&larr; History</a>
       <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
         <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
         <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
@@ -115,7 +115,7 @@
       </article>
     </section>
 
-    <a href="history.html" class="btn-ghost back-link">&larr; Back to History</a>
+    <a href="history.html" class="btn-ghost back-link" id="back-link">&larr; Back to History</a>
 
   </main>
 
@@ -153,7 +153,37 @@
 
     async function init() {
       const session = await requireAuth()
-      await showUserName('user-name')
+
+      const params = new URLSearchParams(window.location.search)
+      const appointmentId = params.get('appointment_id') || params.get('id')
+      let isStaff = params.get('staff') === '1'
+
+      const { data: doctorRow } = await supabase
+        .from('doctors_trm')
+        .select('id, name, specialisation')
+        .eq('email', session.user.email)
+        .maybeSingle()
+
+      if (doctorRow) {
+        isStaff = true
+      } else if (isStaff) {
+        window.location.replace('index.html')
+        return
+      }
+
+      if (isStaff) {
+        const navUser = document.getElementById('user-name')
+        if (navUser) navUser.textContent = doctorRow.name
+        const navBack = document.getElementById('nav-back-link')
+        if (navBack) { navBack.href = 'admin-dashboard.html'; navBack.innerHTML = '\u2190 Dashboard' }
+        const bottomBack = document.getElementById('back-link')
+        if (bottomBack) { bottomBack.href = 'admin-dashboard.html'; bottomBack.innerHTML = '\u2190 Back to Dashboard' }
+      } else {
+        await showUserName('user-name')
+      }
+
+      const backHref = isStaff ? 'admin-dashboard.html' : 'history.html'
+      const backLabel = isStaff ? 'Back to Dashboard' : 'Back to History'
 
       document.getElementById('logout-btn').addEventListener('click', () => {
         logout()
@@ -163,11 +193,8 @@
         history.back()
       })
 
-      const params = new URLSearchParams(window.location.search)
-      const appointmentId = params.get('appointment_id') || params.get('id')
-
       if (!appointmentId) {
-        showMsg('page-message', 'No appointment selected. <a href="history.html">Back to History</a>', 'error')
+        showMsg('page-message', 'No appointment selected. <a href="' + backHref + '">' + backLabel + '</a>', 'error')
         document.getElementById('current-details').innerHTML = '<div class="detail-label">Current Appointment</div><p>No appointment selected.</p>'
         document.getElementById('form-card').style.display = 'none'
         return
@@ -180,7 +207,7 @@
         .single()
 
       if (error || !appointment) {
-        showMsg('page-message', 'Appointment not found. <a href="history.html">Back to History</a>', 'error')
+        showMsg('page-message', 'Appointment not found. <a href="' + backHref + '">' + backLabel + '</a>', 'error')
         document.getElementById('current-details').innerHTML = '<div class="detail-label">Current Appointment</div><p>Appointment not found.</p>'
         document.getElementById('form-card').style.display = 'none'
         return
@@ -215,18 +242,23 @@
       }
 
       const doctorSelect = document.getElementById('new-doctor')
-      const { data: doctors } = await supabase
-        .from('doctors_trm')
-        .select('id, name, specialisation')
-        .eq('available', true)
+      if (isStaff) {
+        const group = doctorSelect.closest('.form-group')
+        if (group) group.style.display = 'none'
+      } else {
+        const { data: doctors } = await supabase
+          .from('doctors_trm')
+          .select('id, name, specialisation')
+          .eq('available', true)
 
-      if (doctors) {
-        for (const d of doctors) {
-          const opt = document.createElement('option')
-          opt.value = d.id
-          opt.textContent = d.name + ' - ' + d.specialisation
-          if (doctor && d.id === doctor.id) opt.selected = true
-          doctorSelect.appendChild(opt)
+        if (doctors) {
+          for (const d of doctors) {
+            const opt = document.createElement('option')
+            opt.value = d.id
+            opt.textContent = d.name + ' - ' + d.specialisation
+            if (doctor && d.id === doctor.id) opt.selected = true
+            doctorSelect.appendChild(opt)
+          }
         }
       }
 
@@ -276,13 +308,13 @@
           : doctorName
 
         await insertNotification(
-          session.user.id,
+          isStaff ? appointment.user_id : session.user.id,
           'Your ' + appointment.appointment_type + ' has been rescheduled to ' + formatDateShort(newISO) + ' with ' + selectedDoctorName + '.'
         )
 
         showMsg('page-message', 'Appointment rescheduled! <svg class="sym" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>', 'success')
         showMsg('message',
-          'Your appointment has been updated. <a href="history.html" style="color:var(--nhs-blue);text-decoration:underline;">&larr; Back to History</a>',
+          'Your appointment has been updated. <a href="' + backHref + '" style="color:var(--nhs-blue);text-decoration:underline;">&larr; ' + backLabel + '</a>',
           'success')
 
         document.getElementById('form-card').style.display = 'none'
