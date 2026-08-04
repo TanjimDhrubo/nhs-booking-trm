@@ -212,6 +212,8 @@ img { max-width: 100%; display: block; }
   margin: 0 auto;
   padding: 40px 24px;
   flex: 1;
+  width: 100%;
+  min-width: 0;
 }
 
 .container-sm {
@@ -219,6 +221,8 @@ img { max-width: 100%; display: block; }
   margin: 0 auto;
   padding: 40px 24px;
   flex: 1;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ---------- Page Header ---------- */
@@ -463,6 +467,18 @@ img { max-width: 100%; display: block; }
   text-decoration: none;
 }
 
+.cancel-lock {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nhs-muted);
+  background: var(--bg-subtle);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  white-space: nowrap;
+}
+
 .btn-sm {
   font-size: 13px;
   padding: 7px 14px;
@@ -593,7 +609,7 @@ select {
 .table-wrap {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  overflow: hidden;
+  overflow-x: auto;
   background: var(--bg-card);
   box-shadow: var(--shadow-sm);
 }
@@ -923,14 +939,8 @@ footer a:hover {
     white-space: nowrap;
     font-size: 14px;
   }
-  .navbar-avatar ~ .navbar-user {
-    display: none;
-  }
   .navbar-user {
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: none;
   }
   .navbar-links a.btn-primary,
   .navbar-links a.btn-secondary {
@@ -948,10 +958,7 @@ footer a:hover {
     max-width: 110px;
     font-size: 13px;
   }
-  .navbar-user {
-    max-width: 70px;
-  }
-  .admin-staff-badge {
+  .navbar .admin-staff-badge {
     display: none;
   }
 }

@@ -67,6 +67,15 @@
       color: var(--nhs-blue);
       font-size: 15px;
     }
+    .stat-chip-link {
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .stat-chip-link:hover {
+      background: var(--nhs-blue-soft);
+      color: var(--nhs-blue);
+    }
     .section-heading {
       font-size: 22px;
       font-weight: 700;
@@ -116,9 +125,9 @@
       <h1 class="greeting-large" id="greeting-text">Good morning</h1>
       <div class="welcome-subtitle" id="doctor-spec"></div>
       <ul class="stat-chips" style="list-style:none;padding:0;margin:0">
-        <li class="stat-chip"><strong id="stat-today">0</strong> appointments today</li>
-        <li class="stat-chip"><strong id="stat-week">0</strong> this week</li>
-        <li class="stat-chip"><strong id="stat-total">0</strong> total appointments</li>
+        <li><a class="stat-chip stat-chip-link" href="#today-heading" aria-label="Appointments today"><strong id="stat-today">0</strong> appointments today</a></li>
+        <li><a class="stat-chip stat-chip-link" href="#week-heading" aria-label="Appointments this week"><strong id="stat-week">0</strong> this week</a></li>
+        <li><a class="stat-chip stat-chip-link" href="admin-analytics.html" aria-label="Total appointments"><strong id="stat-total">0</strong> total appointments</a></li>
       </ul>
     </header>
 

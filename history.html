@@ -155,7 +155,12 @@
         let actions = '<span class="appt-email">&mdash;</span>'
         if (isFuture) {
           actions = '<a href="reschedule.html?appointment_id=' + a.id + '" class="btn-secondary btn-sm">Reschedule</a>'
-          actions += '<button class="btn-danger btn-sm cancel-btn" data-id="' + a.id + '" data-date="' + a.appointment_date + '">Cancel</button>'
+          const hoursUntil = (apptDate.getTime() - now.getTime()) / 3600000
+          if (hoursUntil < 12) {
+            actions += '<span class="cancel-lock" title="Cancellation closes 12 hours before your appointment">Cancellation closed (&lt;12h)</span>'
+          } else {
+            actions += '<button class="btn-danger btn-sm cancel-btn" data-id="' + a.id + '" data-date="' + a.appointment_date + '">Cancel</button>'
+          }
         }
 
         html += '<tr>'
@@ -174,6 +179,11 @@
         btn.addEventListener('click', async () => {
           const id = btn.dataset.id
           const date = btn.dataset.date
+
+          if ((new Date(date).getTime() - Date.now()) / 3600000 < 12) {
+            showMsg('Cancellation is not available within 12 hours of your appointment.', 'error')
+            return
+          }
 
           if (!confirm('Cancel this appointment?')) return
 

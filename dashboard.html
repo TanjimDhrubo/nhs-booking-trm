@@ -551,7 +551,12 @@
         html +=      renderBadge(a.status)
         html += '    <a href="reschedule.html?appointment_id=' + encodeURIComponent(a.id) + '" class="btn-ghost btn-sm">Reschedule</a>'
         if (a.status === 'confirmed') {
-          html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + escapeHtml(a.id) + '" data-date="' + escapeHtml(a.appointment_date) + '" data-doc="' + escapeHtml(doc ? doc.name : '') + '">Cancel</button>'
+          const hoursUntil = (new Date(a.appointment_date).getTime() - Date.now()) / 3600000
+          if (hoursUntil < 12) {
+            html += '    <span class="cancel-lock" title="Cancellation closes 12 hours before your appointment">Cancellation closed (&lt;12h)</span>'
+          } else {
+            html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + escapeHtml(a.id) + '" data-date="' + escapeHtml(a.appointment_date) + '" data-doc="' + escapeHtml(doc ? doc.name : '') + '">Cancel</button>'
+          }
         }
         html += '  </div>'
         html += '</article>'
@@ -564,6 +569,11 @@
           const id = btn.dataset.id
           const date = btn.dataset.date
           const doc = btn.dataset.doc
+
+          if ((new Date(date).getTime() - Date.now()) / 3600000 < 12) {
+            alert('Cancellation is not available within 12 hours of your appointment.')
+            return
+          }
 
           if (!confirm('Cancel your ' + (doc ? 'appointment with ' + doc : 'appointment') + ' on ' + formatDate(date) + '?')) return
 
