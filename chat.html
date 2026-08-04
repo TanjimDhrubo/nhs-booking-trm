@@ -104,7 +104,7 @@
     <p>
       <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">&#183;</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span class="footer-trm">Developed by TRM</span>
       <span aria-hidden="true">&#183;</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">&#183;</span>
@@ -139,25 +139,7 @@
     let conversation = []
     let userId = null
 
-    async function loadHistory() {
-      const { data: history } = await supabase
-        .from('chat_history_trm')
-        .select('role, message')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: true })
-        .limit(50)
-
-      if (history && history.length > 0) {
-        chatMsgs.innerHTML = ''
-        conversation = []
-        for (const m of history) {
-          addMsg(m.role, m.message, false)
-          conversation.push({ role: m.role, content: m.message })
-        }
-      }
-    }
-
-    function addMsg(role, text, saveToDb = true) {
+    function addMsg(role, text) {
       const div = document.createElement('div')
       div.className = 'chat-msg ' + role
       const av = document.createElement('div')
@@ -174,14 +156,6 @@
       div.appendChild(bub)
       chatMsgs.appendChild(div)
       chatMsgs.scrollTop = chatMsgs.scrollHeight
-
-      if (saveToDb && userId) {
-        supabase.from('chat_history_trm').insert({
-          user_id: userId,
-          role: role,
-          message: text
-        }).then(() => {})
-      }
     }
 
     function showLoading() {
@@ -302,7 +276,10 @@
         return
       }
 
+      const existingBooking = sessionStorage.getItem('trm_booking')
+      const existingData = existingBooking ? JSON.parse(existingBooking) : {}
       sessionStorage.setItem('trm_booking', JSON.stringify({
+        ...existingData,
         from_chat: true,
         questionnaire_id: qData.id
       }))
@@ -322,7 +299,6 @@
       if (session) {
         userId = session.user.id
         await showUserName('user-name')
-        await loadHistory()
         document.getElementById('logout-btn').style.display = 'flex'
       } else {
         const userNameEl = document.getElementById('user-name')
@@ -344,5 +320,7 @@
     init()
   </script>
 
+
+  <script type="module" src="js/navbar.js"></script>
 </body>
 </html>

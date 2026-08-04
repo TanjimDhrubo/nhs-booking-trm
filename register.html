@@ -71,7 +71,7 @@
     <p>
       <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span class="footer-trm">Developed by TRM</span>
       <span aria-hidden="true">·</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">·</span>
@@ -167,11 +167,11 @@
 
         const { data: profile } = await supabase
           .from('profiles_trm')
-          .select('nhs_number')
+          .select('prn')
           .eq('id', authData.user.id)
           .single()
 
-        const displayNhs = profile?.nhs_number || 'auto-generated'
+        const displayNhs = profile?.prn || 'auto-generated'
 
         msgDiv.innerHTML = ''
         const da = document.createElement('div'); da.className = 'alert alert-success'; da.textContent = 'Account created successfully! You can now sign in.'; msgDiv.appendChild(da)

@@ -74,7 +74,7 @@
     <p>
       <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span class="footer-trm">Developed by TRM</span>
       <span aria-hidden="true">·</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">·</span>
@@ -128,7 +128,7 @@
 
       const { data: profiles } = await supabase
         .from('profiles_trm')
-        .select('id, full_name, date_of_birth, nhs_number, created_at')
+        .select('id, full_name, date_of_birth, prn, created_at')
         .order('full_name')
 
       if (!profiles || profiles.length === 0) {
@@ -169,7 +169,7 @@
 
         rows += '<tr>'
         rows += '<td><a href="admin-dashboard.html?patient=' + p.id + '" class="patient-link">' + (p.full_name || 'Unknown') + '</a></td>'
-        rows += '<td>' + (p.nhs_number || '—') + '</td>'
+        rows += '<td>' + (p.prn || '—') + '</td>'
         rows += '<td>' + dob + '</td>'
         rows += '<td>' + p.appointment_count + '</td>'
         rows += '<td>' + (p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—') + '</td>'
@@ -187,7 +187,7 @@
       }
       const filtered = allPatients.filter(p =>
         (p.full_name && p.full_name.toLowerCase().includes(q)) ||
-        (p.nhs_number && p.nhs_number.includes(q))
+        (p.prn && p.prn.includes(q))
       )
       renderPatients(filtered)
     })
@@ -204,5 +204,7 @@
     init()
   </script>
 
+
+  <script type="module" src="js/navbar.js"></script>
 </body>
 </html>

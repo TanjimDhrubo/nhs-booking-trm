@@ -104,7 +104,7 @@
     <p>
       <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span class="footer-trm">Developed by TRM</span>
       <span aria-hidden="true">·</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">·</span>
@@ -151,20 +151,96 @@
         return
       }
 
-      const { data: appt, error } = await supabase
-        .from('appointments_trm')
-        .select('*, doctors_trm(name, specialisation)')
-        .eq('id', apptId)
-        .single()
+      const bookedFor = params.get('booked_for')
 
-      if (error || !appt) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <p>Appointment not found.</p>
-            <a href="dashboard.html" class="btn-primary">Go to Dashboard</a>
-          </div>`
-        return
-      }
+      if (bookedFor) {
+          const stored = JSON.parse(sessionStorage.getItem('trm_booking') || '{}')
+          let docName = 'Your Doctor'
+          let docSpec = ''
+          if (stored.doctor_id) {
+            const { data: doc } = await supabase
+              .from('doctors_trm')
+              .select('name, specialisation')
+              .eq('id', stored.doctor_id)
+              .maybeSingle()
+            if (doc) {
+              docName = doc.name
+              docSpec = doc.specialisation
+            }
+          }
+
+          const detailRows = `
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Booked For</span>
+              <span class="confirm-detail-value">${escapeHtml(bookedFor)}</span>
+            </div>
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Doctor</span>
+              <span class="confirm-detail-value">${escapeHtml(docName)}</span>
+            </div>
+            ${docSpec ? `
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Specialisation</span>
+              <span class="confirm-detail-value">${escapeHtml(docSpec)}</span>
+            </div>` : ''}
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Date &amp; Time</span>
+              <span class="confirm-detail-value">${stored.appointment_date ? escapeHtml(formatDate(stored.appointment_date)) : '&mdash;'}</span>
+            </div>
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Type</span>
+              <span class="confirm-detail-value">${stored.appointment_type ? escapeHtml(stored.appointment_type) : '&mdash;'}</span>
+            </div>
+            <div class="confirm-detail-row">
+              <span class="confirm-detail-label">Status</span>
+              <span class="confirm-detail-value"><span class="badge badge-confirmed">Confirmed</span></span>
+            </div>`
+
+          container.innerHTML = `
+            <article class="card" style="text-align:center;padding:40px 32px">
+              <div class="confirm-icon" aria-hidden="true">&#10003;</div>
+              <h1 style="font-size:24px;font-weight:700;color:var(--nhs-dark);margin-bottom:4px">Appointment Confirmed</h1>
+              <p style="color:var(--nhs-muted);font-size:15px;margin-bottom:4px">Appointment booked for ${escapeHtml(bookedFor)}</p>
+              <div class="confirm-id">Ref: NHS-${escapeHtml(apptId.slice(0,8).toUpperCase())}</div>
+
+              <div style="background:var(--bg-subtle);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:24px;text-align:left">
+                ${detailRows}
+              </div>
+
+              <div style="margin:24px 0;text-align:center">
+                <p style="font-size:13px;color:var(--nhs-muted);margin-bottom:8px;font-weight:600">CHECK-IN QR CODE</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=NHS-${escapeHtml(apptId.slice(0,8).toUpperCase())}"
+                     alt="QR code for appointment NHS-${escapeHtml(apptId.slice(0,8).toUpperCase())}"
+                     style="border-radius:var(--radius-md);border:2px solid var(--border)"
+                     width="150" height="150"
+                     loading="lazy">
+                <p style="font-size:12px;color:var(--nhs-muted);margin-top:6px">This appointment is saved under ${escapeHtml(bookedFor)}'s account and they have been notified.</p>
+              </div>
+
+              <div class="confirm-actions">
+                <a href="dashboard.html" class="btn-primary btn-full">Go to Dashboard &rarr;</a>
+                <button class="btn-secondary btn-full" id="print-btn">Print Confirmation</button>
+              </div>
+            </article>`
+
+          document.getElementById('print-btn').addEventListener('click', () => window.print())
+          return
+        }
+
+        const { data: appt, error } = await supabase
+          .from('appointments_trm')
+          .select('*, doctors_trm(name, specialisation)')
+          .eq('id', apptId)
+          .single()
+
+        if (error || !appt) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <p>Appointment not found.</p>
+              <a href="dashboard.html" class="btn-primary">Go to Dashboard</a>
+            </div>`
+          return
+        }
 
       // Fetch questionnaire AI brief if one exists
       const { data: questionnaire } = await supabase
@@ -257,5 +333,7 @@
     init()
   </script>
 
+
+  <script type="module" src="js/navbar.js"></script>
 </body>
 </html>

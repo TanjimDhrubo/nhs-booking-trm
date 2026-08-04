@@ -65,8 +65,8 @@
           </div>
 
           <div class="form-group">
-            <label for="nhs-number">PRN (Patient Reference Number) <span style="font-weight:400;font-size:13px;color:var(--nhs-muted)">(read-only — auto-generated)</span></label>
-            <input type="text" id="nhs-number" readonly disabled style="background:var(--bg-subtle);cursor:not-allowed" aria-describedby="nhs-help">
+            <label for="prn-number">PRN (Patient Reference Number) <span style="font-weight:400;font-size:13px;color:var(--nhs-muted)">(read-only — auto-generated)</span></label>
+            <input type="text" id="prn-number" readonly disabled style="background:var(--bg-subtle);cursor:not-allowed" aria-describedby="nhs-help">
             <small id="nhs-help" style="font-size:12px;color:var(--nhs-muted);margin-top:4px;display:block">Your PRN (Patient Reference Number) is assigned automatically at registration and cannot be changed.</small>
           </div>
 
@@ -98,7 +98,7 @@
     <p>
       <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span class="footer-trm">Developed by TRM</span>
       <span aria-hidden="true">·</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">·</span>
@@ -135,14 +135,14 @@
 
       const { data: profile } = await supabase
         .from('profiles_trm')
-        .select('full_name, date_of_birth, nhs_number')
+        .select('full_name, date_of_birth, prn')
         .eq('id', user.id)
         .single()
 
       if (profile) {
         document.getElementById('full-name').value = profile.full_name || ''
         document.getElementById('date-of-birth').value = profile.date_of_birth || ''
-        document.getElementById('nhs-number').value = profile.nhs_number || ''
+        document.getElementById('prn-number').value = profile.prn || ''
       }
     }
 
@@ -224,5 +224,7 @@
     init()
   </script>
 
+
+  <script type="module" src="js/navbar.js"></script>
 </body>
 </html>

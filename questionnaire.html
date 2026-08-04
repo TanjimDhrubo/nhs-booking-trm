@@ -157,7 +157,7 @@
     <p>
       <span>&copy; 2026 NHS Appointment Booking System</span>
       <span aria-hidden="true">&#183;</span>
-      <span class="footer-trm">Developed by <a href="team.html" aria-label="Meet the TRM team">TRM</a></span>
+      <span class="footer-trm">Developed by TRM</span>
       <span aria-hidden="true">&#183;</span>
       <a href="privacy.html">Privacy Policy</a>
       <span aria-hidden="true">&#183;</span>
@@ -224,6 +224,26 @@
       if (!user) {
         showMsg('Authentication error.', 'error')
         return null
+      }
+
+      if (data.dependent_prn) {
+        const { data: depResult, error: depErr } = await supabase.rpc('book_dependent_appointment', {
+          p_prn: data.dependent_prn,
+          p_doctor_id: data.doctor_id,
+          p_appointment_type: data.appointment_type,
+          p_appointment_date: data.appointment_date
+        })
+        if (depErr || !depResult || !depResult.success) {
+          showMsg(depResult?.code === 'not_registered'
+            ? 'This patient is no longer registered. Ask them to create an account first.'
+            : 'Unable to book for this dependent. Please try again.', 'error')
+          return null
+        }
+        // Link questionnaire to appointment
+        if (questionnaireId) {
+          await supabase.from('questionnaires_trm').update({ appointment_id: depResult.appointment_id }).eq('id', questionnaireId)
+        }
+        return depResult.appointment_id
       }
 
       const insertData = {
@@ -310,7 +330,9 @@
       const apptId = await bookAppointment(qId)
       if (!apptId) { setButtonsLoading(false); return }
 
-      window.location.replace('confirmation.html?id=' + apptId)
+      const stored = JSON.parse(sessionStorage.getItem('trm_booking') || '{}')
+      const depName = stored.dependent_name || ''
+      window.location.replace('confirmation.html?id=' + apptId + (depName ? '&booked_for=' + encodeURIComponent(depName) : ''))
     })
 
     aiBookBtn.addEventListener('click', async () => {
@@ -339,7 +361,9 @@
       const apptId = await bookAppointment(qId)
       if (!apptId) { setButtonsLoading(false); return }
 
-      window.location.replace('confirmation.html?id=' + apptId)
+      const stored = JSON.parse(sessionStorage.getItem('trm_booking') || '{}')
+      const depName = stored.dependent_name || ''
+      window.location.replace('confirmation.html?id=' + apptId + (depName ? '&booked_for=' + encodeURIComponent(depName) : ''))
     })
 
     async function init() {
@@ -369,5 +393,7 @@
     init()
   </script>
 
+
+  <script type="module" src="js/navbar.js"></script>
 </body>
 </html>
