@@ -152,6 +152,12 @@ img { max-width: 100%; display: block; }
   text-decoration: none;
 }
 
+.navbar-links a.navbar-avatar,
+.navbar-links a.navbar-avatar:hover {
+  color: #fff;
+  background: var(--nhs-blue);
+}
+
 /* Navbar buttons must keep button colors (not the muted link color) */
 .navbar-links a.btn-primary,
 .navbar-links a.btn-primary:hover {
@@ -1512,6 +1518,12 @@ footer a:hover {
 
 :root.dark .navbar-links a {
   color: var(--nhs-muted);
+}
+
+:root.dark .navbar-links a.navbar-avatar,
+:root.dark .navbar-links a.navbar-avatar:hover {
+  color: #fff;
+  background: var(--nhs-blue);
 }
 
 :root.dark .navbar-links a.btn-primary,

@@ -61,7 +61,7 @@
 
     <div class="search-bar">
       <label for="patient-search" class="visually-hidden">Search patients</label>
-      <input type="text" id="patient-search" placeholder="Search by name or NHS number..." style="width:100%">
+      <input type="text" id="patient-search" placeholder="Search by name or PRN..." style="width:100%">
     </div>
 
     <div id="patients-content">
@@ -176,7 +176,7 @@
         rows += '</tr>'
       }
 
-      container.innerHTML = '<div class="table-wrap"><table><caption class="sr-only">All registered patients</caption><thead><tr><th scope="col">Name</th><th scope="col">NHS Number</th><th scope="col">Date of Birth</th><th scope="col">Appointments</th><th scope="col">Registered</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+      container.innerHTML = '<div class="table-wrap"><table><caption class="sr-only">All registered patients</caption><thead><tr><th scope="col">Name</th><th scope="col">PRN (Patient Reference Number)</th><th scope="col">Date of Birth</th><th scope="col">Appointments</th><th scope="col">Registered</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
     }
 
     searchInput.addEventListener('input', () => {
