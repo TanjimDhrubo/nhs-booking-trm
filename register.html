@@ -57,11 +57,6 @@
           <input type="date" id="dob" required>
         </div>
 
-        <div class="form-group">
-          <label for="nhs-number">PRN (Patient Reference Number) (optional)</label>
-          <input type="text" id="nhs-number" placeholder="10-digit PRN" pattern="[0-9]{10}" maxlength="10" autocomplete="off">
-        </div>
-
         <button type="submit" class="btn-primary" id="register-btn">Create Account</button>
       </form>
 
@@ -111,7 +106,6 @@
       const email = document.getElementById('email').value.trim()
       const password = document.getElementById('password').value
       const dob = document.getElementById('dob').value
-      const nhsNumber = document.getElementById('nhs-number').value.trim()
       const msgDiv = document.getElementById('message')
       const submitBtn = form.querySelector('button[type=submit]')
 
@@ -146,8 +140,7 @@
           options: {
             data: {
               full_name: fullName,
-              date_of_birth: dob || null,
-              nhs_number: nhsNumber || null
+              date_of_birth: dob || null
             }
           }
         })
@@ -178,7 +171,7 @@
           .eq('id', authData.user.id)
           .single()
 
-        const displayNhs = profile?.nhs_number || nhsNumber || 'auto-generated'
+        const displayNhs = profile?.nhs_number || 'auto-generated'
 
         msgDiv.innerHTML = ''
         const da = document.createElement('div'); da.className = 'alert alert-success'; da.textContent = 'Account created successfully! You can now sign in.'; msgDiv.appendChild(da)
