@@ -113,14 +113,14 @@
       }
       const userEmail = session.user.email
 
-      const { data: doctor } = await supabase
+      const { data: doctor, error: doctorError } = await supabase
         .from('doctors_trm')
         .select('id, name')
         .eq('email', userEmail)
-        .single()
+        .maybeSingle()
 
-      if (!doctor) {
-        window.location.replace('admin-login.html')
+      if (doctorError || !doctor) {
+        window.location.replace('index.html')
         return
       }
 

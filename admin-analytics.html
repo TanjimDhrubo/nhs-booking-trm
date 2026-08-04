@@ -163,10 +163,10 @@
         .from('doctors_trm')
         .select('id, name, specialisation')
         .eq('email', userEmail)
-        .single()
+        .maybeSingle()
 
       if (doctorError || !doctor) {
-        window.location.replace('admin-login.html')
+        window.location.replace('index.html')
         return
       }
 

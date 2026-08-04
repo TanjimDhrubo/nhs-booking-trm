@@ -466,7 +466,7 @@
         line += '.'
         actionsEl.innerHTML = '' +
           '<a href="checkin.html" class="btn-primary">Check In &rarr;</a>' +
-          '<a href="reschedule.html?id=' + encodeURIComponent(todayAppts[0].id) + '" class="btn-secondary">View details</a>'
+          '<a href="reschedule.html?appointment_id=' + encodeURIComponent(todayAppts[0].id) + '" class="btn-secondary">View details</a>'
       } else if (nextAppt) {
         if (weekCount > 1) {
           line = 'You have ' + weekCount + ' appointments coming up this week.'
@@ -515,7 +515,7 @@
         '  ' + renderBadge(nextAppt.status) +
         '</div>' +
         '<div class="next-actions">' +
-        '  <a href="reschedule.html?id=' + encodeURIComponent(nextAppt.id) + '" class="btn-ghost btn-sm">Reschedule</a>' +
+        '  <a href="reschedule.html?appointment_id=' + encodeURIComponent(nextAppt.id) + '" class="btn-ghost btn-sm">Reschedule</a>' +
         '</div>'
     }
 
@@ -549,7 +549,7 @@
         html += '  </div>'
         html += '  <div class="appt-actions">'
         html +=      renderBadge(a.status)
-        html += '    <a href="reschedule.html?id=' + encodeURIComponent(a.id) + '" class="btn-ghost btn-sm">Reschedule</a>'
+        html += '    <a href="reschedule.html?appointment_id=' + encodeURIComponent(a.id) + '" class="btn-ghost btn-sm">Reschedule</a>'
         if (a.status === 'confirmed') {
           html += '    <button class="btn-danger btn-sm dash-cancel-btn" data-id="' + escapeHtml(a.id) + '" data-date="' + escapeHtml(a.appointment_date) + '" data-doc="' + escapeHtml(doc ? doc.name : '') + '">Cancel</button>'
         }

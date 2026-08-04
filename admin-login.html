@@ -138,7 +138,16 @@
 
     async function redirectIfLoggedIn() {
       const { data: { session } } = await supabase.auth.getSession()
-      if (session) window.location.replace('admin-dashboard.html')
+      if (!session) return
+
+      const { data: doctor } = await supabase
+        .from('doctors_trm')
+        .select('id')
+        .eq('email', session.user.email)
+        .maybeSingle()
+
+      if (doctor) window.location.replace('admin-dashboard.html')
+      else window.location.replace('index.html')
     }
     redirectIfLoggedIn()
 

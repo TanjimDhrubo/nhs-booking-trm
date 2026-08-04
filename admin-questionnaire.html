@@ -107,13 +107,13 @@
       if (!session) { window.location.replace('admin-login.html'); return }
 
       // Verify doctor
-      const { data: doctor } = await supabase
+      const { data: doctor, error: doctorError } = await supabase
         .from('doctors_trm')
         .select('id, name')
         .eq('email', session.user.email)
-        .single()
+        .maybeSingle()
 
-      if (!doctor) { window.location.replace('admin-login.html'); return }
+      if (doctorError || !doctor) { window.location.replace('index.html'); return }
 
       document.getElementById('doctor-name').textContent = doctor.name
 
