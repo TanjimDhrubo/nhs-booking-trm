@@ -132,8 +132,16 @@
 
         <div class="questionnaire-actions">
           <button type="submit" class="btn-primary btn-full" id="submit-book-btn">Submit Answers &amp; Book &rarr;</button>
-          <button type="button" class="btn-ai btn-full" id="ai-book-btn">Get AI Analysis &amp; Book &rarr;</button>
+          <button type="button" class="btn-ai btn-full" id="ai-book-btn" disabled>Get AI Analysis &amp; Book &rarr;</button>
         </div>
+        <label for="ai-consent" style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--nhs-muted);margin:10px 0 0;cursor:pointer;line-height:1.5">
+          <input type="checkbox" id="ai-consent" style="margin-top:2px">
+          <span>I consent to my symptoms being shared with the AI service for a summary (<a href="privacy.html" style="color:var(--nhs-blue)">privacy policy</a>).</span>
+        </label>
+        <p style="font-size:12px;color:var(--nhs-muted);text-align:center;margin:8px 0 0">
+          <strong>Submit Answers &amp; Book</strong> sends your answers straight to your doctor &mdash; no AI involved.
+          <strong>Get AI Analysis &amp; Book</strong> also sends your answers to an AI service for a summary.
+        </p>
 
         <details class="chat-info" style="margin:16px 0 0;font-size:13px;color:var(--nhs-muted)">
           <summary style="cursor:pointer;font-weight:500">Why send this to my doctor?</summary>
@@ -194,6 +202,11 @@
     const card = document.getElementById('questionnaire-card')
     const submitBookBtn = document.getElementById('submit-book-btn')
     const aiBookBtn = document.getElementById('ai-book-btn')
+    const aiConsent = document.getElementById('ai-consent')
+
+    aiConsent.addEventListener('change', () => {
+      aiBookBtn.disabled = isSubmitting || !aiConsent.checked
+    })
 
     severitySlider.addEventListener('input', () => {
       severityValue.textContent = severitySlider.value
@@ -288,9 +301,12 @@
       msgEl.appendChild(div)
     }
 
+    let isSubmitting = false
+
     function setButtonsLoading(loading) {
+      isSubmitting = loading
       submitBookBtn.disabled = loading
-      aiBookBtn.disabled = loading
+      aiBookBtn.disabled = loading || !aiConsent.checked
       submitBookBtn.textContent = loading ? 'Processing...' : 'Submit Answers & Book \u2192'
       aiBookBtn.textContent = loading ? 'Analysing...' : 'Get AI Analysis & Book \u2192'
     }
@@ -323,8 +339,7 @@
       setButtonsLoading(true)
 
       const answers = getAnswers()
-      const brief = await analyseSymptoms(answers)
-      const qId = await saveQuestionnaire(answers, brief)
+      const qId = await saveQuestionnaire(answers)
       if (!qId) { setButtonsLoading(false); return }
 
       const apptId = await bookAppointment(qId)
