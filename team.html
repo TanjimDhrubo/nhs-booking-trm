@@ -104,19 +104,6 @@
 
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <nav class="navbar" aria-label="Main navigation">
-    <a href="index.html" class="navbar-brand" aria-label="NHS Booking home">
-      <div class="navbar-logo" aria-hidden="true">NHS</div>
-      <span class="navbar-name"><abbr title="National Health Service" style="text-decoration:none">NHS</abbr> Appointment Booking <span>| TRM</span></span>
-    </a>
-    <div class="navbar-links">
-      <a href="index.html" class="btn-ghost">Home</a>
-      <a href="#flagship" class="btn-ghost">Our System</a>
-      <a href="register.html" class="btn-primary" id="nav-book">Book Appointment</a>
-      <a href="dashboard.html" class="btn-primary" id="nav-dashboard" style="display:none">Dashboard &rarr;</a>
-    </div>
-  </nav>
-
   <main id="main-content" class="wrap">
 
     <section aria-labelledby="team-heading">
@@ -233,28 +220,6 @@
 
   </main>
 
-  <script type="module">
-    import { supabase } from './js/supabase.js'
 
-    async function updateAuthNav() {
-      const { data: { session } } = await supabase.auth.getSession()
-
-      const bookBtn = document.getElementById('nav-book')
-      const dashBtn = document.getElementById('nav-dashboard')
-
-      if (session) {
-        if (bookBtn) bookBtn.style.display = 'none'
-        if (dashBtn) dashBtn.style.display = 'inline-flex'
-      } else {
-        if (bookBtn) bookBtn.style.display = ''
-        if (dashBtn) dashBtn.style.display = 'none'
-      }
-    }
-
-    updateAuthNav()
-    window.addEventListener('pageshow', (e) => { if (e.persisted) updateAuthNav() })
-  </script>
-
-  <script type="module" src="js/navbar.js"></script>
 </body>
 </html>
