@@ -5,146 +5,102 @@
       <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ataqzfyppitexytlitsw.supabase.co https://api.groq.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="TRM">
-  <meta name="description" content="Meet the TRM team behind the NHS Appointment Booking System — Tanjim Rahman Dhrubo, MD Ratul Hasan, and Mohamed Barrie.">
-  <meta name="keywords" content="NHS, appointment, booking, healthcare, TRM, team, developers, university project">
-  <title>NHS Booking — Meet the Team</title>
+  <meta name="description" content="TRM — three engineers building secure, accessible, full-stack web systems. Tanjim Rahman Dhrubo, MD Ratul Hasan and Mohamed Barrie.">
+  <meta name="keywords" content="TRM, team, developers, engineering, university project, NHS, appointment, booking">
+  <title>TRM — Meet the Team</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
-  <script>if(localStorage.getItem('trm-theme')==='dark')document.documentElement.classList.add('dark')</script>
+  <script>document.documentElement.classList.add('dark')</script>
   <style>
-    .team-intro {
-      max-width: 560px;
-      margin: 12px auto 0;
-      text-align: center;
+    .gridbg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(232,228,216,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,228,216,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
     }
-    .team-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 24px;
+    .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 44px 24px 64px; }
+
+    .eyebrow { font-size: 12px; letter-spacing: 3px; color: #35E0C4; font-weight: 600; text-transform: uppercase; }
+    .eyebrow::before { content: '// '; color: #C6461F; }
+    h1 { font-size: clamp(44px, 7vw, 78px); font-weight: 800; letter-spacing: -2.5px; color: #F4F1E7; line-height: 0.95; margin: 14px 0 16px; }
+    h1 .hl { color: #35E0C4; }
+    .sub { font-size: 15px; color: #9AA2AC; max-width: 560px; }
+    .sub b { color: #E8E4D8; font-weight: 600; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 40px 0 48px; }
+    .stat {
+      background: #111824; border: 1px solid #222D3C; padding: 20px;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
     }
-    .team-stats li {
-      list-style: none;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--nhs-muted);
+    .stat .num { font-size: 44px; font-weight: 800; letter-spacing: -1px; color: #F4F1E7; line-height: 1; }
+    .stat .num i { font-style: normal; color: #35E0C4; }
+    .stat .lbl { display: block; margin-top: 8px; font-size: 11px; letter-spacing: 2px; color: #7C8694; font-weight: 600; }
+
+    .sec-tag { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .sec-tag h2 { font-size: 12px; letter-spacing: 3px; color: #E8E4D8; font-weight: 700; margin: 0; }
+    .sec-tag .line { flex: 1; height: 1px; background: linear-gradient(90deg, #222D3C, transparent); }
+
+    .nodes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .node { background: #111824; border: 1px solid #222D3C; display: flex; flex-direction: column; }
+    .node-head {
+      padding: 18px; background: #161F2C; border-bottom: 1px solid #222D3C; position: relative;
+      display: flex; align-items: center; gap: 14px;
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
     }
-    .team-stats strong {
-      color: var(--nhs-blue);
-      font-size: 15px;
-      margin-right: 2px;
+    .tile {
+      width: 52px; height: 52px; flex: none;
+      background: #0C1118; border: 2px solid #35E0C4; color: #35E0C4;
+      display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, Consolas, monospace; font-size: 17px; font-weight: 700; letter-spacing: 1px;
     }
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 40px;
+    .node-name { font-size: 19px; font-weight: 700; color: #F4F1E7; letter-spacing: -0.3px; }
+    .node-role { font-size: 10.5px; letter-spacing: 1.8px; color: #35E0C4; font-weight: 600; margin-top: 3px; }
+    .node-body { padding: 18px; flex: 1; }
+    .node-bio { font-size: 13px; color: #9AA2AC; line-height: 1.7; }
+    .skills-label { margin: 16px 0 8px; font-size: 10.5px; letter-spacing: 1.6px; color: #C6461F; font-weight: 700; }
+    .mods { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mods span { font-size: 11px; color: #C9CFD6; border: 1px solid #293545; padding: 2px 8px; font-family: ui-monospace, Consolas, monospace; }
+
+    .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .value { background: #111824; border: 1px solid #222D3C; padding: 24px; position: relative; }
+    .value .idx { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #C6461F; letter-spacing: 1px; }
+    .value h3 { font-size: 15px; letter-spacing: 1px; color: #F4F1E7; margin: 10px 0 8px; font-weight: 700; }
+    .value p { font-size: 13px; color: #9AA2AC; line-height: 1.7; }
+
+    .featured {
+      margin-top: 20px; background: #111824; border: 1px solid #222D3C; padding: 32px;
+      display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: center;
+      position: relative;
+      clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px));
     }
-    .team-card {
-      background: var(--bg-card);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 32px 26px;
-      text-align: center;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-    }
-    .team-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--nhs-blue);
-    }
-    .team-avatar {
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      margin: 0 auto 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: 800;
-    }
-    .team-role {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 14px;
-    }
-    .team-name {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--nhs-dark);
-      margin-bottom: 4px;
-    }
-    .team-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--nhs-muted);
-      margin-bottom: 16px;
-    }
-    .team-divider {
-      height: 1px;
-      background: var(--border-soft);
-      margin: 16px 0;
-    }
-    .team-bio {
-      font-size: 14px;
-      color: var(--nhs-muted);
-      line-height: 1.7;
-      text-align: left;
-      padding: 0 2px;
-    }
-    .team-owned {
-      margin-top: 20px;
-    }
-    .team-owned-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--nhs-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .team-owned ul {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .team-owned li {
-      font-size: 12px;
-      padding: 3px 10px;
-      background: var(--bg-subtle);
-      color: var(--nhs-muted);
-      border-radius: 20px;
-      font-weight: 500;
-    }
-    .project-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: start;
-    }
+    .featured .tag { display: inline-block; font-size: 11px; letter-spacing: 2.5px; color: #C6461F; border: 1px solid #3A2A24; padding: 3px 10px; font-weight: 700; }
+    .featured h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #F4F1E7; margin: 14px 0 8px; }
+    .featured p { font-size: 13.5px; color: #9AA2AC; line-height: 1.8; margin-bottom: 16px; }
+    .featured .cta { display: inline-block; background: #35E0C4; color: #0C1118; font-weight: 700; font-size: 13px; letter-spacing: 1px; padding: 12px 22px; text-decoration: none; }
+    .featured .cta:hover { background: #E8E4D8; text-decoration: none; }
+    .featured .stack { border-left: 1px solid #222D3C; padding-left: 28px; }
+    .featured .stack .sl { font-size: 10.5px; letter-spacing: 2px; color: #7C8694; font-weight: 600; margin-bottom: 12px; }
+    .stack-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #222D3C; font-size: 12.5px; }
+    .stack-row:last-child { border-bottom: none; }
+    .stack-row .lbl { color: #7C8694; }
+    .stack-row .val { color: #E8E4D8; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+
+    .team-foot { margin-top: 44px; border-top: 1px solid #222D3C; padding-top: 14px; font-size: 12px; color: #5A6472; letter-spacing: 1px; }
+    .team-foot b { color: #35E0C4; font-weight: 600; }
+
     @media (max-width: 900px) {
-      .team-grid { grid-template-columns: 1fr; }
-      .project-grid { grid-template-columns: 1fr; gap: 28px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .nodes { grid-template-columns: 1fr; }
+      .values { grid-template-columns: 1fr; }
+      .featured { grid-template-columns: 1fr; }
+      .featured .stack { border-left: none; border-top: 1px solid #222D3C; padding-left: 0; padding-top: 20px; }
     }
   </style>
 </head>
 <body>
+
+  <div class="gridbg" aria-hidden="true"></div>
 
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -154,190 +110,131 @@
       <span class="navbar-name"><abbr title="National Health Service" style="text-decoration:none">NHS</abbr> Appointment Booking <span>| TRM</span></span>
     </a>
     <div class="navbar-links">
-      <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
-        <span class="theme-icon icon-sun" aria-hidden="true">&#9728;</span>
-        <span class="theme-icon icon-moon" aria-hidden="true">&#9790;</span>
-      </button>
       <a href="index.html" class="btn-ghost">Home</a>
-      <a href="#about-project" class="btn-ghost">Our System</a>
+      <a href="#flagship" class="btn-ghost">Our System</a>
       <a href="register.html" class="btn-primary" id="nav-book">Book Appointment</a>
       <a href="dashboard.html" class="btn-primary" id="nav-dashboard" style="display:none">Dashboard &rarr;</a>
     </div>
   </nav>
 
-  <main id="main-content">
+  <main id="main-content" class="wrap">
 
-    <section aria-labelledby="team-heading" style="padding:72px 24px 40px;background:var(--bg-page)">
-      <div class="container" style="padding-top:0;padding-bottom:0">
-        <div style="text-align:center">
-          <span class="story-eyebrow">The People Behind TRM</span>
-          <h1 id="team-heading" style="font-size:clamp(30px,4vw,44px);font-weight:800;letter-spacing:-1.5px;color:var(--nhs-dark);margin-bottom:12px">
-            Meet the Team
-          </h1>
-          <p class="team-intro" style="font-size:17px;color:var(--nhs-muted);line-height:1.7">
-            Three developers. One mission. Build the best NHS appointment booking system our university has ever seen.
-          </p>
-        </div>
-
-        <ul class="team-stats" aria-label="Project statistics" style="list-style:none;padding:0;margin:24px 0 0">
-          <li><strong>13</strong> Pages Built</li>
-          <li><strong>5</strong> Database Tables</li>
-          <li><strong>3</strong> Team Members</li>
-          <li><strong>100%</strong> Built with Passion</li>
-        </ul>
-      </div>
+    <section aria-labelledby="team-heading">
+      <span class="eyebrow">TRM — engineering unit</span>
+      <h1 id="team-heading">WE ARE <span class="hl">TRM</span></h1>
+      <p class="sub">Three engineers. Full-stack delivery. Security-first, accessibility-obsessed, built to be shipped. Our flagship: <b>the NHS Appointment Booking System</b>.</p>
     </section>
 
-    <section aria-labelledby="heading-developers" style="padding:40px 24px 80px;background:var(--bg-page)">
-      <div class="container" style="padding-top:0;padding-bottom:0">
-        <div class="team-grid">
-
-          <article class="team-card">
-            <div class="team-avatar" style="background:#E8F1FB;color:#1E40AF" aria-hidden="true">TR</div>
-            <span class="team-role" style="background:var(--nhs-blue-soft);color:var(--nhs-blue)">Project Lead</span>
-            <h2 class="team-name">Tanjim Rahman Dhrubo</h2>
-            <p class="team-title">DevOps Engineer &amp; Project Architect</p>
-            <div class="team-divider" aria-hidden="true"></div>
-            <p class="team-bio">
-              The architect behind TRM. Tanjim led the technical direction of the project — from database design and Supabase security policies to deployment on GitHub Pages. He defined the project structure, set up the entire development environment, and kept the team moving forward. If it runs, he made sure it runs right.
-            </p>
-            <div class="team-owned">
-              <div class="team-owned-label">Pages Owned</div>
-              <ul>
-                <li>index.html</li>
-                <li>login.html</li>
-                <li>register.html</li>
-                <li>admin-login.html</li>
-                <li>privacy.html</li>
-              </ul>
-            </div>
-          </article>
-
-          <article class="team-card">
-            <div class="team-avatar" style="background:#E1F5EE;color:#065F46" aria-hidden="true">MR</div>
-            <span class="team-role" style="background:var(--nhs-green-soft);color:var(--nhs-green)">Senior Developer</span>
-            <h2 class="team-name">MD Ratul Hasan</h2>
-            <p class="team-title">Senior Frontend Developer</p>
-            <div class="team-divider" aria-hidden="true"></div>
-            <p class="team-bio">
-              The engine of TRM. Ratul built the core of the booking system — every appointment booked, rescheduled or cancelled flows through his code. He focused on clean logic, smart Supabase queries, and a seamless patient experience across the most critical pages of the application.
-            </p>
-            <div class="team-owned">
-              <div class="team-owned-label">Pages Owned</div>
-              <ul>
-                <li>dashboard.html</li>
-                <li>book.html</li>
-                <li>history.html</li>
-                <li>reschedule.html</li>
-                <li>admin-dashboard.html</li>
-              </ul>
-            </div>
-          </article>
-
-          <article class="team-card">
-            <div class="team-avatar" style="background:#FAEEDA;color:#92400E" aria-hidden="true">MB</div>
-            <span class="team-role" style="background:var(--nhs-amber-soft, #FDF1E3);color:var(--nhs-amber)">QA Engineer</span>
-            <h2 class="team-name">Mohamed Barrie</h2>
-            <p class="team-title">QA Engineer &amp; Frontend Developer</p>
-            <div class="team-divider" aria-hidden="true"></div>
-            <p class="team-bio">
-              The quality gate of TRM. Mohamed built the doctor listing, check-in system and notification centre, then turned his focus to quality — running W3C validation, accessibility audits and cross-browser testing across every page. If something was broken, he found it, fixed it, and made it better.
-            </p>
-            <div class="team-owned">
-              <div class="team-owned-label">Pages Owned</div>
-              <ul>
-                <li>doctors.html</li>
-                <li>checkin.html</li>
-                <li>notifications.html</li>
-                <li>team.html</li>
-              </ul>
-            </div>
-          </article>
-
-        </div>
-      </div>
+    <section aria-label="Team statistics" class="stats">
+      <div class="stat"><span class="num">3</span><span class="lbl">ENGINEERS</span></div>
+      <div class="stat"><span class="num"><i>21</i></span><span class="lbl">PAGES SHIPPED</span></div>
+      <div class="stat"><span class="num"><i>46</i></span><span class="lbl">COMMITS PUSHED</span></div>
+      <div class="stat"><span class="num"><i>27</i></span><span class="lbl">SECURITY POLICIES</span></div>
     </section>
 
-    <section aria-labelledby="heading-about-project" id="about-project" style="padding:72px 24px;background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-      <div class="container" style="padding-top:0;padding-bottom:0">
-        <div style="text-align:center;margin-bottom:44px">
-          <span class="story-eyebrow">Behind the build</span>
-          <h2 id="heading-about-project" style="font-size:28px;font-weight:700;letter-spacing:-0.5px;color:var(--nhs-dark);margin-top:8px">About This Project</h2>
-        </div>
+    <section aria-labelledby="heading-operators">
+      <div class="sec-tag"><h2 id="heading-operators">THE OPERATORS</h2><div class="line" aria-hidden="true"></div></div>
 
-        <div class="project-grid">
-          <div>
-            <h3 style="font-size:18px;font-weight:700;color:var(--nhs-dark);margin-bottom:12px">The Brief</h3>
-            <p style="font-size:14px;line-height:1.8;color:var(--nhs-muted);margin-bottom:24px">
-              This NHS Appointment Booking System was developed as a group university project. The brief required a fully functional web application allowing patients to register, book appointments, check in, and manage their medical appointments online.
-            </p>
-            <div class="team-divider" aria-hidden="true"></div>
-            <h3 style="font-size:18px;font-weight:700;color:var(--nhs-dark);margin:24px 0 12px">The Challenge</h3>
-            <p style="font-size:14px;line-height:1.8;color:var(--nhs-muted)">
-              We were tasked with replacing a traditional PHP and MySQL stack with modern alternatives. We chose Supabase for our cloud database and authentication, and built the entire frontend with vanilla JavaScript and semantic HTML5 — no frameworks, no shortcuts.
-            </p>
-          </div>
-          <div>
-            <h3 style="font-size:18px;font-weight:700;color:var(--nhs-dark);margin-bottom:16px">Tech Stack</h3>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px">
-              <span style="color:var(--nhs-muted);min-width:120px">Frontend</span>
-              <span style="color:var(--nhs-blue);font-weight:600">HTML5, CSS3, Vanilla JS</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px">
-              <span style="color:var(--nhs-muted);min-width:120px">Database</span>
-              <span style="color:var(--nhs-blue);font-weight:600">Supabase PostgreSQL</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px">
-              <span style="color:var(--nhs-muted);min-width:120px">Authentication</span>
-              <span style="color:var(--nhs-blue);font-weight:600">Supabase Auth (JWT)</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px">
-              <span style="color:var(--nhs-muted);min-width:120px">Security</span>
-              <span style="color:var(--nhs-blue);font-weight:600">Row Level Security (RLS)</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px">
-              <span style="color:var(--nhs-muted);min-width:120px">Hosting</span>
-              <span style="color:var(--nhs-blue);font-weight:600">GitHub Pages</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;font-size:14px">
-              <span style="color:var(--nhs-muted);min-width:120px">Version Control</span>
-              <span style="color:var(--nhs-blue);font-weight:600">Git &amp; GitHub</span>
+      <div class="nodes">
+        <article class="node">
+          <div class="node-head">
+            <div class="tile" aria-hidden="true">TR</div>
+            <div>
+              <h3 class="node-name">Tanjim Rahman Dhrubo</h3>
+              <div class="node-role">PROJECT LEAD · DEVOPS</div>
             </div>
           </div>
+          <div class="node-body">
+            <p class="node-bio">The architect. Database design, security policies and deployment — the one who decides how the system is built and makes sure it runs right.</p>
+            <div class="skills-label">// SKILLS</div>
+            <div class="mods"><span>Supabase</span><span>PostgreSQL</span><span>RLS</span><span>GitHub Pages</span><span>DevOps</span></div>
+          </div>
+        </article>
+
+        <article class="node">
+          <div class="node-head">
+            <div class="tile" aria-hidden="true">MR</div>
+            <div>
+              <h3 class="node-name">MD Ratul Hasan</h3>
+              <div class="node-role">SENIOR DEVELOPER</div>
+            </div>
+          </div>
+          <div class="node-body">
+            <p class="node-bio">The engine. Core booking logic, smart database queries and a seamless patient flow — the one who makes the whole system actually work.</p>
+            <div class="skills-label">// SKILLS</div>
+            <div class="mods"><span>Vanilla JS</span><span>SQL</span><span>UI Logic</span><span>Supabase Queries</span><span>Workflow</span></div>
+          </div>
+        </article>
+
+        <article class="node">
+          <div class="node-head">
+            <div class="tile" aria-hidden="true">MB</div>
+            <div>
+              <h3 class="node-name">Mohamed Barrie</h3>
+              <div class="node-role">QA ENGINEER · FRONTEND</div>
+            </div>
+          </div>
+          <div class="node-body">
+            <p class="node-bio">The quality gate. Frontend builds plus W3C validation, accessibility audits and cross-browser testing — the one who finds every bug and fixes it.</p>
+            <div class="skills-label">// SKILLS</div>
+            <div class="mods"><span>QA</span><span>Accessibility</span><span>W3C</span><span>Frontend</span><span>Testing</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="heading-values" style="margin-top:44px">
+      <div class="sec-tag"><h2 id="heading-values">WHAT WE BRING</h2><div class="line" aria-hidden="true"></div></div>
+
+      <div class="values">
+        <div class="value">
+          <span class="idx">01</span>
+          <h3>END-TO-END DELIVERY</h3>
+          <p>From database schema to live deployment — we ship complete systems, not just pages.</p>
+        </div>
+        <div class="value">
+          <span class="idx">02</span>
+          <h3>SECURITY-FIRST</h3>
+          <p>Row Level Security on every table, JWT auth, private by default. 27 policies enforced.</p>
+        </div>
+        <div class="value">
+          <span class="idx">03</span>
+          <h3>QUALITY &amp; ACCESSIBILITY</h3>
+          <p>W3C-valid markup, WCAG-minded design, cross-browser tested on every single page.</p>
         </div>
       </div>
     </section>
+
+    <section aria-labelledby="heading-flagship" id="flagship" style="margin-top:44px">
+      <div class="sec-tag"><h2 id="heading-flagship">FLAGSHIP BUILD</h2><div class="line" aria-hidden="true"></div></div>
+
+      <div class="featured">
+        <div>
+          <span class="tag">FEATURED PROJECT</span>
+          <h3>NHS APPOINTMENT BOOKING SYSTEM</h3>
+          <p>A fully functional web app for patients to register, book, check in and manage medical appointments — replacing a traditional PHP + MySQL stack with a modern, secure alternative.</p>
+          <a href="index.html" class="cta">EXPLORE THE SYSTEM →</a>
+        </div>
+        <div class="stack">
+          <div class="sl">// STACK</div>
+          <div class="stack-row"><span class="lbl">Frontend</span><span class="val">HTML5 · CSS3 · JS</span></div>
+          <div class="stack-row"><span class="lbl">Database</span><span class="val">Supabase PostgreSQL</span></div>
+          <div class="stack-row"><span class="lbl">Auth</span><span class="val">Supabase Auth · JWT</span></div>
+          <div class="stack-row"><span class="lbl">Security</span><span class="val">RLS · 27 policies</span></div>
+          <div class="stack-row"><span class="lbl">Hosting</span><span class="val">GitHub Pages</span></div>
+          <div class="stack-row"><span class="lbl">VCS</span><span class="val">Git · 46 commits</span></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="team-foot">
+      <span><b>TRM</b> // built to be shipped</span>
+    </footer>
+
   </main>
-
-  <footer class="site-footer">
-    <p>
-      <span>&copy; 2026 NHS Appointment Booking System</span>
-      <span aria-hidden="true">·</span>
-      <span class="footer-trm">Developed by TRM</span>
-      <span aria-hidden="true">·</span>
-      <a href="privacy.html">Privacy Policy</a>
-      <span aria-hidden="true">·</span>
-      <a href="team.html">Meet the Team</a>
-    </p>
-  </footer>
-
-  <a href="team.html" class="trm-watermark" aria-label="Meet the TRM team">Developed by TRM</a>
-
-  <script>
-    (function(){
-      const b=document.getElementById('theme-toggle')||document.getElementById('theme-toggle-menu');
-      if(b)b.addEventListener('click',function(){
-        const d=document.documentElement.classList.toggle('dark');
-        localStorage.setItem('trm-theme',d?'dark':'light');
-        const l=document.getElementById('theme-label');
-        if(l)l.textContent=d?'On':'Off';
-      });
-    })();
-  </script>
 
   <script type="module">
     import { supabase } from './js/supabase.js'
-
 
     async function updateAuthNav() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -357,7 +254,6 @@
     updateAuthNav()
     window.addEventListener('pageshow', (e) => { if (e.persisted) updateAuthNav() })
   </script>
-
 
   <script type="module" src="js/navbar.js"></script>
 </body>
