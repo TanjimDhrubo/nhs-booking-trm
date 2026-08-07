@@ -305,12 +305,18 @@
 
     let isSubmitting = false
 
-    function setButtonsLoading(loading) {
+    function setSubmitLoading(loading) {
       isSubmitting = loading
       submitBookBtn.disabled = loading
-      aiBookBtn.disabled = loading || !aiConsent.checked
       submitBookBtn.textContent = loading ? 'Processing...' : 'Submit Answers & Book \u2192'
+      aiBookBtn.disabled = loading || !aiConsent.checked
+    }
+
+    function setAiLoading(loading) {
+      isSubmitting = loading
+      aiBookBtn.disabled = loading || !aiConsent.checked
       aiBookBtn.textContent = loading ? 'Analysing...' : 'Get AI Analysis & Book \u2192'
+      submitBookBtn.disabled = loading
     }
 
     async function saveQuestionnaire(answers, aiBrief) {
@@ -338,14 +344,14 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
       msgEl.innerHTML = ''
-      setButtonsLoading(true)
+      setSubmitLoading(true)
 
       const answers = getAnswers()
       const qId = await saveQuestionnaire(answers)
-      if (!qId) { setButtonsLoading(false); return }
+      if (!qId) { setSubmitLoading(false); return }
 
       const apptId = await bookAppointment(qId)
-      if (!apptId) { setButtonsLoading(false); return }
+      if (!apptId) { setSubmitLoading(false); return }
 
       const stored = JSON.parse(sessionStorage.getItem('trm_booking') || '{}')
       const depName = stored.dependent_name || ''
@@ -354,7 +360,7 @@
 
     aiBookBtn.addEventListener('click', async () => {
       msgEl.innerHTML = ''
-      setButtonsLoading(true)
+      setAiLoading(true)
       aiResult.classList.add('is-hidden')
 
       const answers = getAnswers()
@@ -373,10 +379,10 @@
       aiResult.appendChild(disc)
 
       const qId = await saveQuestionnaire(answers, brief)
-      if (!qId) { setButtonsLoading(false); return }
+      if (!qId) { setAiLoading(false); return }
 
       const apptId = await bookAppointment(qId)
-      if (!apptId) { setButtonsLoading(false); return }
+      if (!apptId) { setAiLoading(false); return }
 
       const stored = JSON.parse(sessionStorage.getItem('trm_booking') || '{}')
       const depName = stored.dependent_name || ''
