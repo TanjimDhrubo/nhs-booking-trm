@@ -26,6 +26,8 @@
     .loading { text-align: center; padding: 40px 0; }
     .is-hidden { display: none; }
     .ai-section { margin-top: 20px; padding: 16px; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border); }
+    .consent-check { width: 16px; height: 16px; flex-shrink: 0; margin: 2px 0 0; padding: 0; border: none; appearance: auto; -webkit-appearance: auto; accent-color: var(--nhs-blue); background: var(--bg-card); }
+    .consent-check:focus-visible { outline: 2px solid var(--nhs-blue); outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -135,7 +137,7 @@
           <button type="button" class="btn-ai btn-full" id="ai-book-btn" disabled>Get AI Analysis &amp; Book &rarr;</button>
         </div>
         <label for="ai-consent" style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--nhs-muted);margin:10px 0 0;cursor:pointer;line-height:1.5">
-          <input type="checkbox" id="ai-consent" style="margin-top:2px">
+          <input type="checkbox" id="ai-consent" class="consent-check">
           <span>I consent to my symptoms being shared with the AI service for a summary (<a href="privacy.html" style="color:var(--nhs-blue)">privacy policy</a>).</span>
         </label>
         <p style="font-size:12px;color:var(--nhs-muted);text-align:center;margin:8px 0 0">
