@@ -282,6 +282,24 @@
         btn.disabled = true
         btn.textContent = 'Saving...'
 
+        const targetDoctorId = newDoctorId || appointment.doctor_id
+
+        const { data: clash } = await supabase
+          .from('appointments_trm')
+          .select('id')
+          .eq('doctor_id', targetDoctorId)
+          .eq('appointment_date', newISO)
+          .in('status', ['confirmed', 'checked_in'])
+          .neq('id', appointmentId)
+          .maybeSingle()
+
+        if (clash) {
+          showMsg('message', 'This time is already booked for this doctor. Please choose another.', 'error')
+          btn.disabled = false
+          btn.textContent = 'Save Changes \u2192'
+          return
+        }
+
         const updateData = {
           appointment_date: newISO,
           status: 'confirmed'
@@ -297,7 +315,9 @@
           .eq('id', appointmentId)
 
         if (updateError) {
-          showMsg('message', 'Failed to reschedule: ' + updateError.message, 'error')
+          showMsg('message', updateError.code === '23505'
+            ? 'This time is already booked for this doctor. Please choose another.'
+            : 'Failed to reschedule: ' + updateError.message, 'error')
           btn.disabled = false
           btn.textContent = 'Save Changes \u2192'
           return
