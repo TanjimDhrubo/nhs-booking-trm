@@ -215,8 +215,14 @@
     }
 
     function populateTimes() {
-      const slots = generateTimeSlots()
+      const slots = generateTimeSlots(apptDate.value)
       apptTime.innerHTML = '<option value="">Select time&hellip;</option>'
+      if (!slots.length) {
+        const opt = document.createElement('option')
+        opt.value = ''
+        opt.textContent = 'No more times available today'
+        apptTime.appendChild(opt)
+      }
       for (const t of slots) {
         const opt = document.createElement('option')
         opt.value = t.value
@@ -228,7 +234,9 @@
     populateTimes()
 
     const today = new Date()
-    apptDate.min = today.toISOString().slice(0, 10)
+    apptDate.min = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0')
+
+    apptDate.addEventListener('change', populateTimes)
 
     async function loadDoctors(selectedId) {
       doctorSelect.innerHTML = '<option value="" disabled selected>Loading doctors&hellip;</option>'
@@ -344,6 +352,10 @@
       }
 
       const data = JSON.parse(bookingData)
+      if (new Date(data.appointment_date) < new Date()) {
+        showMsg('This appointment time has already passed. Please choose a future date and time.')
+        return null
+      }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         showMsg('Authentication error. Please sign in again.')
@@ -435,12 +447,11 @@
         return
       }
 
-      const selectedDate = new Date(date + 'T' + (time || '00:00'))
+      const selectedDate = new Date(date + 'T' + time)
       const now = new Date()
-      now.setHours(0, 0, 0, 0)
 
       if (selectedDate < now) {
-        showMsg('Please select a future date.')
+        showMsg('Please select a future date and time.')
         return
       }
 

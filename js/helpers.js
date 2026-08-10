@@ -69,13 +69,23 @@ export function showMsg(elementId, message, type) {
   el.appendChild(div)
 }
 
-export function generateTimeSlots() {
+function localDateString(d = new Date()) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}
+
+export function generateTimeSlots(dateStr) {
   const slots = []
+  const now = new Date()
+  const isToday = !!dateStr && dateStr === localDateString(now)
   for (let h = 9; h <= 16; h++) {
     for (let m = 0; m < 60; m += 30) {
       if (h === 16 && m === 30) break
       const hh = String(h).padStart(2, '0')
       const mm = String(m).padStart(2, '0')
+      if (isToday) {
+        const slotDate = new Date(dateStr + 'T' + hh + ':' + mm + ':00')
+        if (slotDate <= now) continue
+      }
       slots.push({ label: formatTimeShort('2024-01-01T' + hh + ':' + mm + ':00'), value: hh + ':' + mm })
     }
   }

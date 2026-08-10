@@ -148,7 +148,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js'
     import { requireAuth, showUserName, logout } from './js/auth.js'
-    import { formatDate, formatDateShort, showMsg, generateTimeSlots, getTomorrow, insertNotification } from './js/helpers.js'
+    import { formatDate, formatDateShort, showMsg, generateTimeSlots, insertNotification } from './js/helpers.js'
 
 
     async function init() {
@@ -228,18 +228,32 @@
       const dateInput = document.getElementById('new-date')
       const currentDateStr = appointment.appointment_date.substring(0, 10)
       dateInput.value = currentDateStr
-      dateInput.min = getTomorrow()
+      const todayLocal = new Date()
+      dateInput.min = todayLocal.getFullYear() + '-' + String(todayLocal.getMonth() + 1).padStart(2, '0') + '-' + String(todayLocal.getDate()).padStart(2, '0')
 
       const timeSelect = document.getElementById('new-time')
       const currentTime = appointment.appointment_date.substring(11, 16)
-      const slots = generateTimeSlots()
-      for (const slot of slots) {
-        const opt = document.createElement('option')
-        opt.value = slot.value
-        opt.textContent = slot.label
-        if (slot.value === currentTime) opt.selected = true
-        timeSelect.appendChild(opt)
+
+      function populateRescheduleTimes() {
+        const slots = generateTimeSlots(dateInput.value)
+        timeSelect.innerHTML = ''
+        if (!slots.length) {
+          const opt = document.createElement('option')
+          opt.value = ''
+          opt.textContent = 'No more times available on this date'
+          timeSelect.appendChild(opt)
+        }
+        for (const slot of slots) {
+          const opt = document.createElement('option')
+          opt.value = slot.value
+          opt.textContent = slot.label
+          if (slot.value === currentTime) opt.selected = true
+          timeSelect.appendChild(opt)
+        }
       }
+
+      populateRescheduleTimes()
+      dateInput.addEventListener('change', populateRescheduleTimes)
 
       const doctorSelect = document.getElementById('new-doctor')
       if (isStaff) {
@@ -272,8 +286,8 @@
 
         document.getElementById('message').innerHTML = ''
 
-        if (new Date(newDate) <= new Date()) {
-          showMsg('message', 'New date must be after today.', 'error')
+        if (new Date(newDate + 'T' + (newTime || '00:00')) <= new Date()) {
+          showMsg('message', 'New date and time must be in the future.', 'error')
           return
         }
 
